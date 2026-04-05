@@ -1,4 +1,4 @@
-// buildy — Supabase Postgres 互換スキーマ（ローカルは Docker Postgres でも可）
+// kabuto — Supabase Postgres 互換スキーマ（ローカルは Docker Postgres でも可）
 
 generator client {
   provider = "prisma-client-js"

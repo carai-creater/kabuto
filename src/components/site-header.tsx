@@ -5,20 +5,27 @@ type Props = {
   displayName?: string | null;
   email?: string | null;
   balancePt?: number | null;
+  /** DB 未設定・接続失敗時の短い説明 */
+  configWarning?: string | null;
 };
 
-export function SiteHeader({ displayName, email, balancePt }: Props) {
+export function SiteHeader({
+  displayName,
+  email,
+  balancePt,
+  configWarning,
+}: Props) {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050505]/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link
           href="/"
-          className="group flex min-w-0 shrink items-center gap-3 outline-none focus-visible:ring-2 focus-visible:ring-buildy-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
+          className="group flex min-w-0 shrink items-center gap-3 outline-none focus-visible:ring-2 focus-visible:ring-kabuto-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
         >
           <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-black shadow-[0_0_24px_-4px_rgba(212,175,55,0.35)] ring-1 ring-[#D4AF37]/30 transition group-hover:ring-[#D4AF37]/55">
             <Image
-              src="/buildy-logo.png"
-              alt="buildy"
+              src="/kabuto-logo.png"
+              alt="kabuto"
               width={40}
               height={40}
               className="object-contain"
@@ -26,10 +33,15 @@ export function SiteHeader({ displayName, email, balancePt }: Props) {
             />
           </span>
           <span className="truncate font-semibold tracking-tight text-zinc-100">
-            buildy
+            kabuto
           </span>
         </Link>
 
+        {configWarning && (
+          <p className="max-w-[min(100%,12rem)] truncate text-[10px] text-amber-400/90 sm:max-w-xs lg:max-w-md">
+            {configWarning}
+          </p>
+        )}
         <nav className="flex shrink-0 items-center gap-2 text-sm sm:gap-4">
           <Link
             href="/wallet"

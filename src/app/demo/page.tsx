@@ -1,16 +1,32 @@
 import { prisma } from "@/lib/prisma";
 import { DemoUserForm } from "@/components/demo-user-form";
+import { DbUnavailableMessage } from "@/components/db-unavailable";
+import { isDatabaseConfigured } from "@/lib/is-database-configured";
 
 export default async function DemoPage() {
-  const users = await prisma.user.findMany({
-    orderBy: { email: "asc" },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      wallet: { select: { balancePt: true } },
-    },
-  });
+  if (!isDatabaseConfigured()) {
+    return <DbUnavailableMessage />;
+  }
+
+  let users: {
+    id: string;
+    email: string;
+    name: string | null;
+    wallet: { balancePt: number } | null;
+  }[] = [];
+  try {
+    users = await prisma.user.findMany({
+      orderBy: { email: "asc" },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        wallet: { select: { balancePt: true } },
+      },
+    });
+  } catch {
+    return <DbUnavailableMessage />;
+  }
 
   return (
     <main className="relative flex flex-1 flex-col px-4 pb-24 pt-8 sm:px-6">
@@ -18,7 +34,7 @@ export default async function DemoPage() {
         <h1 className="text-2xl font-semibold text-zinc-50">デモログイン</h1>
         <p className="mt-2 text-sm leading-relaxed text-zinc-400">
           Supabase Auth 接続前の仮セッションです。ユーザーを選ぶと Cookie{" "}
-          <code className="rounded bg-white/5 px-1">buildy_uid</code>{" "}
+          <code className="rounded bg-white/5 px-1">kabuto_uid</code>{" "}
           が設定されます。
         </p>
 

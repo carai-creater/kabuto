@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-export const SESSION_COOKIE = "buildy_uid";
+export const SESSION_COOKIE = "kabuto_uid";
 
 export async function getSessionUserId(): Promise<string | null> {
   const jar = await cookies();

@@ -1,28 +1,48 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
+import { DbUnavailableMessage } from "@/components/db-unavailable";
+import { isDatabaseConfigured } from "@/lib/is-database-configured";
+
+const ledgerWithAgent = {
+  include: {
+    agent: { select: { title: true, slug: true } },
+  },
+} satisfies Prisma.UsageLedgerFindManyArgs;
+
+type UsageLedgerRow = Prisma.UsageLedgerGetPayload<typeof ledgerWithAgent>;
 
 export default async function WalletPage() {
+  if (!isDatabaseConfigured()) {
+    return <DbUnavailableMessage />;
+  }
+
   const userId = await getSessionUserId();
   if (!userId) {
     redirect("/demo");
   }
 
-  const [wallet, rows] = await Promise.all([
-    prisma.wallet.findUnique({
-      where: { userId },
-      select: { balancePt: true },
-    }),
-    prisma.usageLedger.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      take: 40,
-      include: {
-        agent: { select: { title: true, slug: true } },
-      },
-    }),
-  ]);
+  let wallet: { balancePt: number } | null = null;
+  let rows: UsageLedgerRow[] = [];
+
+  try {
+    [wallet, rows] = await Promise.all([
+      prisma.wallet.findUnique({
+        where: { userId },
+        select: { balancePt: true },
+      }),
+      prisma.usageLedger.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        take: 40,
+        ...ledgerWithAgent,
+      }),
+    ]);
+  } catch {
+    return <DbUnavailableMessage />;
+  }
 
   return (
     <main className="relative flex flex-1 flex-col px-4 pb-24 pt-8 sm:px-6">

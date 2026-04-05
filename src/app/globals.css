@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
-/* buildy ブランド: ロゴのメタリックゴールド × ディープブラック */
+/* kabuto ブランド: ロゴのメタリックゴールド × ディープブラック */
 :root {
   --background: #050505;
   --foreground: #f4f4f5;
-  --buildy-gold: #d4af37;
-  --buildy-gold-deep: #b8860b;
+  --kabuto-gold: #d4af37;
+  --kabuto-gold-deep: #b8860b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-buildy-gold: var(--buildy-gold);
-  --color-buildy-gold-deep: var(--buildy-gold-deep);
+  --color-kabuto-gold: var(--kabuto-gold);
+  --color-kabuto-gold-deep: var(--kabuto-gold-deep);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

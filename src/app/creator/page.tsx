@@ -2,33 +2,57 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
+import { DbUnavailableMessage } from "@/components/db-unavailable";
+import { isDatabaseConfigured } from "@/lib/is-database-configured";
 
 export default async function CreatorPage() {
+  if (!isDatabaseConfigured()) {
+    return <DbUnavailableMessage />;
+  }
+
   const userId = await getSessionUserId();
   if (!userId) {
     redirect("/demo");
   }
 
-  const [cw, agents] = await Promise.all([
-    prisma.creatorWallet.findUnique({
-      where: { userId },
-      select: { balancePt: true },
-    }),
-    prisma.agent.findMany({
-      where: { creatorId: userId },
-      orderBy: { updatedAt: "desc" },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        usageCount: true,
-        pricePerUsePt: true,
-        ratingAvg: true,
-        reviewCount: true,
-        isPublished: true,
-      },
-    }),
-  ]);
+  let cw: { balancePt: number } | null = null;
+  let agents: {
+    id: string;
+    slug: string;
+    title: string;
+    usageCount: number;
+    pricePerUsePt: number;
+    ratingAvg: import("@prisma/client").Prisma.Decimal;
+    reviewCount: number;
+    isPublished: boolean;
+  }[] = [];
+
+  try {
+    const pair = await Promise.all([
+      prisma.creatorWallet.findUnique({
+        where: { userId },
+        select: { balancePt: true },
+      }),
+      prisma.agent.findMany({
+        where: { creatorId: userId },
+        orderBy: { updatedAt: "desc" },
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          usageCount: true,
+          pricePerUsePt: true,
+          ratingAvg: true,
+          reviewCount: true,
+          isPublished: true,
+        },
+      }),
+    ]);
+    cw = pair[0];
+    agents = pair[1];
+  } catch {
+    return <DbUnavailableMessage />;
+  }
 
   if (agents.length === 0 && !cw) {
     return (

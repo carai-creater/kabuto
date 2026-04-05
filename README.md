@@ -1,4 +1,4 @@
-# buildy
+# kabuto
 
 AI エージェント・マーケットプレイス（Next.js App Router + Tailwind + Prisma + Postgres）。要件は `requirements.md` を参照。
 
