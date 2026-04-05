@@ -28,13 +28,21 @@ export function SiteHeader({
           href="/"
           className="group flex min-w-0 shrink items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
         >
-          <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-[var(--card)] shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.08]">
+          <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-transparent ring-1 ring-black/[0.06] dark:bg-[var(--card)] dark:shadow-sm dark:ring-white/[0.08]">
+            <Image
+              src="/kabuto-logo-light.png"
+              alt=""
+              width={32}
+              height={32}
+              className="object-contain dark:hidden"
+              priority
+            />
             <Image
               src="/kabuto-logo.png"
               alt=""
               width={32}
               height={32}
-              className="object-contain"
+              className="hidden object-contain dark:block"
               priority
             />
           </span>
