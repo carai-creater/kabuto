@@ -30,17 +30,16 @@ export function SiteHeader({
           href="/"
           className="group flex shrink-0 items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
         >
-          <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-transparent ring-1 ring-black/[0.06] dark:bg-[var(--card)] dark:shadow-sm dark:ring-white/[0.08]">
-            {/* next/image の SVG は環境によって不安定なため img で配信 */}
+          <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-transparent ring-1 ring-black/[0.06] dark:bg-[#0a0a0a] dark:shadow-sm dark:ring-white/[0.08]">
             <img
-              src="/kabuto-logo-light.svg"
+              src="/kabuto-logo-light.png"
               alt=""
               width={32}
               height={32}
               className="h-8 w-8 object-contain dark:hidden"
             />
             <img
-              src="/kabuto-logo.svg"
+              src="/kabuto-logo-dark.png"
               alt=""
               width={32}
               height={32}
