@@ -1,0 +1,142 @@
+// buildy — Supabase Postgres 互換スキーマ（ローカルは Docker Postgres でも可）
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  wallet          Wallet?
+  creatorWallet   CreatorWallet?
+  agentsCreated   Agent[]             @relation("CreatorAgents")
+  reviews         Review[]
+  usageLedgers    UsageLedger[]
+}
+
+/// 利用者のプリペイド残高（pt）
+model Wallet {
+  id        String @id @default(cuid())
+  userId    String @unique
+  balancePt Int    @default(0)
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// クリエイター報酬の未払い残高（pt）
+model CreatorWallet {
+  id        String @id @default(cuid())
+  userId    String @unique
+  balancePt Int    @default(0)
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Agent {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  creatorId   String
+  title       String
+  description String  @db.Text
+  /// 表示用（絵文字1つなど）
+  iconEmoji   String  @default("🤖")
+  /// 役割: システムプロンプト
+  systemPrompt String @db.Text
+
+  pricePerUsePt Int @default(10)
+  usageCount    Int @default(0)
+
+  ratingAvg   Decimal @default(0) @db.Decimal(3, 2)
+  reviewCount Int     @default(0)
+
+  firstThreeFree Boolean @default(false)
+  isPublished    Boolean @default(false)
+  /// タグ（例: 高コスパ, 初回3回無料）
+  tags           String[]
+
+  /// 機能: Function Calling / 外部API 設定の配列 JSON
+  tools Json @default("[]")
+
+  defaultLlm String @default("gpt-4o")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creator              User                   @relation("CreatorAgents", fields: [creatorId], references: [id], onDelete: Cascade)
+  knowledgeDocuments   KnowledgeDocument[]
+  conversationStarters ConversationStarter[]
+  reviews              Review[]
+  usageLedgers         UsageLedger[]
+}
+
+/// 知識: アップロード文書のメタ（実ファイルは Storage 側を想定）
+model KnowledgeDocument {
+  id         String @id @default(cuid())
+  agentId    String
+  title      String
+  mimeType   String
+  storageKey String
+  createdAt  DateTime @default(now())
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agentId])
+}
+
+/// 会話スターター（最大4件はアプリ層で検証）
+model ConversationStarter {
+  id       String @id @default(cuid())
+  agentId  String
+  position Int
+  text     String @db.Text
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, position])
+  @@index([agentId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  agentId   String
+  userId    String
+  rating    Int
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, userId])
+  @@index([agentId])
+}
+
+/// 利用確定の台帳。idempotencyKey で二重課金を防止
+model UsageLedger {
+  id               String @id @default(cuid())
+  userId           String
+  agentId          String
+  pointsCharged    Int
+  creatorEarningsPt Int
+  platformFeePt    Int
+  idempotencyKey   String @unique
+  createdAt        DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([agentId, createdAt])
+}
