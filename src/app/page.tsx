@@ -4,25 +4,28 @@ import { AgentCard } from "@/components/agent-card";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
 import { PAGE_SHELL } from "@/lib/page-shell";
 
+/** トップは本文を狭めて中央に寄せる（大画面で右に空白が偏らないようにする） */
+const CENTER = "mx-auto w-full max-w-lg text-center";
+
 export default async function Home() {
   if (!isDatabaseConfigured()) {
     return (
       <div className="flex min-h-full flex-1 flex-col">
         <main
-          className={`flex flex-1 flex-col items-center justify-center px-5 pb-24 pt-16 ${PAGE_SHELL}`}
+          className={`flex flex-1 flex-col items-center justify-center pb-24 pt-12 ${PAGE_SHELL}`}
         >
-          <div className="surface-card w-full max-w-md p-8 text-center sm:p-10">
-            <h1 className="text-[19px] font-semibold tracking-tight text-foreground">
+          <div className={`surface-card ${CENTER} max-w-md p-8 sm:p-9`}>
+            <h1 className="text-[18px] font-semibold tracking-tight text-foreground">
               データベースが未設定です
             </h1>
-            <p className="mt-4 text-[15px] leading-relaxed text-[var(--muted)]">
+            <p className="mt-3 text-[14px] leading-relaxed text-[var(--muted)]">
               Vercel に{" "}
-              <code className="rounded-md bg-[var(--card-elevated)] px-1.5 py-0.5 text-[13px] ring-1 ring-[var(--border)]">
+              <code className="rounded-md bg-[var(--card-elevated)] px-1.5 py-0.5 text-[12px] ring-1 ring-[var(--border)]">
                 DATABASE_URL
               </code>{" "}
-              を追加し、再デプロイ後に次を実行してください。
+              を追加して再デプロイし、次を実行してください。
             </p>
-            <pre className="mt-6 rounded-xl border border-[var(--border)] bg-[var(--card-elevated)] px-4 py-3 text-left text-[13px] leading-relaxed text-foreground">
+            <pre className="mt-5 rounded-xl border border-[var(--border)] bg-[var(--card-elevated)] px-4 py-3 text-left text-[12px] leading-relaxed text-foreground">
               npx prisma migrate deploy{"\n"}npm run db:seed
             </pre>
           </div>
@@ -42,32 +45,35 @@ export default async function Home() {
   } catch (err) {
     console.error("[Home] database error:", err);
     loadError =
-      "データベースに接続できません。DATABASE_URL・SSL・IP 許可を確認してください。";
+      "接続できません。DATABASE_URL・SSL・ネットワーク（Supabase の IP 制限など）を確認してください。";
   }
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <main className="relative flex w-full flex-1 flex-col">
+      <main className="relative flex w-full flex-1 flex-col items-center">
         <section
-          className={`border-b border-[var(--border)] py-16 sm:py-20 ${PAGE_SHELL}`}
+          className={`w-full border-b border-[var(--border)] py-14 sm:py-20 ${PAGE_SHELL} flex flex-col items-center`}
         >
-          <div className="mx-auto max-w-xl text-center">
-            <h1 className="text-balance text-[clamp(1.75rem,5vw,2.75rem)] font-semibold leading-tight tracking-tight text-foreground">
+          <div className={CENTER}>
+            <h1 className="text-balance text-[clamp(1.6rem,4.5vw,2.25rem)] font-semibold leading-snug tracking-tight text-foreground">
               エージェントを探す
             </h1>
-            <p className="mx-auto mt-4 max-w-md text-pretty text-[15px] leading-relaxed text-[var(--muted)]">
-              目的に合う AI エージェントを選び、詳細から会話を始められます。
+            <p className="mt-3 text-pretty text-[15px] leading-relaxed text-[var(--muted)]">
+              カードを開いて会話を始められます。
             </p>
-            <div className="mt-10">
-              <a href="#agent-list" className="btn-primary inline-flex rounded-full px-8 py-3 text-[15px]">
+            <div className="mt-8">
+              <a
+                href="#agent-list"
+                className="btn-primary inline-flex rounded-full px-7 py-2.5 text-[15px]"
+              >
                 一覧を見る
               </a>
             </div>
-            <p className="mt-8 text-[14px] text-[var(--muted)]">
+            <p className="mt-7 text-[13px] text-[var(--muted)]">
               <Link href="/demo" className="text-[var(--accent)] hover:underline">
-                デモでログイン
+                デモ
               </Link>
-              <span className="mx-2 text-[var(--border-strong)]">·</span>
+              <span className="mx-2 opacity-40">·</span>
               <Link href="/wallet" className="text-[var(--accent)] hover:underline">
                 ウォレット
               </Link>
@@ -77,41 +83,41 @@ export default async function Home() {
 
         <section
           id="agent-list"
-          className={`scroll-mt-20 pb-24 pt-14 sm:pt-16 ${PAGE_SHELL}`}
+          className={`w-full scroll-mt-20 pb-20 pt-12 sm:pt-14 ${PAGE_SHELL} flex flex-col items-center`}
           aria-labelledby="agent-list-heading"
         >
           {loadError && (
-            <div className="mx-auto mb-10 max-w-lg rounded-2xl border border-[var(--destructive)]/25 bg-[var(--destructive)]/5 px-6 py-4 text-center text-[15px] text-[var(--destructive)]">
+            <div
+              className={`${CENTER} max-w-md rounded-2xl border border-[var(--border)] bg-[var(--card-elevated)] px-5 py-4 text-[14px] leading-relaxed text-[var(--muted)]`}
+              role="alert"
+            >
               {loadError}
             </div>
           )}
 
-          <div className="mx-auto max-w-3xl text-center">
+          <div className={`${CENTER} mt-8 max-w-2xl`}>
             <h2
               id="agent-list-heading"
-              className="text-[22px] font-semibold tracking-tight text-foreground sm:text-[24px]"
+              className="text-[20px] font-semibold tracking-tight text-foreground sm:text-[22px]"
             >
               すべてのエージェント
             </h2>
-            <p className="mt-2 text-[15px] text-[var(--muted)]">
-              {agents.length > 0
-                ? `${agents.length} 件`
-                : loadError
-                  ? ""
-                  : "公開中のエージェント"}
-            </p>
+            {!loadError && (
+              <p className="mt-1.5 text-[14px] text-[var(--muted)]">
+                {agents.length > 0 ? `${agents.length} 件` : "公開中のエージェント"}
+              </p>
+            )}
           </div>
 
           {!loadError && agents.length === 0 ? (
-            <p className="mx-auto mt-12 max-w-md text-center text-[15px] text-[var(--muted)]">
+            <p className={`${CENTER} mt-10 max-w-md text-[14px] text-[var(--muted)]`}>
               まだありません。{" "}
-              <code className="rounded-md bg-[var(--card-elevated)] px-2 py-0.5 text-[13px] ring-1 ring-[var(--border)]">
+              <code className="rounded-md bg-[var(--card-elevated)] px-1.5 py-0.5 text-[12px] ring-1 ring-[var(--border)]">
                 npm run db:seed
-              </code>{" "}
-              でサンプルを投入できます。
+              </code>
             </p>
           ) : !loadError ? (
-            <ul className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+            <ul className="mx-auto mt-10 grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
               {agents.map((a) => (
                 <li key={a.id}>
                   <AgentCard agent={a} />
