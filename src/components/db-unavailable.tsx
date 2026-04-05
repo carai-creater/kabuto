@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { PAGE_SHELL } from "@/lib/page-shell";
 
 export function DbUnavailableMessage() {
   return (
-    <main className="relative flex flex-1 flex-col px-5 pb-28 pt-14 sm:px-8">
+    <main className={`relative flex flex-1 flex-col pb-28 pt-14 ${PAGE_SHELL}`}>
       <div className="relative mx-auto w-full max-w-lg surface-card p-8 sm:p-10">
         <h1 className="text-[21px] font-semibold tracking-tight text-foreground">
           データベースに接続できません

@@ -2,13 +2,14 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { AgentCard } from "@/components/agent-card";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
+import { PAGE_SHELL } from "@/lib/page-shell";
 
 export default async function Home() {
   if (!isDatabaseConfigured()) {
     return (
       <div className="flex min-h-full flex-1 flex-col">
-        <main className="relative flex flex-1 flex-col px-5 pb-28 pt-14 sm:px-8">
-          <div className="relative mx-auto w-full max-w-2xl surface-card p-8 sm:p-10">
+        <main className={`relative flex flex-1 flex-col pb-24 pt-10 ${PAGE_SHELL}`}>
+          <div className="surface-card max-w-2xl p-8 sm:p-10">
             <h1 className="text-[21px] font-semibold tracking-tight text-foreground">
               データベースが未設定です
             </h1>
@@ -49,35 +50,121 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <main className="relative flex flex-1 flex-col px-5 pb-28 pt-12 sm:px-8">
+      <main className="relative flex w-full flex-1 flex-col">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgb(0_113_227/0.06),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgb(212_175_55/0.07),transparent)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgb(0_113_227/0.07),transparent)] dark:bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgb(212_175_55/0.08),transparent)]"
         />
-        <div className="relative mx-auto w-full max-w-5xl">
+
+        {/* ヒーロー：最初に「エージェントを探す」が一目で分かる */}
+        <section
+          className={`relative border-b border-[var(--border)] bg-[var(--background)]/80 pb-12 pt-10 sm:pb-16 sm:pt-14 lg:pb-20 lg:pt-16 ${PAGE_SHELL}`}
+        >
+          <div className="max-w-4xl">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+              kabuto
+            </p>
+            <h1 className="mt-3 text-balance text-[clamp(2rem,5vw,3.5rem)] font-semibold leading-[1.08] tracking-tight text-foreground">
+              エージェントを探す
+            </h1>
+            <p className="mt-4 max-w-2xl text-pretty text-[clamp(1rem,2vw,1.25rem)] leading-relaxed text-[var(--muted)]">
+              目的に合う AI エージェントを選び、カードを開いてすぐ会話を始められます。ポイントは
+              <strong className="font-semibold text-foreground"> 実行が終わったときだけ </strong>
+              消費されます。
+            </p>
+          </div>
+
+          <ol className="mt-10 grid max-w-3xl gap-4 sm:grid-cols-3 sm:gap-6">
+            <li className="flex gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-sm dark:shadow-none">
+              <span
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-[13px] font-bold text-white"
+                aria-hidden
+              >
+                1
+              </span>
+              <div>
+                <p className="text-[15px] font-semibold text-foreground">エージェントを選ぶ</p>
+                <p className="mt-1 text-[13px] leading-snug text-[var(--muted)]">
+                  下の一覧からカードをタップ
+                </p>
+              </div>
+            </li>
+            <li className="flex gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-sm dark:shadow-none">
+              <span
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-[13px] font-bold text-white"
+                aria-hidden
+              >
+                2
+              </span>
+              <div>
+                <p className="text-[15px] font-semibold text-foreground">詳細で試す</p>
+                <p className="mt-1 text-[13px] leading-snug text-[var(--muted)]">
+                  スターターまたは自由入力で実行
+                </p>
+              </div>
+            </li>
+            <li className="flex gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 shadow-sm dark:shadow-none sm:col-span-1">
+              <span
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-[13px] font-bold text-white"
+                aria-hidden
+              >
+                3
+              </span>
+              <div>
+                <p className="text-[15px] font-semibold text-foreground">評価・ウォレット</p>
+                <p className="mt-1 text-[13px] leading-snug text-[var(--muted)]">
+                  気に入ったらレビュー、pt はウォレットで確認
+                </p>
+              </div>
+            </li>
+          </ol>
+
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <a
+              href="#agent-list"
+              className="btn-primary inline-flex rounded-full px-6 py-3 text-[16px]"
+            >
+              一覧へ進む
+            </a>
+            <Link
+              href="/wallet"
+              className="inline-flex items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] px-5 py-3 text-[15px] font-medium text-[var(--accent)] shadow-sm transition hover:opacity-90 dark:shadow-none"
+            >
+              ウォレットを開く
+            </Link>
+            <Link
+              href="/demo"
+              className="link-subtle inline-flex items-center rounded-full px-3 py-2 text-[15px]"
+            >
+              はじめての方（デモログイン）
+            </Link>
+          </div>
+        </section>
+
+        {/* エージェント一覧：画面幅いっぱいにグリッド */}
+        <section
+          id="agent-list"
+          className={`relative scroll-mt-20 pb-28 pt-10 sm:pt-14 ${PAGE_SHELL}`}
+          aria-labelledby="agent-list-heading"
+        >
           {loadError && (
             <div className="mb-10 surface-card border-[var(--destructive)]/25 bg-[var(--destructive)]/5 p-6 text-[15px] text-[var(--destructive)]">
               {loadError}
             </div>
           )}
-          <div className="mb-12 flex flex-col gap-6 sm:mb-16 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
-                Marketplace
-              </p>
-              <h1 className="mt-2 text-[32px] font-semibold leading-tight tracking-tight text-foreground sm:text-[40px]">
-                エージェントを探す
-              </h1>
-              <p className="mt-3 text-[17px] leading-relaxed text-[var(--muted)]">
-                評価と利用回数を確認し、会話スターターからすぐ試せます。
-              </p>
-            </div>
-            <Link
-              href="/wallet"
-              className="inline-flex w-fit items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] px-5 py-2.5 text-[15px] font-medium text-[var(--accent)] shadow-sm transition hover:opacity-90 dark:shadow-none"
+
+          <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <h2
+              id="agent-list-heading"
+              className="text-[22px] font-semibold tracking-tight text-foreground sm:text-[26px]"
             >
-              ウォレット
-            </Link>
+              すべてのエージェント
+            </h2>
+            <p className="text-[15px] text-[var(--muted)]">
+              {agents.length > 0
+                ? `${agents.length} 件のエージェントが利用可能です`
+                : "公開中のエージェント"}
+            </p>
           </div>
 
           {!loadError && agents.length === 0 ? (
@@ -89,7 +176,7 @@ export default async function Home() {
               でサンプルを投入してください。
             </p>
           ) : !loadError ? (
-            <ul className="grid gap-5 sm:grid-cols-2 sm:gap-6">
+            <ul className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6 xl:grid-cols-3 xl:gap-8">
               {agents.map((a) => (
                 <li key={a.id}>
                   <AgentCard agent={a} />
@@ -97,7 +184,7 @@ export default async function Home() {
               ))}
             </ul>
           ) : null}
-        </div>
+        </section>
       </main>
     </div>
   );

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { PAGE_SHELL } from "@/lib/page-shell";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 type Props = {
@@ -23,14 +24,16 @@ export function SiteHeader({
         borderColor: "var(--border)",
       }}
     >
-      <div className="mx-auto flex h-[52px] max-w-5xl items-center justify-between gap-3 px-5 sm:h-14 sm:px-8">
+      <div
+        className={`flex h-[52px] w-full items-center justify-between gap-3 sm:h-14 ${PAGE_SHELL}`}
+      >
         <Link
           href="/"
           className="group flex min-w-0 shrink items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
         >
           <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-transparent ring-1 ring-black/[0.06] dark:bg-[var(--card)] dark:shadow-sm dark:ring-white/[0.08]">
             <Image
-              src="/kabuto-logo-light.png"
+              src="/kabuto-logo-light.svg"
               alt=""
               width={32}
               height={32}
@@ -38,7 +41,7 @@ export function SiteHeader({
               priority
             />
             <Image
-              src="/kabuto-logo.png"
+              src="/kabuto-logo.svg"
               alt=""
               width={32}
               height={32}

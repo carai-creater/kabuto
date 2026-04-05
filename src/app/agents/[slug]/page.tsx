@@ -5,6 +5,7 @@ import { RunAgentPanel } from "@/components/run-agent-panel";
 import { ReviewForm } from "@/components/review-form";
 import { DbUnavailableMessage } from "@/components/db-unavailable";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
+import { PAGE_SHELL } from "@/lib/page-shell";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -57,12 +58,14 @@ export default async function AgentDetailPage(props: Props) {
     (agent.reviewCount >= 3 && rating >= 4);
 
   return (
-    <main className="relative flex flex-1 flex-col px-5 pb-28 pt-10 sm:px-8">
+    <main
+      className={`relative flex flex-1 flex-col pb-28 pt-10 ${PAGE_SHELL}`}
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_40%_at_50%_-10%,rgb(0_113_227/0.06),transparent)] dark:bg-[radial-gradient(ellipse_70%_40%_at_50%_-10%,rgb(212_175_55/0.08),transparent)]"
       />
-      <article className="relative mx-auto w-full max-w-3xl">
+      <article className="relative mx-auto w-full max-w-4xl xl:max-w-5xl">
         <header className="flex flex-col gap-6 border-b border-[var(--border)] pb-10 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex gap-4">
             <span

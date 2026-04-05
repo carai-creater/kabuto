@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
 import { DbUnavailableMessage } from "@/components/db-unavailable";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
+import { PAGE_SHELL } from "@/lib/page-shell";
 
 const ledgerWithAgent = {
   include: {
@@ -45,8 +46,8 @@ export default async function WalletPage() {
   }
 
   return (
-    <main className="relative flex flex-1 flex-col px-5 pb-28 pt-12 sm:px-8">
-      <div className="relative mx-auto w-full max-w-3xl">
+    <main className={`relative flex flex-1 flex-col pb-28 pt-12 ${PAGE_SHELL}`}>
+      <div className="relative mx-auto w-full max-w-4xl xl:max-w-5xl">
         <h1 className="text-[32px] font-semibold tracking-tight text-foreground">
           ウォレット
         </h1>
