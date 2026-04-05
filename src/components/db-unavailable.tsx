@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DbConnectionTips } from "@/components/db-connection-tips";
 import { PAGE_SHELL } from "@/lib/page-shell";
 
 export function DbUnavailableMessage() {
@@ -10,12 +11,7 @@ export function DbUnavailableMessage() {
         <h1 className="text-[19px] font-semibold tracking-tight text-foreground">
           データベースに接続できません
         </h1>
-        <p className="mt-4 text-[15px] leading-relaxed text-[var(--muted)]">
-          <code className="rounded-md bg-[var(--card-elevated)] px-1.5 py-0.5 text-[13px] ring-1 ring-[var(--border)]">
-            DATABASE_URL
-          </code>{" "}
-          とマイグレーションを確認してください。
-        </p>
+        <DbConnectionTips />
         <Link
           href="/"
           className="mt-8 inline-block text-[15px] font-medium text-[var(--accent)] hover:underline"

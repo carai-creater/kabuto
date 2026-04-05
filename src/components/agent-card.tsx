@@ -27,21 +27,21 @@ export function AgentCard({ agent }: Props) {
   return (
     <Link
       href={`/agents/${agent.slug}`}
-      className="group surface-card block p-6 transition hover:border-[var(--border-strong)] hover:shadow-md dark:hover:shadow-none"
+      className="agent-card-surface group block p-5 sm:p-6"
     >
       <div className="mb-4 flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <span
-            className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--card-elevated)] text-[26px] ring-1 ring-[var(--border)]"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--card-elevated)] text-[26px] ring-1 ring-black/[0.06] dark:ring-white/[0.08]"
             aria-hidden
           >
             {agent.iconEmoji}
           </span>
-          <div>
-            <h2 className="text-[17px] font-semibold tracking-tight text-foreground group-hover:text-[var(--accent)]">
+          <div className="min-w-0">
+            <h2 className="text-[17px] font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-[var(--accent)]">
               {agent.title}
             </h2>
-            <p className="mt-0.5 text-[13px] text-[var(--muted)]">
+            <p className="mt-1 text-[12px] font-medium text-[var(--muted)]">
               利用 {agent.usageCount.toLocaleString("ja-JP")} 回 · レビュー{" "}
               {agent.reviewCount} 件
             </p>
@@ -51,17 +51,17 @@ export function AgentCard({ agent }: Props) {
           {agent.pricePerUsePt} pt
         </span>
       </div>
-      <p className="line-clamp-2 text-[15px] leading-relaxed text-[var(--subtle)]">
+      <p className="line-clamp-2 text-[15px] leading-[1.47] text-[var(--subtle)]">
         {agent.description}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         {agent.firstThreeFree && (
-          <span className="rounded-full bg-emerald-500/12 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
+          <span className="rounded-full bg-[var(--brand-muted)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--accent)]">
             初回3回無料
           </span>
         )}
         {highValue && (
-          <span className="rounded-full bg-amber-500/12 px-2.5 py-0.5 text-[11px] font-medium text-amber-800 dark:text-amber-300">
+          <span className="rounded-full bg-[var(--brand-muted)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--accent)]">
             高コスパ
           </span>
         )}
@@ -71,7 +71,7 @@ export function AgentCard({ agent }: Props) {
           .map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-[var(--card-elevated)] px-2.5 py-0.5 text-[11px] text-[var(--muted)] ring-1 ring-[var(--border)]"
+              className="rounded-full border border-[var(--border)] bg-transparent px-2.5 py-0.5 text-[11px] font-medium text-[var(--muted)]"
             >
               {tag}
             </span>

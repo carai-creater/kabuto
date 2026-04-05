@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { AgentCard } from "@/components/agent-card";
+import { DbConnectionTips } from "@/components/db-connection-tips";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
 import { PAGE_SHELL } from "@/lib/page-shell";
 
@@ -44,8 +45,7 @@ export default async function Home() {
     });
   } catch (err) {
     console.error("[Home] database error:", err);
-    loadError =
-      "接続できません。DATABASE_URL・SSL・ネットワーク（Supabase の IP 制限など）を確認してください。";
+    loadError = "connection_failed";
   }
 
   return (
@@ -88,22 +88,28 @@ export default async function Home() {
         >
           {loadError && (
             <div
-              className={`${CENTER} max-w-md rounded-2xl border border-[var(--border)] bg-[var(--card-elevated)] px-5 py-4 text-[14px] leading-relaxed text-[var(--muted)]`}
+              className={`${CENTER} max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--card-elevated)] px-5 py-4 text-[14px] leading-relaxed text-[var(--muted)]`}
               role="alert"
             >
-              {loadError}
+              <p className="font-medium text-foreground">
+                データベースに接続できません
+              </p>
+              <DbConnectionTips />
             </div>
           )}
 
           <div className={`${CENTER} mt-8 max-w-2xl`}>
+            <p className="text-[12px] font-semibold tracking-[0.08em] text-[var(--muted)]">
+              エージェント一覧
+            </p>
             <h2
               id="agent-list-heading"
-              className="text-[20px] font-semibold tracking-tight text-foreground sm:text-[22px]"
+              className="mt-2 text-[28px] font-semibold leading-tight tracking-tight text-foreground sm:text-[32px]"
             >
               すべてのエージェント
             </h2>
             {!loadError && (
-              <p className="mt-1.5 text-[14px] text-[var(--muted)]">
+              <p className="mt-2 text-[15px] text-[var(--muted)]">
                 {agents.length > 0 ? `${agents.length} 件` : "公開中のエージェント"}
               </p>
             )}
@@ -117,7 +123,7 @@ export default async function Home() {
               </code>
             </p>
           ) : !loadError ? (
-            <ul className="mx-auto mt-10 grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+            <ul className="mx-auto mt-12 grid w-full max-w-5xl grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
               {agents.map((a) => (
                 <li key={a.id}>
                   <AgentCard agent={a} />
