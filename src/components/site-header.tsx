@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { PAGE_SHELL } from "@/lib/page-shell";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -25,37 +24,36 @@ export function SiteHeader({
       }}
     >
       <div
-        className={`flex h-[52px] w-full items-center justify-between gap-3 sm:h-14 ${PAGE_SHELL}`}
+        className={`flex h-[52px] w-full items-center justify-between gap-2 sm:gap-3 sm:h-14 ${PAGE_SHELL}`}
       >
         <Link
           href="/"
-          className="group flex min-w-0 shrink items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
+          className="group flex shrink-0 items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
         >
           <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-transparent ring-1 ring-black/[0.06] dark:bg-[var(--card)] dark:shadow-sm dark:ring-white/[0.08]">
-            <Image
+            {/* next/image の SVG は環境によって不安定なため img で配信 */}
+            <img
               src="/kabuto-logo-light.svg"
               alt=""
               width={32}
               height={32}
-              className="object-contain dark:hidden"
-              priority
+              className="h-8 w-8 object-contain dark:hidden"
             />
-            <Image
+            <img
               src="/kabuto-logo.svg"
               alt=""
               width={32}
               height={32}
-              className="hidden object-contain dark:block"
-              priority
+              className="hidden h-8 w-8 object-contain dark:block"
             />
           </span>
-          <span className="truncate text-[17px] font-semibold tracking-tight text-foreground">
+          <span className="text-[17px] font-semibold tracking-tight text-foreground">
             kabuto
           </span>
         </Link>
 
         {configWarning && (
-          <p className="hidden max-w-[10rem] truncate text-[11px] text-[var(--muted)] sm:block md:max-w-xs">
+          <p className="hidden min-w-0 flex-1 truncate px-1 text-center text-[11px] text-[var(--muted)] sm:block">
             {configWarning}
           </p>
         )}
