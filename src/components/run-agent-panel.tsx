@@ -58,7 +58,7 @@ export function RunAgentPanel({ agentId, pricePerUsePt, starters, tools }: Props
           setError("デモでユーザーを選んでから実行してください（/demo）。");
         } else if (res.code === "INSUFFICIENT") {
           setError(
-            `ポイントが足りません（必要 ${res.required ?? pricePerUsePt} pt）。ウォレットでチャージを想定してください。`,
+            `ポイントが足りません（必要 ${res.required ?? pricePerUsePt} pt）。`,
           );
         } else {
           setError("実行に失敗しました。しばらくしてから再度お試しください。");
@@ -73,28 +73,28 @@ export function RunAgentPanel({ agentId, pricePerUsePt, starters, tools }: Props
 
   return (
     <section
-      className="rounded-2xl border border-white/10 bg-zinc-950/50 p-5 ring-1 ring-white/[0.04]"
+      className="surface-card p-6 sm:p-8"
       aria-labelledby={`${panelId}-heading`}
     >
       <h2
         id={`${panelId}-heading`}
-        className="text-sm font-medium uppercase tracking-wider text-zinc-500"
+        className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]"
       >
         実行
       </h2>
 
       {toolRows.length > 0 && (
-        <div className="mt-3">
-          <p className="text-xs text-zinc-500">接続ツール</p>
-          <ul className="mt-1 flex flex-wrap gap-2">
+        <div className="mt-5">
+          <p className="text-label">接続ツール</p>
+          <ul className="mt-2 flex flex-wrap gap-2">
             {toolRows.map((t) => (
               <li
                 key={t.name}
-                className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-zinc-300 ring-1 ring-white/10"
+                className="rounded-full bg-[var(--card-elevated)] px-3 py-1 text-[12px] text-[var(--subtle)] ring-1 ring-[var(--border)]"
               >
                 {t.name}
                 {t.type ? (
-                  <span className="text-zinc-500"> · {t.type}</span>
+                  <span className="text-[var(--muted)]"> · {t.type}</span>
                 ) : null}
               </li>
             ))}
@@ -102,16 +102,16 @@ export function RunAgentPanel({ agentId, pricePerUsePt, starters, tools }: Props
         </div>
       )}
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-[1fr,12rem] sm:items-end">
+      <div className="mt-6 grid gap-4 sm:grid-cols-[1fr,11rem] sm:items-end">
         <div>
-          <label htmlFor={`${panelId}-llm`} className="text-xs text-zinc-500">
+          <label htmlFor={`${panelId}-llm`} className="text-label">
             モデル
           </label>
           <select
             id={`${panelId}-llm`}
             value={llm}
             onChange={(e) => setLlm(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-white/10 bg-black/60 px-3 py-2.5 text-sm text-zinc-100 outline-none focus:border-[#D4AF37]/50 focus:ring-2 focus:ring-[#D4AF37]/25"
+            className="input-apple mt-2 w-full"
           >
             {LLMS.map((m) => (
               <option key={m.id} value={m.id}>
@@ -120,16 +120,16 @@ export function RunAgentPanel({ agentId, pricePerUsePt, starters, tools }: Props
             ))}
           </select>
         </div>
-        <div className="text-right text-xs text-zinc-500 sm:pb-2">
-          1回の消費:{" "}
-          <span className="font-medium text-[#E8D48B]">
+        <div className="text-right text-[13px] text-[var(--muted)] sm:pb-2">
+          1回{" "}
+          <span className="font-semibold tabular-nums text-[var(--brand)]">
             {pricePerUsePt} pt
           </span>
         </div>
       </div>
 
-      <div className="mt-4">
-        <label htmlFor={`${panelId}-msg`} className="text-xs text-zinc-500">
+      <div className="mt-5">
+        <label htmlFor={`${panelId}-msg`} className="text-label">
           メッセージ
         </label>
         <textarea
@@ -138,13 +138,13 @@ export function RunAgentPanel({ agentId, pricePerUsePt, starters, tools }: Props
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
           placeholder="質問を入力…"
-          className="mt-1 w-full resize-y rounded-xl border border-white/10 bg-black/60 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-[#D4AF37]/50 focus:ring-2 focus:ring-[#D4AF37]/25"
+          className="input-apple mt-2 w-full resize-y placeholder:text-[var(--muted)]"
         />
       </div>
 
       {starters.length > 0 && (
-        <div className="mt-4">
-          <p className="text-xs text-zinc-500">会話スターター</p>
+        <div className="mt-5">
+          <p className="text-label">会話スターター</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {starters
               .sort((a, b) => a.position - b.position)
@@ -154,7 +154,7 @@ export function RunAgentPanel({ agentId, pricePerUsePt, starters, tools }: Props
                   type="button"
                   disabled={pending}
                   onClick={() => setMessage(s.text)}
-                  className="max-w-full rounded-lg border border-[#D4AF37]/25 bg-[#D4AF37]/5 px-3 py-2 text-left text-xs leading-snug text-zinc-200 transition hover:border-[#D4AF37]/45 hover:bg-[#D4AF37]/10 disabled:opacity-50"
+                  className="max-w-full rounded-full border border-[var(--border)] bg-[var(--card-elevated)] px-4 py-2 text-left text-[13px] leading-snug text-[var(--foreground)] transition hover:border-[var(--accent)] disabled:opacity-50"
                 >
                   {s.text}
                 </button>
@@ -163,23 +163,28 @@ export function RunAgentPanel({ agentId, pricePerUsePt, starters, tools }: Props
         </div>
       )}
 
-      <div className="mt-5 flex flex-wrap items-center gap-3">
+      <div className="mt-8 flex flex-wrap items-center gap-4">
         <button
           type="button"
           disabled={pending}
           onClick={run}
-          className="inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-[#c9a227] to-[#8a6a1a] px-5 py-2.5 text-sm font-semibold text-black shadow-[0_0_24px_-6px_rgba(212,175,55,0.55)] transition hover:brightness-110 disabled:opacity-50"
+          className="btn-primary min-w-[120px]"
         >
-          {pending ? "実行中…" : "実行（モック）"}
+          {pending ? "実行中…" : "実行"}
         </button>
         {balance != null && (
-          <span className="text-xs text-zinc-500">
-            残高 <span className="text-zinc-200">{balance} pt</span>
+          <span className="text-[13px] text-[var(--muted)]">
+            残高{" "}
+            <span className="font-medium tabular-nums text-foreground">
+              {balance} pt
+            </span>
             {usageCount != null && (
               <>
                 {" "}
-                · 利用回数{" "}
-                <span className="text-zinc-200">{usageCount}</span>
+                · 利用{" "}
+                <span className="font-medium tabular-nums text-foreground">
+                  {usageCount}
+                </span>
               </>
             )}
           </span>
@@ -187,16 +192,16 @@ export function RunAgentPanel({ agentId, pricePerUsePt, starters, tools }: Props
       </div>
 
       {error && (
-        <p className="mt-3 text-sm text-red-400" role="alert">
+        <p className="mt-4 text-[15px] text-[var(--destructive)]" role="alert">
           {error}
         </p>
       )}
       {reply && (
-        <div className="mt-4 rounded-xl border border-white/10 bg-black/40 p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+        <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--card-elevated)] p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--muted)]">
             応答
           </p>
-          <pre className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-200">
+          <pre className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--foreground)]">
             {reply}
           </pre>
         </div>

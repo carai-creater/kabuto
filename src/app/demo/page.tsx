@@ -29,19 +29,25 @@ export default async function DemoPage() {
   }
 
   return (
-    <main className="relative flex flex-1 flex-col px-4 pb-24 pt-8 sm:px-6">
+    <main className="relative flex flex-1 flex-col px-5 pb-28 pt-12 sm:px-8">
       <div className="relative mx-auto w-full max-w-lg">
-        <h1 className="text-2xl font-semibold text-zinc-50">デモログイン</h1>
-        <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+        <h1 className="text-[32px] font-semibold tracking-tight text-foreground">
+          デモログイン
+        </h1>
+        <p className="mt-3 text-[17px] leading-relaxed text-[var(--muted)]">
           Supabase Auth 接続前の仮セッションです。ユーザーを選ぶと Cookie{" "}
-          <code className="rounded bg-white/5 px-1">kabuto_uid</code>{" "}
+          <code className="rounded-lg bg-[var(--card-elevated)] px-2 py-0.5 text-[13px] ring-1 ring-[var(--border)]">
+            kabuto_uid
+          </code>{" "}
           が設定されます。
         </p>
 
         {users.length === 0 ? (
-          <p className="mt-8 rounded-2xl border border-dashed border-white/15 p-6 text-sm text-zinc-500">
+          <p className="surface-card mt-10 p-8 text-[15px] text-[var(--muted)]">
             ユーザーがありません。{" "}
-            <code className="rounded bg-white/5 px-1">npm run db:seed</code>{" "}
+            <code className="rounded-md bg-[var(--card-elevated)] px-2 py-0.5 text-[13px] ring-1 ring-[var(--border)]">
+              npm run db:seed
+            </code>{" "}
             を実行してください。
           </p>
         ) : (

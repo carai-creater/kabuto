@@ -56,18 +56,18 @@ export default async function CreatorPage() {
 
   if (agents.length === 0 && !cw) {
     return (
-      <main className="relative flex flex-1 flex-col px-4 pb-24 pt-8 sm:px-6">
+      <main className="relative flex flex-1 flex-col px-5 pb-28 pt-12 sm:px-8">
         <div className="relative mx-auto w-full max-w-3xl">
-          <h1 className="text-2xl font-semibold text-zinc-50">
+          <h1 className="text-[32px] font-semibold tracking-tight text-foreground">
             クリエイターダッシュボード
           </h1>
-          <p className="mt-3 text-sm text-zinc-400">
+          <p className="mt-3 text-[17px] leading-relaxed text-[var(--muted)]">
             このアカウントではまだエージェントを作成していません。Bob
             のデモアカウントでログインするとサンプルが表示されます。
           </p>
           <Link
             href="/demo"
-            className="mt-6 inline-flex rounded-xl border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-4 py-2 text-sm text-[#E8D48B]"
+            className="mt-8 inline-flex rounded-full border border-[var(--border)] bg-[var(--card)] px-5 py-2.5 text-[15px] font-medium text-[var(--accent)] shadow-sm transition hover:opacity-90 dark:shadow-none"
           >
             デモで切り替え
           </Link>
@@ -77,54 +77,57 @@ export default async function CreatorPage() {
   }
 
   return (
-    <main className="relative flex flex-1 flex-col px-4 pb-24 pt-8 sm:px-6">
+    <main className="relative flex flex-1 flex-col px-5 pb-28 pt-12 sm:px-8">
       <div className="relative mx-auto w-full max-w-3xl">
-        <h1 className="text-2xl font-semibold text-zinc-50">
+        <h1 className="text-[32px] font-semibold tracking-tight text-foreground">
           クリエイターダッシュボード
         </h1>
-        <p className="mt-2 text-sm text-zinc-400">
-          利用回数・単価・評価のサマリー（分析の骨格）。
+        <p className="mt-2 text-[17px] leading-relaxed text-[var(--muted)]">
+          利用回数・単価・評価のサマリー。
         </p>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border border-white/10 bg-zinc-950/50 p-5">
-            <p className="text-xs uppercase tracking-wider text-zinc-500">
+        <div className="mt-10 grid gap-5 sm:grid-cols-2">
+          <div className="surface-card p-6">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
               報酬残高（pt）
             </p>
-            <p className="mt-2 text-2xl font-semibold tabular-nums text-[#E8D48B]">
+            <p className="mt-2 text-[32px] font-semibold tabular-nums text-[var(--brand)]">
               {(cw?.balancePt ?? 0).toLocaleString("ja-JP")}
             </p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-zinc-950/50 p-5">
-            <p className="text-xs uppercase tracking-wider text-zinc-500">
+          <div className="surface-card p-6">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
               公開エージェント
             </p>
-            <p className="mt-2 text-2xl font-semibold tabular-nums text-zinc-100">
+            <p className="mt-2 text-[32px] font-semibold tabular-nums text-foreground">
               {agents.filter((a) => a.isPublished).length}
             </p>
           </div>
         </div>
 
-        <section className="mt-10">
-          <h2 className="text-sm font-medium uppercase tracking-wider text-zinc-500">
+        <section className="mt-12">
+          <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]">
             あなたのエージェント
           </h2>
-          <ul className="mt-3 divide-y divide-white/10 rounded-2xl border border-white/10 bg-zinc-950/40">
+          <ul className="mt-4 divide-y divide-[var(--border)] overflow-hidden rounded-[22px] border border-[var(--border)] bg-[var(--card)] shadow-sm dark:shadow-none">
             {agents.map((a) => (
-              <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+              <li
+                key={a.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+              >
                 <div>
                   <Link
                     href={`/agents/${a.slug}`}
-                    className="font-medium text-zinc-200 hover:text-white"
+                    className="text-[17px] font-medium text-[var(--accent)] hover:underline"
                   >
                     {a.title}
                   </Link>
-                  <p className="text-xs text-zinc-500">
+                  <p className="mt-0.5 text-[13px] text-[var(--muted)]">
                     {a.pricePerUsePt} pt/回 · 利用 {a.usageCount} · 評価{" "}
                     {Number(a.ratingAvg).toFixed(1)}（{a.reviewCount} 件）
                   </p>
                 </div>
-                <span className="text-xs text-zinc-600">
+                <span className="text-[12px] text-[var(--muted)]">
                   {a.isPublished ? "公開" : "下書き"}
                 </span>
               </li>

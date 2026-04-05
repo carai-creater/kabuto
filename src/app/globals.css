@@ -1,24 +1,112 @@
 @import "tailwindcss";
 
-/* kabuto ブランド: ロゴのメタリックゴールド × ディープブラック */
+/* Apple 風: 余白・ヘアライン・システムフォント。ライト既定 + .dark */
 :root {
-  --background: #050505;
-  --foreground: #f4f4f5;
-  --kabuto-gold: #d4af37;
-  --kabuto-gold-deep: #b8860b;
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
+  --muted: #86868b;
+  --subtle: #6e6e73;
+  --card: #ffffff;
+  --card-elevated: #fafafa;
+  --border: rgb(0 0 0 / 0.06);
+  --border-strong: rgb(0 0 0 / 0.1);
+  --input-bg: rgb(255 255 255 / 0.92);
+  --input-border: rgb(0 0 0 / 0.08);
+  --accent: #0071e3;
+  --accent-hover: #0077ed;
+  --brand: #b8860b;
+  --brand-muted: rgb(184 134 11 / 0.12);
+  --destructive: #ff3b30;
+  --header-bg: rgb(245 245 247 / 0.72);
+}
+
+.dark {
+  --background: #000000;
+  --foreground: #f5f5f7;
+  --muted: #a1a1a6;
+  --subtle: #8e8e93;
+  --card: #1c1c1e;
+  --card-elevated: #2c2c2e;
+  --border: rgb(255 255 255 / 0.1);
+  --border-strong: rgb(255 255 255 / 0.16);
+  --input-bg: rgb(28 28 30 / 0.85);
+  --input-border: rgb(255 255 255 / 0.12);
+  --accent: #0a84ff;
+  --accent-hover: #409cff;
+  --brand: #d4af37;
+  --brand-muted: rgb(212 175 55 / 0.14);
+  --destructive: #ff453a;
+  --header-bg: rgb(0 0 0 / 0.65);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-kabuto-gold: var(--kabuto-gold);
-  --color-kabuto-gold-deep: var(--kabuto-gold-deep);
+  --color-muted-foreground: var(--muted);
+  --color-card: var(--card);
+  --color-accent: var(--accent);
+  --color-brand: var(--brand);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+html {
+  color-scheme: light dark;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family:
+    var(--font-geist-sans),
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
+    "SF Pro Display",
+    system-ui,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.015em;
+}
+
+/* カード・サーフェス共通（コンポーネントから参照） */
+@layer components {
+  .surface-card {
+    @apply rounded-[22px] border bg-card shadow-sm dark:shadow-none;
+    border-color: var(--border);
+  }
+  .surface-card-elevated {
+    @apply rounded-[22px] border bg-[var(--card-elevated)] shadow-sm dark:shadow-none;
+    border-color: var(--border);
+  }
+  .text-label {
+    @apply text-[13px] font-medium text-[var(--muted)];
+  }
+  .input-apple {
+    @apply rounded-2xl border px-3 py-2.5 text-[15px] outline-none transition;
+    background: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--foreground);
+  }
+  .input-apple:focus {
+    border-color: var(--accent);
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-full px-5 py-2.5 text-[15px] font-medium text-white transition;
+    background: var(--accent);
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover);
+  }
+  .btn-primary:disabled {
+    opacity: 0.45;
+  }
+  .link-subtle {
+    @apply text-[15px] transition;
+    color: var(--muted);
+  }
+  .link-subtle:hover {
+    color: var(--foreground);
+  }
 }

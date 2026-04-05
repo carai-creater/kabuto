@@ -16,7 +16,7 @@ export function DemoUserForm({ users }: { users: UserRow[] }) {
   const [err, setErr] = useState<string | null>(null);
 
   return (
-    <ul className="mt-8 space-y-3">
+    <ul className="mt-10 space-y-3">
       {users.map((u) => (
         <li key={u.id}>
           <button
@@ -37,21 +37,25 @@ export function DemoUserForm({ users }: { users: UserRow[] }) {
                 router.refresh();
               });
             }}
-            className="flex w-full items-center justify-between gap-4 rounded-2xl border border-white/10 bg-zinc-950/50 px-4 py-3 text-left text-sm transition hover:border-[#D4AF37]/35 hover:bg-zinc-900/60 disabled:opacity-50"
+            className="surface-card flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:border-[var(--accent)]/30 disabled:opacity-50"
           >
             <span>
-              <span className="block font-medium text-zinc-100">
+              <span className="block text-[17px] font-medium text-foreground">
                 {u.name ?? u.email}
               </span>
-              <span className="text-xs text-zinc-500">{u.email}</span>
+              <span className="text-[13px] text-[var(--muted)]">{u.email}</span>
             </span>
-            <span className="shrink-0 tabular-nums text-[#E8D48B]">
+            <span className="shrink-0 text-[15px] font-semibold tabular-nums text-[var(--brand)]">
               {(u.wallet?.balancePt ?? 0).toLocaleString("ja-JP")} pt
             </span>
           </button>
         </li>
       ))}
-      {err && <p className="text-sm text-red-400">{err}</p>}
+      {err && (
+        <p className="text-[15px] text-[var(--destructive)]" role="alert">
+          {err}
+        </p>
+      )}
     </ul>
   );
 }

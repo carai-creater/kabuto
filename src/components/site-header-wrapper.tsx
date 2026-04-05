@@ -40,6 +40,13 @@ export async function SiteHeaderWrapper() {
       />
     );
   } catch (err) {
+    const digest =
+      err && typeof err === "object" && "digest" in err
+        ? String((err as { digest?: string }).digest)
+        : "";
+    if (digest === "DYNAMIC_SERVER_USAGE") {
+      return <SiteHeader email={null} displayName={null} balancePt={null} />;
+    }
     console.error("[SiteHeaderWrapper] database error:", err);
     return (
       <SiteHeader

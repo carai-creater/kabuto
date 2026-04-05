@@ -27,41 +27,41 @@ export function AgentCard({ agent }: Props) {
   return (
     <Link
       href={`/agents/${agent.slug}`}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/60 p-5 shadow-[0_0_0_1px_rgba(212,175,55,0.06)] transition hover:border-[#D4AF37]/35 hover:shadow-[0_0_40px_-16px_rgba(212,175,55,0.35)]"
+      className="group surface-card block p-6 transition hover:border-[var(--border-strong)] hover:shadow-md dark:hover:shadow-none"
     >
-      <div className="mb-3 flex items-start justify-between gap-3">
+      <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <span
-            className="flex h-12 w-12 items-center justify-center rounded-xl bg-black text-2xl ring-1 ring-white/10"
+            className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--card-elevated)] text-[26px] ring-1 ring-[var(--border)]"
             aria-hidden
           >
             {agent.iconEmoji}
           </span>
           <div>
-            <h2 className="font-semibold text-zinc-100 group-hover:text-white">
+            <h2 className="text-[17px] font-semibold tracking-tight text-foreground group-hover:text-[var(--accent)]">
               {agent.title}
             </h2>
-            <p className="text-xs text-zinc-500">
+            <p className="mt-0.5 text-[13px] text-[var(--muted)]">
               利用 {agent.usageCount.toLocaleString("ja-JP")} 回 · レビュー{" "}
               {agent.reviewCount} 件
             </p>
           </div>
         </div>
-        <span className="shrink-0 rounded-md border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-2 py-1 text-xs font-medium tabular-nums text-[#E8D48B]">
-          {agent.pricePerUsePt} pt / 回
+        <span className="shrink-0 rounded-full bg-[var(--brand-muted)] px-2.5 py-1 text-[12px] font-semibold tabular-nums text-[var(--brand)]">
+          {agent.pricePerUsePt} pt
         </span>
       </div>
-      <p className="line-clamp-2 text-sm leading-relaxed text-zinc-400">
+      <p className="line-clamp-2 text-[15px] leading-relaxed text-[var(--subtle)]">
         {agent.description}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         {agent.firstThreeFree && (
-          <span className="rounded-md bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-300 ring-1 ring-emerald-500/30">
+          <span className="rounded-full bg-emerald-500/12 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
             初回3回無料
           </span>
         )}
         {highValue && (
-          <span className="rounded-md bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-200 ring-1 ring-amber-500/25">
+          <span className="rounded-full bg-amber-500/12 px-2.5 py-0.5 text-[11px] font-medium text-amber-800 dark:text-amber-300">
             高コスパ
           </span>
         )}
@@ -71,7 +71,7 @@ export function AgentCard({ agent }: Props) {
           .map((tag) => (
             <span
               key={tag}
-              className="rounded-md bg-white/5 px-2 py-0.5 text-[11px] text-zinc-400 ring-1 ring-white/10"
+              className="rounded-full bg-[var(--card-elevated)] px-2.5 py-0.5 text-[11px] text-[var(--muted)] ring-1 ring-[var(--border)]"
             >
               {tag}
             </span>

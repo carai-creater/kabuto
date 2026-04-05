@@ -14,22 +14,26 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-4 text-center">
-      <p className="text-lg font-medium text-zinc-100">
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-5 px-5 text-center">
+      <p className="text-[21px] font-semibold text-foreground">
         読み込み中にエラーが発生しました
       </p>
-      <p className="max-w-md text-sm text-zinc-500">
-        多くの場合、本番の{" "}
-        <code className="rounded bg-white/10 px-1">DATABASE_URL</code>{" "}
-        未設定または DB 接続失敗です。Vercel のログと環境変数を確認してください。
+      <p className="max-w-md text-[15px] leading-relaxed text-[var(--muted)]">
+        本番の{" "}
+        <code className="rounded-md bg-[var(--card-elevated)] px-2 py-0.5 text-[13px] ring-1 ring-[var(--border)]">
+          DATABASE_URL
+        </code>{" "}
+        未設定や DB 接続失敗のことがあります。Vercel のログと環境変数を確認してください。
       </p>
       {error.digest && (
-        <p className="font-mono text-xs text-zinc-600">digest: {error.digest}</p>
+        <p className="font-mono text-[11px] text-[var(--muted)]">
+          digest: {error.digest}
+        </p>
       )}
       <button
         type="button"
         onClick={() => reset()}
-        className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-zinc-100 hover:bg-white/10"
+        className="btn-primary"
       >
         再試行
       </button>
