@@ -70,6 +70,10 @@ export default async function Home() {
               </a>
             </div>
             <p className="mt-7 text-[13px] text-[var(--muted)]">
+              <Link href="/dashboard" className="text-[var(--accent)] hover:underline">
+                ダッシュボード
+              </Link>
+              <span className="mx-2 opacity-40">·</span>
               <Link href="/demo" className="text-[var(--accent)] hover:underline">
                 デモ
               </Link>

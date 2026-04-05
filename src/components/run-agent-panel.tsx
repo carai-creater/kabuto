@@ -16,9 +16,17 @@ type Props = {
   pricePerUsePt: number;
   starters: { id: string; position: number; text: string }[];
   tools: unknown;
+  /** 作成者のみ true。false のときツール名は表示しない */
+  showToolDetails?: boolean;
 };
 
-export function RunAgentPanel({ agentId, pricePerUsePt, starters, tools }: Props) {
+export function RunAgentPanel({
+  agentId,
+  pricePerUsePt,
+  starters,
+  tools,
+  showToolDetails = false,
+}: Props) {
   const panelId = useId();
   const [llm, setLlm] = useState<string>(LLMS[0].id);
   const [message, setMessage] = useState("");
@@ -80,10 +88,10 @@ export function RunAgentPanel({ agentId, pricePerUsePt, starters, tools }: Props
         id={`${panelId}-heading`}
         className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]"
       >
-        実行
+        チャット
       </h2>
 
-      {toolRows.length > 0 && (
+      {showToolDetails && toolRows.length > 0 && (
         <div className="mt-5">
           <p className="text-label">接続ツール</p>
           <ul className="mt-2 flex flex-wrap gap-2">
@@ -170,7 +178,7 @@ export function RunAgentPanel({ agentId, pricePerUsePt, starters, tools }: Props
           onClick={run}
           className="btn-primary min-w-[120px]"
         >
-          {pending ? "実行中…" : "実行"}
+          {pending ? "送信中…" : "送信"}
         </button>
         {balance != null && (
           <span className="text-[13px] text-[var(--muted)]">

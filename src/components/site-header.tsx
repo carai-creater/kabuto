@@ -60,6 +60,12 @@ export function SiteHeader({
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <nav className="flex items-center gap-0.5">
             <Link
+              href="/dashboard"
+              className="link-subtle rounded-full px-2 py-1.5 text-[12px] sm:px-3 sm:text-[13px]"
+            >
+              マイページ
+            </Link>
+            <Link
               href="/wallet"
               className="link-subtle rounded-full px-2 py-1.5 text-[12px] sm:px-3 sm:text-[13px]"
             >
@@ -67,7 +73,7 @@ export function SiteHeader({
             </Link>
             <Link
               href="/creator"
-              className="link-subtle hidden rounded-full px-2 py-1.5 text-[12px] sm:inline-flex sm:px-3 sm:text-[13px]"
+              className="link-subtle hidden rounded-full px-2 py-1.5 text-[12px] md:inline-flex md:px-3 md:text-[13px]"
             >
               クリエイター
             </Link>
