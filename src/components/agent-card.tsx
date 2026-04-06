@@ -25,10 +25,12 @@ export function AgentCard({ agent }: Props) {
     (agent.reviewCount >= 3 && rating >= 4);
 
   return (
-    <Link
-      href={`/agents/${agent.slug}`}
-      className="agent-card-surface group block p-4 sm:p-5"
-    >
+    <article className="agent-card-surface group relative cursor-pointer p-4 sm:p-5">
+      <Link
+        href={`/agents/${agent.slug}`}
+        aria-label={`${agent.title} の詳細を見る`}
+        className="absolute inset-0 z-10 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
+      />
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="min-w-0">
@@ -71,6 +73,6 @@ export function AgentCard({ agent }: Props) {
             </span>
           ))}
       </div>
-    </Link>
+    </article>
   );
 }
