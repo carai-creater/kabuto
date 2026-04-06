@@ -15,6 +15,8 @@ model User {
   email     String   @unique
   name      String?
   avatarUrl String?
+  /// Supabase Auth の user id（auth.users.id）と 1:1 で紐付け
+  authUserId String? @unique @db.Uuid
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

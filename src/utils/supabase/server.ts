@@ -2,16 +2,9 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { getSupabasePublicEnv } from "@/utils/supabase/env";
 
-export async function createClient() {
-  const cookieStore = await cookies();
+function createServerClientWithStore(cookieStore: Awaited<ReturnType<typeof cookies>>) {
   const { url, key } = getSupabasePublicEnv();
-
-  if (!url || !key) {
-    throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL or publishable/anon key. See .env.example",
-    );
-  }
-
+  if (!url || !key) return null;
   return createServerClient(url, key, {
     cookies: {
       getAll() {
@@ -28,4 +21,25 @@ export async function createClient() {
       },
     },
   });
+}
+
+/** URL / キーが揃っていないときは null（セッション解決でフォールバック可能） */
+export async function createClientOrNull() {
+  const cookieStore = await cookies();
+  return createServerClientWithStore(cookieStore);
+}
+
+export async function createClient() {
+  const cookieStore = await cookies();
+  const { url, key } = getSupabasePublicEnv();
+
+  if (!url || !key) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_SUPABASE_URL or publishable/anon key. See .env.example",
+    );
+  }
+
+  return createServerClientWithStore(cookieStore) as NonNullable<
+    Awaited<ReturnType<typeof createServerClientWithStore>>
+  >;
 }

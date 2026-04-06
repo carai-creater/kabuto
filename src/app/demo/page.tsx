@@ -1,10 +1,16 @@
+import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DemoUserForm } from "@/components/demo-user-form";
 import { DbUnavailableMessage } from "@/components/db-unavailable";
+import { isDemoLoginEnabled } from "@/lib/demo";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
 import { PAGE_SHELL } from "@/lib/page-shell";
 
 export default async function DemoPage() {
+  if (!isDemoLoginEnabled()) {
+    notFound();
+  }
+
   if (!isDatabaseConfigured()) {
     return <DbUnavailableMessage />;
   }
@@ -36,11 +42,15 @@ export default async function DemoPage() {
           デモログイン
         </h1>
         <p className="mt-3 text-[17px] leading-relaxed text-[var(--muted)]">
-          Supabase Auth 接続前の仮セッションです。ユーザーを選ぶと Cookie{" "}
+          開発用の仮ログインです（本番では無効）。ユーザーを選ぶと Cookie{" "}
           <code className="rounded-lg bg-[var(--card-elevated)] px-2 py-0.5 text-[13px] ring-1 ring-[var(--border)]">
             kabuto_uid
           </code>{" "}
-          が設定されます。
+          が設定されます。本番利用は{" "}
+          <a href="/login" className="text-[var(--accent)] underline">
+            ログイン
+          </a>{" "}
+          を使ってください。
         </p>
 
         {users.length === 0 ? (

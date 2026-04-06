@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { isDemoLoginEnabled } from "@/lib/demo";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
 import { getSessionUserId } from "@/lib/session";
 import { SiteHeader } from "@/components/site-header";
@@ -10,6 +11,7 @@ export async function SiteHeaderWrapper() {
         email={null}
         displayName={null}
         balancePt={null}
+        demoLoginEnabled={isDemoLoginEnabled()}
         configWarning="DATABASE_URL が未設定です（Vercel の Environment Variables を確認）"
       />
     );
@@ -37,6 +39,7 @@ export async function SiteHeaderWrapper() {
         email={user?.email ?? null}
         displayName={user?.name ?? user?.email ?? null}
         balancePt={balance?.balancePt ?? null}
+        demoLoginEnabled={isDemoLoginEnabled()}
       />
     );
   } catch (err) {
@@ -45,7 +48,14 @@ export async function SiteHeaderWrapper() {
         ? String((err as { digest?: string }).digest)
         : "";
     if (digest === "DYNAMIC_SERVER_USAGE") {
-      return <SiteHeader email={null} displayName={null} balancePt={null} />;
+      return (
+        <SiteHeader
+          email={null}
+          displayName={null}
+          balancePt={null}
+          demoLoginEnabled={isDemoLoginEnabled()}
+        />
+      );
     }
     console.error("[SiteHeaderWrapper] database error:", err);
     return (
@@ -53,6 +63,7 @@ export async function SiteHeaderWrapper() {
         email={null}
         displayName={null}
         balancePt={null}
+        demoLoginEnabled={isDemoLoginEnabled()}
         configWarning="データベースに接続できません（接続文字列・マイグレーション・ファイアウォールを確認）"
       />
     );

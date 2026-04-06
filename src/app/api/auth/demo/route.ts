@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { isDemoLoginEnabled } from "@/lib/demo";
 import { SESSION_COOKIE } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
+  if (!isDemoLoginEnabled()) {
+    return NextResponse.json(
+      { ok: false, error: "demo login disabled" },
+      { status: 403 }
+    );
+  }
+
   const body = (await req.json().catch(() => null)) as { userId?: string } | null;
   const userId = body?.userId?.trim();
   if (!userId) {

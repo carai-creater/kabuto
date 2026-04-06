@@ -7,6 +7,8 @@ type Props = {
   email?: string | null;
   balancePt?: number | null;
   configWarning?: string | null;
+  /** デモページへのリンクを出すか（本番では false になりやすい） */
+  demoLoginEnabled?: boolean;
 };
 
 export function SiteHeader({
@@ -14,6 +16,7 @@ export function SiteHeader({
   email,
   balancePt,
   configWarning,
+  demoLoginEnabled = true,
 }: Props) {
   return (
     <header
@@ -77,12 +80,31 @@ export function SiteHeader({
             >
               クリエイター
             </Link>
-            <Link
-              href="/demo"
-              className="link-subtle rounded-full px-2 py-1.5 text-[12px] sm:px-3 sm:text-[13px]"
-            >
-              デモ
-            </Link>
+            {demoLoginEnabled ? (
+              <Link
+                href="/demo"
+                className="link-subtle rounded-full px-2 py-1.5 text-[12px] sm:px-3 sm:text-[13px]"
+              >
+                デモ
+              </Link>
+            ) : null}
+            {email ? (
+              <form action="/auth/signout" method="post" className="inline">
+                <button
+                  type="submit"
+                  className="link-subtle rounded-full px-2 py-1.5 text-[12px] sm:px-3 sm:text-[13px]"
+                >
+                  ログアウト
+                </button>
+              </form>
+            ) : (
+              <Link
+                href="/login"
+                className="link-subtle rounded-full px-2 py-1.5 text-[12px] sm:px-3 sm:text-[13px]"
+              >
+                ログイン
+              </Link>
+            )}
           </nav>
           {balancePt != null && (
             <span
