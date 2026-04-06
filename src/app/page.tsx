@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { AgentCard } from "@/components/agent-card";
 import { DbConnectionTips } from "@/components/db-connection-tips";
@@ -52,42 +51,8 @@ export default async function Home() {
     <div className="flex min-h-full flex-1 flex-col">
       <main className="relative flex w-full flex-1 flex-col items-center">
         <section
-          className={`w-full border-b border-[var(--border)] py-14 sm:py-20 ${PAGE_SHELL} flex flex-col items-center`}
-        >
-          <div className={CENTER}>
-            <h1 className="text-balance text-[clamp(1.6rem,4.5vw,2.25rem)] font-semibold leading-snug tracking-tight text-foreground">
-              エージェントを探す
-            </h1>
-            <p className="mt-3 text-pretty text-[15px] leading-relaxed text-[var(--muted)]">
-              カードを開いて会話を始められます。
-            </p>
-            <div className="mt-8">
-              <a
-                href="#agent-list"
-                className="btn-primary inline-flex rounded-full px-7 py-2.5 text-[15px]"
-              >
-                一覧を見る
-              </a>
-            </div>
-            <p className="mt-7 text-[13px] text-[var(--muted)]">
-              <Link href="/dashboard" className="text-[var(--accent)] hover:underline">
-                ダッシュボード
-              </Link>
-              <span className="mx-2 opacity-40">·</span>
-              <Link href="/demo" className="text-[var(--accent)] hover:underline">
-                デモ
-              </Link>
-              <span className="mx-2 opacity-40">·</span>
-              <Link href="/wallet" className="text-[var(--accent)] hover:underline">
-                ウォレット
-              </Link>
-            </p>
-          </div>
-        </section>
-
-        <section
           id="agent-list"
-          className={`w-full scroll-mt-20 pb-20 pt-12 sm:pt-14 ${PAGE_SHELL} flex flex-col items-center`}
+          className={`w-full scroll-mt-20 pb-20 pt-10 sm:pt-12 ${PAGE_SHELL} flex flex-col items-center`}
           aria-labelledby="agent-list-heading"
         >
           {loadError && (
@@ -102,13 +67,10 @@ export default async function Home() {
             </div>
           )}
 
-          <div className={`${CENTER} mt-8 max-w-2xl`}>
-            <p className="text-[12px] font-semibold tracking-[0.08em] text-[var(--muted)]">
-              エージェント一覧
-            </p>
+          <div className={`${CENTER} max-w-2xl`}>
             <h2
               id="agent-list-heading"
-              className="mt-2 text-[28px] font-semibold leading-tight tracking-tight text-foreground sm:text-[32px]"
+              className="text-[28px] font-semibold leading-tight tracking-tight text-foreground sm:text-[32px]"
             >
               すべてのエージェント
             </h2>
@@ -127,7 +89,7 @@ export default async function Home() {
               </code>
             </p>
           ) : !loadError ? (
-            <ul className="mx-auto mt-12 grid w-full max-w-5xl grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
+            <ul className="mx-auto mt-8 grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
               {agents.map((a) => (
                 <li key={a.id}>
                   <AgentCard agent={a} />
