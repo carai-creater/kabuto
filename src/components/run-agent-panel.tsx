@@ -1,7 +1,17 @@
 "use client";
 
-import { useCallback, useId, useMemo, useState, useTransition } from "react";
-import { runAgentCompletion } from "@/app/actions/usage";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
+import { useRouter } from "next/navigation";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from "react";
+
+import { getSessionWalletBalance } from "@/app/actions/wallet";
 
 const LLMS = [
   { id: "gpt-4o", label: "GPT-4o" },
@@ -9,11 +19,36 @@ const LLMS = [
   { id: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet" },
 ] as const;
 
+function coerceModelId(id: string | undefined): string {
+  if (!id) return LLMS[0].id;
+  return LLMS.some((m) => m.id === id) ? id : LLMS[0].id;
+}
+
+function uiMessagePlainText(m: UIMessage): string {
+  if (!m.parts?.length) return "";
+  const lines: string[] = [];
+  for (const p of m.parts) {
+    if (p.type === "text") {
+      lines.push(p.text);
+    } else if (p.type === "reasoning") {
+      lines.push(`[思考] ${p.text}`);
+    } else if (p.type === "step-start") {
+      continue;
+    } else if (p.type === "dynamic-tool") {
+      lines.push(`[ツール ${p.toolName}]`);
+    } else if (typeof p.type === "string" && p.type.startsWith("tool-")) {
+      lines.push(`[ツール ${p.type.slice("tool-".length)}]`);
+    }
+  }
+  return lines.join("\n");
+}
+
 type ToolRow = { name: string; type?: string };
-type ChatMessage = { id: string; role: "user" | "assistant"; content: string };
 
 type Props = {
   agentId: string;
+  /** DB の defaultLlm など。未指定時は LLMS[0] */
+  defaultModelId?: string;
   pricePerUsePt: number;
   starters: { id: string; position: number; text: string }[];
   tools: unknown;
@@ -24,6 +59,7 @@ type Props = {
 
 export function RunAgentPanel({
   agentId,
+  defaultModelId,
   pricePerUsePt,
   starters,
   tools,
@@ -31,71 +67,105 @@ export function RunAgentPanel({
   fullScreenChat = false,
 }: Props) {
   const panelId = useId();
-  const [llm, setLlm] = useState<string>(LLMS[0].id);
+  const router = useRouter();
+  const [llm, setLlm] = useState(() => coerceModelId(defaultModelId));
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
-  const [usageCount, setUsageCount] = useState<number | null>(null);
-  const [pending, startTransition] = useTransition();
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        fetch: async (url, init) => {
+          const res = await fetch(
+            typeof url === "string" ? url : url.toString(),
+            init
+          );
+          if (res.status === 401) {
+            throw new Error("KABUTO_UNAUTHORIZED");
+          }
+          if (res.status === 402) {
+            const text = await res.text();
+            throw new Error(`KABUTO_INSUFFICIENT:${text}`);
+          }
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(text || `HTTP ${res.status}`);
+          }
+          return res;
+        },
+        prepareSendMessagesRequest: ({ messages, body }) => ({
+          body: {
+            ...body,
+            messages,
+            modelId: llm,
+            agentId,
+            idempotencyKey: crypto.randomUUID(),
+          },
+        }),
+      }),
+    [llm, agentId]
+  );
+
+  const { messages, sendMessage, status, clearError } = useChat({
+    id: agentId,
+    transport,
+    onFinish: async () => {
+      const b = await getSessionWalletBalance();
+      setBalance(b);
+      router.refresh();
+    },
+    onError: (err) => {
+      if (err.message === "KABUTO_UNAUTHORIZED") {
+        setError("デモでユーザーを選んでから実行してください（/demo）。");
+        return;
+      }
+      if (err.message.startsWith("KABUTO_INSUFFICIENT:")) {
+        const raw = err.message.slice("KABUTO_INSUFFICIENT:".length);
+        try {
+          const j = JSON.parse(raw) as {
+            requiredPt?: number;
+            balancePt?: number;
+          };
+          setError(
+            `ポイントが足りません（推定 ${j.requiredPt ?? "?"} pt、残高 ${j.balancePt ?? "?"} pt）。`
+          );
+        } catch {
+          setError("ポイントが足りません。");
+        }
+        return;
+      }
+      setError(err.message || "エラーが発生しました。");
+    },
+  });
+
+  const pending = status === "submitted" || status === "streaming";
+
+  useEffect(() => {
+    const run = async () => {
+      const b = await getSessionWalletBalance();
+      setBalance(b);
+    };
+    void run();
+  }, []);
 
   const toolRows = useMemo(() => {
     if (!Array.isArray(tools)) return [] as ToolRow[];
     return tools.filter((t): t is ToolRow => t != null && typeof t === "object");
   }, [tools]);
 
-  const run = useCallback(() => {
+  const run = useCallback(async () => {
     setError(null);
+    clearError();
     const text = message.trim();
     if (!text) {
       setError("メッセージを入力するか、スターターを選んでください。");
       return;
     }
-    const userMessageId =
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(16).slice(2)}-u`;
-    setMessages((prev) => [
-      ...prev,
-      { id: userMessageId, role: "user", content: text },
-    ]);
     setMessage("");
-    const idempotencyKey =
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
-    startTransition(async () => {
-      const res = await runAgentCompletion({
-        agentId,
-        idempotencyKey,
-        selectedLlm: llm,
-        userMessage: text,
-      });
-      if (!res.ok) {
-        if (res.code === "UNAUTHORIZED") {
-          setError("デモでユーザーを選んでから実行してください（/demo）。");
-        } else if (res.code === "INSUFFICIENT") {
-          setError(
-            `ポイントが足りません（必要 ${res.required ?? pricePerUsePt} pt）。`,
-          );
-        } else {
-          setError("実行に失敗しました。しばらくしてから再度お試しください。");
-        }
-        return;
-      }
-      const assistantMessageId =
-        typeof crypto !== "undefined" && crypto.randomUUID
-          ? crypto.randomUUID()
-          : `${Date.now()}-${Math.random().toString(16).slice(2)}-a`;
-      setMessages((prev) => [
-        ...prev,
-        { id: assistantMessageId, role: "assistant", content: res.assistantMessage },
-      ]);
-      setBalance(res.newBalancePt);
-      setUsageCount(res.usageCount);
-    });
-  }, [agentId, llm, message, pricePerUsePt]);
+    await sendMessage({ text });
+  }, [message, sendMessage, clearError]);
 
   return (
     <section
@@ -122,6 +192,7 @@ export function RunAgentPanel({
               id={`${panelId}-llm`}
               value={llm}
               onChange={(e) => setLlm(e.target.value)}
+              disabled={pending}
               className="input-apple h-10 w-full py-1 text-[13px]"
             >
               {LLMS.map((m) => (
@@ -163,6 +234,7 @@ export function RunAgentPanel({
               id={`${panelId}-llm`}
               value={llm}
               onChange={(e) => setLlm(e.target.value)}
+              disabled={pending}
               className="input-apple mt-2 w-full"
             >
               {LLMS.map((m) => (
@@ -173,9 +245,12 @@ export function RunAgentPanel({
             </select>
           </div>
           <div className="text-right text-[13px] text-[var(--muted)] sm:pb-2">
-            1回{" "}
+            掲載{" "}
             <span className="font-semibold tabular-nums text-[var(--brand)]">
-              {pricePerUsePt} pt
+              {pricePerUsePt} pt/回
+            </span>
+            <span className="block text-[11px] text-[var(--muted)]">
+              実際はトークン従量
             </span>
           </div>
         </div>
@@ -200,9 +275,11 @@ export function RunAgentPanel({
                     }
                   >
                     {m.role === "assistant" ? (
-                      <pre className="whitespace-pre-wrap">{m.content}</pre>
+                      <pre className="whitespace-pre-wrap">
+                        {uiMessagePlainText(m)}
+                      </pre>
                     ) : (
-                      m.content
+                      uiMessagePlainText(m)
                     )}
                   </div>
                 ))}
@@ -210,7 +287,10 @@ export function RunAgentPanel({
             )}
           </div>
           {error && (
-            <p className="mt-3 text-[14px] text-[var(--destructive)]" role="alert">
+            <p
+              className="mt-3 text-[14px] text-[var(--destructive)]"
+              role="alert"
+            >
               {error}
             </p>
           )}
@@ -244,16 +324,16 @@ export function RunAgentPanel({
               <button
                 type="button"
                 disabled={pending}
-                onClick={run}
+                onClick={() => void run()}
                 className="btn-primary h-10 shrink-0 px-4 py-0 text-[14px]"
               >
                 {pending ? "送信中…" : "送信"}
               </button>
             </div>
             <div className="mt-2 text-right text-[12px] text-[var(--muted)]">
-              1回{" "}
+              掲載{" "}
               <span className="font-semibold tabular-nums text-[var(--brand)]">
-                {pricePerUsePt} pt
+                {pricePerUsePt} pt/回
               </span>
               {balance != null && (
                 <>
@@ -264,15 +344,9 @@ export function RunAgentPanel({
                   </span>
                 </>
               )}
-              {usageCount != null && (
-                <>
-                  {" "}
-                  · 利用{" "}
-                  <span className="font-medium tabular-nums text-foreground">
-                    {usageCount}
-                  </span>
-                </>
-              )}
+              <span className="block text-[11px] text-[var(--muted)]">
+                消費はトークンに応じて変動（完了時に確定）
+              </span>
             </div>
           </div>
         </>
@@ -315,7 +389,7 @@ export function RunAgentPanel({
             <button
               type="button"
               disabled={pending}
-              onClick={run}
+              onClick={() => void run()}
               className="btn-primary min-w-[120px]"
             >
               {pending ? "送信中…" : "送信"}
@@ -326,20 +400,14 @@ export function RunAgentPanel({
                 <span className="font-medium tabular-nums text-foreground">
                   {balance} pt
                 </span>
-                {usageCount != null && (
-                  <>
-                    {" "}
-                    · 利用{" "}
-                    <span className="font-medium tabular-nums text-foreground">
-                      {usageCount}
-                    </span>
-                  </>
-                )}
               </span>
             )}
           </div>
           {error && (
-            <p className="mt-4 text-[15px] text-[var(--destructive)]" role="alert">
+            <p
+              className="mt-4 text-[15px] text-[var(--destructive)]"
+              role="alert"
+            >
               {error}
             </p>
           )}
@@ -355,7 +423,7 @@ export function RunAgentPanel({
                       {m.role === "user" ? "ユーザー" : "応答"}
                     </p>
                     <pre className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--foreground)]">
-                      {m.content}
+                      {uiMessagePlainText(m)}
                     </pre>
                   </div>
                 ))}

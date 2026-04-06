@@ -18,11 +18,12 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  wallet          Wallet?
-  creatorWallet   CreatorWallet?
-  agentsCreated   Agent[]             @relation("CreatorAgents")
-  reviews         Review[]
-  usageLedgers    UsageLedger[]
+  wallet               Wallet?
+  creatorWallet        CreatorWallet?
+  agentsCreated        Agent[]              @relation("CreatorAgents")
+  reviews              Review[]
+  usageLedgers         UsageLedger[]
+  walletTransactions   WalletTransaction[]
 }
 
 /// 利用者のプリペイド残高（pt）
@@ -55,6 +56,14 @@ model Agent {
   iconEmoji   String  @default("🤖")
   /// 役割: システムプロンプト
   systemPrompt String @db.Text
+  /// 追加のエージェント指示（任意）。未設定なら systemPrompt のみを使用
+  instructions  String? @db.Text
+  /// tools にマージする追加のツール設定 JSON
+  toolConfig    Json?
+  /// Supabase Vector 側のナレッジベース ID（任意）
+  knowledgeBaseId String? @db.Uuid
+  /// ベース価格（pt）。将来の固定課金や下限に利用可能（現行チャット課金はトークン従量が主）
+  basePrice     Int?
 
   pricePerUsePt Int @default(10)
   usageCount    Int @default(0)
@@ -80,6 +89,7 @@ model Agent {
   conversationStarters ConversationStarter[]
   reviews              Review[]
   usageLedgers         UsageLedger[]
+  walletTransactions   WalletTransaction[]
 }
 
 /// 知識: アップロード文書のメタ（実ファイルは Storage 側を想定）
@@ -137,6 +147,34 @@ model UsageLedger {
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([agentId, createdAt])
+}
+
+/// LLM モデルごとのトークン単価（1k トークンあたりの消費 pt）
+model ModelConfig {
+  id         String   @id @default(cuid())
+  modelId    String   @unique
+  label      String?
+  inputRate  Float
+  outputRate Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+/// チャット実行ごとのトークン従量課金トランザクション
+model WalletTransaction {
+  id             String   @id @default(cuid())
+  userId         String
+  agentId        String?
+  amountPt       Int
+  tokenUsage     Json
+  idempotencyKey String?  @unique
+  createdAt      DateTime @default(now())
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent Agent? @relation(fields: [agentId], references: [id], onDelete: SetNull)
 
   @@index([userId, createdAt])
   @@index([agentId, createdAt])

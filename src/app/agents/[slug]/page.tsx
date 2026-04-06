@@ -59,6 +59,7 @@ export default async function AgentDetailPage(props: Props) {
     <main className="flex min-h-screen w-full flex-1 flex-col">
       <RunAgentPanel
         agentId={agent.id}
+        defaultModelId={agent.defaultLlm}
         pricePerUsePt={agent.pricePerUsePt}
         starters={agent.conversationStarters}
         tools={agent.tools}

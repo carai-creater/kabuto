@@ -27,8 +27,8 @@ export type RunAgentCompletionState =
     };
 
 /**
- * 残高チェック → モック LLM 応答 → 完了時のみ課金（トランザクション）。
- * 本番では Vercel AI SDK 等で LLM を実行し、成功時にのみ completeUsage を呼ぶ。
+ * レガシー: モック応答 + `UsageLedger` 課金（回数ベース）。
+ * エージェント画面のチャットは `/api/chat` + トークン従量に移行済み。
  */
 export async function runAgentCompletion(input: {
   agentId: string;

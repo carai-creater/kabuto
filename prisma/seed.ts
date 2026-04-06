@@ -3,6 +3,8 @@ import { Prisma, PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.walletTransaction.deleteMany();
+  await prisma.modelConfig.deleteMany();
   await prisma.usageLedger.deleteMany();
   await prisma.review.deleteMany();
   await prisma.conversationStarter.deleteMany();
@@ -120,6 +122,35 @@ async function main() {
         ],
       },
     },
+  });
+
+  await prisma.modelConfig.createMany({
+    data: [
+      {
+        modelId: "gpt-4o",
+        label: "GPT-4o",
+        inputRate: 0.6,
+        outputRate: 1.8,
+      },
+      {
+        modelId: "claude-3-5-sonnet-20241022",
+        label: "Claude 3.5 Sonnet",
+        inputRate: 0.7,
+        outputRate: 2.1,
+      },
+      {
+        modelId: "gemini-1.5-pro",
+        label: "Gemini 1.5 Pro",
+        inputRate: 0.55,
+        outputRate: 1.65,
+      },
+      {
+        modelId: "gemini-2.0-flash",
+        label: "Gemini 2.0 Flash",
+        inputRate: 0.35,
+        outputRate: 1.0,
+      },
+    ],
   });
 
   console.log("Seed OK:", { alice: alice.email, bob: bob.email });
