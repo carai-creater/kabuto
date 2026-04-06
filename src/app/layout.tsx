@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SiteHeaderWrapper } from "@/components/site-header-wrapper";
 import { ThemeProvider } from "@/components/theme-provider";
+import { HeaderVisibility } from "@/components/header-visibility";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,7 +34,9 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-background text-foreground">
         <ThemeProvider>
-          <SiteHeaderWrapper />
+          <HeaderVisibility>
+            <SiteHeaderWrapper />
+          </HeaderVisibility>
           {children}
         </ThemeProvider>
       </body>

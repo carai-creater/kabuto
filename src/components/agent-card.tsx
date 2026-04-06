@@ -25,20 +25,16 @@ export function AgentCard({ agent }: Props) {
     (agent.reviewCount >= 3 && rating >= 4);
 
   return (
-    <Link
-      href={`/agents/${agent.slug}`}
-      className="agent-card-surface group block p-5 sm:p-6"
-    >
-      <div className="mb-4 flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <span
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--card-elevated)] text-[26px] ring-1 ring-black/[0.06] dark:ring-white/[0.08]"
-            aria-hidden
-          >
-            {agent.iconEmoji}
-          </span>
+    <article className="agent-card-surface group relative cursor-pointer p-4 sm:p-5">
+      <Link
+        href={`/agents/${agent.slug}`}
+        aria-label={`${agent.title} の詳細を見る`}
+        className="absolute inset-0 z-10 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
+      />
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div className="min-w-0">
           <div className="min-w-0">
-            <h2 className="text-[17px] font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-[var(--accent)]">
+            <h2 className="text-[16px] font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-[var(--accent)]">
               {agent.title}
             </h2>
             <p className="mt-1 text-[12px] font-medium text-[var(--muted)]">
@@ -51,10 +47,10 @@ export function AgentCard({ agent }: Props) {
           {agent.pricePerUsePt} pt
         </span>
       </div>
-      <p className="line-clamp-2 text-[15px] leading-[1.47] text-[var(--subtle)]">
+      <p className="line-clamp-2 text-[14px] leading-[1.5] text-[var(--subtle)]">
         {agent.description}
       </p>
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-3 flex flex-wrap gap-1.5">
         {agent.firstThreeFree && (
           <span className="rounded-full bg-[var(--brand-muted)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--accent)]">
             初回3回無料
@@ -77,6 +73,6 @@ export function AgentCard({ agent }: Props) {
             </span>
           ))}
       </div>
-    </Link>
+    </article>
   );
 }
