@@ -1,13 +1,25 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Plus } from "lucide-react";
+import {
+  BarChart3,
+  Bot,
+  Pencil,
+  Plus,
+  Sparkles,
+  Star,
+  Store,
+} from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
 import { DbUnavailableMessage } from "@/components/db-unavailable";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
 
-export default async function CreatorManagePage() {
+export async function generateMetadata() {
+  return { title: "クリエイターダッシュボード — kabuto" };
+}
+
+export default async function CreatorDashboardPage() {
   if (!isDatabaseConfigured()) {
     return <DbUnavailableMessage />;
   }
@@ -21,102 +33,208 @@ export default async function CreatorManagePage() {
     id: string;
     slug: string;
     title: string;
-    usageCount: number;
+    iconEmoji: string;
     pricePerUsePt: number;
     isPublished: boolean;
+    ratingAvg: import("@prisma/client").Prisma.Decimal;
+    reviewCount: number;
   }[] = [];
 
+  let totalRevenuePt = 0;
+
   try {
-    agents = await prisma.agent.findMany({
-      where: { creatorId: userId },
-      orderBy: { updatedAt: "desc" },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        usageCount: true,
-        pricePerUsePt: true,
-        isPublished: true,
-      },
-    });
+    const [agentRows, revenueAgg] = await Promise.all([
+      prisma.agent.findMany({
+        where: { creatorId: userId },
+        orderBy: { updatedAt: "desc" },
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          iconEmoji: true,
+          pricePerUsePt: true,
+          isPublished: true,
+          ratingAvg: true,
+          reviewCount: true,
+        },
+      }),
+      prisma.usageLedger.aggregate({
+        where: { agent: { creatorId: userId } },
+        _sum: { creatorEarningsPt: true },
+      }),
+    ]);
+    agents = agentRows;
+    totalRevenuePt = revenueAgg._sum.creatorEarningsPt ?? 0;
   } catch {
     return <DbUnavailableMessage />;
   }
 
+  const publishedCount = agents.filter((a) => a.isPublished).length;
+
+  let weightedStars = 0;
+  let totalReviews = 0;
+  for (const a of agents) {
+    weightedStars += Number(a.ratingAvg) * a.reviewCount;
+    totalReviews += a.reviewCount;
+  }
+  const avgRating =
+    totalReviews > 0 ? weightedStars / totalReviews : 0;
+
   return (
-    <div className="mx-auto w-full max-w-4xl">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="w-full">
+      <header className="flex flex-col gap-6 border-b border-slate-200/80 pb-8 dark:border-slate-800 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[12px] font-semibold tracking-[0.08em] text-[var(--muted)]">
-            クリエイター
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+            Creator
           </p>
-          <h1 className="mt-1 text-[28px] font-semibold tracking-tight text-foreground sm:text-[32px]">
-            エージェント管理
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+            クリエイターダッシュボード
           </h1>
-          <p className="mt-2 text-[15px] text-[var(--muted)]">
-            作成したエージェントの一覧と新規作成です。
+          <p className="mt-2 max-w-xl text-slate-600 dark:text-slate-400">
+            あなたが作成したエージェントの公開状況と売上をまとめて確認できます。
           </p>
         </div>
         <Link
           href="/dashboard/creator/new"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-5 py-3 text-[14px] font-semibold text-white shadow-lg shadow-[var(--accent)]/25 transition hover:opacity-95"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500"
         >
           <Plus className="h-5 w-5" aria-hidden />
-          新規作成
+          新しいエージェントを作成
         </Link>
-      </div>
+      </header>
+
+      <section className="mt-10 grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-none">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <Store className="h-4 w-4 text-blue-600 dark:text-blue-400" aria-hidden />
+            公開中のエージェント
+          </div>
+          <p className="mt-4 text-3xl font-bold tabular-nums text-slate-900 dark:text-white">
+            {publishedCount}
+            <span className="ml-1 text-base font-medium text-slate-500 dark:text-slate-400">
+              件
+            </span>
+          </p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-none">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <BarChart3 className="h-4 w-4 text-blue-600 dark:text-blue-400" aria-hidden />
+            総売上 (pt)
+          </div>
+          <p className="mt-4 text-3xl font-bold tabular-nums text-blue-600 dark:text-blue-400">
+            {totalRevenuePt.toLocaleString("ja-JP")}
+            <span className="ml-1 text-base font-medium text-slate-500 dark:text-slate-400">
+              pt
+            </span>
+          </p>
+          <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-500">
+            利用確定ごとのクリエイター取り分の累計
+          </p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-none">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <Star className="h-4 w-4 text-amber-500" aria-hidden />
+            平均評価
+          </div>
+          <p className="mt-4 flex items-baseline gap-1.5 text-3xl font-bold tabular-nums text-slate-900 dark:text-white">
+            {totalReviews > 0 ? avgRating.toFixed(1) : "—"}
+            {totalReviews > 0 ? (
+              <span className="text-amber-500" aria-hidden>
+                ★
+              </span>
+            ) : null}
+          </p>
+          <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-500">
+            {totalReviews > 0
+              ? `レビュー ${totalReviews.toLocaleString("ja-JP")} 件を反映`
+              : "レビューがまだありません"}
+          </p>
+        </div>
+      </section>
 
       <section className="mt-10">
+        <div className="mb-4 flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden />
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+            あなたのエージェント
+          </h2>
+        </div>
+
         {agents.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--card)] p-12 text-center shadow-lg dark:shadow-black/40">
-            <p className="text-[15px] text-[var(--muted)]">
-              まだエージェントがありません。新規作成から追加してください。
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-6 py-16 text-center dark:border-slate-700 dark:bg-slate-950/50">
+            <div
+              className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 to-violet-500/15 ring-1 ring-blue-500/20"
+              aria-hidden
+            >
+              <div className="relative">
+                <Bot className="h-10 w-10 text-blue-600 dark:text-blue-400" strokeWidth={1.5} />
+                <Sparkles className="absolute -right-1 -top-1 h-5 w-5 text-amber-400" strokeWidth={2} />
+              </div>
+            </div>
+            <p className="mt-6 text-base font-semibold text-slate-800 dark:text-slate-100">
+              まだエージェントがありません。作成を開始しましょう！
+            </p>
+            <p className="mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
+              新規作成から名前・説明・システムプロンプトを登録すると、ストアに並べられます。
             </p>
             <Link
               href="/dashboard/creator/new"
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-6 py-3 text-[14px] font-semibold text-white shadow-lg"
+              className="mt-8 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-500"
             >
               <Plus className="h-5 w-5" aria-hidden />
-              新規作成
+              新しいエージェントを作成
             </Link>
           </div>
         ) : (
-          <ul className="space-y-3">
-            {agents.map((a) => (
-              <li
-                key={a.id}
-                className="flex flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-lg dark:shadow-black/40 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="min-w-0">
-                  <Link
-                    href={`/agents/${a.slug}`}
-                    className="text-[17px] font-semibold text-[var(--accent)] hover:underline"
-                  >
-                    {a.title}
-                  </Link>
-                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-[var(--muted)]">
-                    <span>利用価格: {a.pricePerUsePt.toLocaleString("ja-JP")} pt/回</span>
-                    <span>利用数: {a.usageCount.toLocaleString("ja-JP")}</span>
-                    <span
-                      className={
-                        a.isPublished
-                          ? "text-emerald-500 dark:text-emerald-400"
-                          : "text-[var(--muted)]"
-                      }
-                    >
-                      {a.isPublished ? "公開中" : "下書き"}
-                    </span>
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-none">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+              {agents.map((a) => (
+                <li key={a.id}>
+                  <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5">
+                    <div className="flex min-w-0 flex-1 items-center gap-4">
+                      <span
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-2xl dark:bg-slate-800"
+                        aria-hidden
+                      >
+                        {a.iconEmoji}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <Link
+                          href={`/agents/${a.slug}`}
+                          className="truncate text-base font-semibold text-slate-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+                        >
+                          {a.title}
+                        </Link>
+                        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                          <span className="tabular-nums">
+                            {a.pricePerUsePt.toLocaleString("ja-JP")} pt/回
+                          </span>
+                          <span
+                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                              a.isPublished
+                                ? "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400"
+                                : "bg-slate-200/80 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                            }`}
+                          >
+                            {a.isPublished ? "公開中" : "下書き"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center justify-end gap-2 sm:justify-center">
+                      <Link
+                        href={`/agents/${a.slug}`}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-blue-500/50 dark:hover:bg-slate-700 dark:hover:text-blue-300"
+                      >
+                        <Pencil className="h-4 w-4" aria-hidden />
+                        編集
+                      </Link>
+                    </div>
                   </div>
-                </div>
-                <Link
-                  href={`/agents/${a.slug}`}
-                  className="shrink-0 rounded-xl border border-[var(--border)] px-4 py-2 text-center text-[13px] font-medium text-foreground transition hover:bg-[var(--card-elevated)]"
-                >
-                  開く
-                </Link>
-              </li>
-            ))}
-          </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </section>
     </div>

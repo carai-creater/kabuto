@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Clock, CreditCard, MessageSquare, Wallet } from "lucide-react";
+import {
+  Bot,
+  ChevronRight,
+  Clock,
+  CreditCard,
+  MessageSquare,
+  Sparkles,
+  Wallet,
+} from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
@@ -66,83 +74,114 @@ export default async function UserDashboardPage() {
     return <DbUnavailableMessage />;
   }
 
-  const greeting = user?.name ?? user?.email ?? "ユーザー";
+  const displayName = user?.name ?? user?.email ?? "User";
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
-      <div>
-        <p className="text-[12px] font-semibold tracking-[0.08em] text-[var(--muted)]">
+    <div className="w-full">
+      <header className="border-b border-slate-200/80 pb-8 dark:border-slate-800">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
           マイページ
         </p>
-        <h1 className="mt-2 text-[28px] font-semibold tracking-tight text-foreground sm:text-[32px]">
-          ようこそ、{greeting} さん
+        <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+          Welcome back, {displayName}!
         </h1>
-        <p className="mt-2 text-[15px] text-[var(--muted)]">
-          残高と最近の会話を確認できます。
+        <p className="mt-3 max-w-2xl text-base text-slate-600 dark:text-slate-400">
+          残高と最近の会話をひと目で確認できます。
         </p>
-      </div>
+      </header>
 
-      <div className="mt-10 flex flex-col gap-6">
+      <div className="mt-10 flex flex-col gap-8">
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-lg ring-1 ring-black/5 dark:shadow-black/40 dark:ring-white/5">
-            <div className="flex items-center gap-2 text-[13px] font-semibold text-[var(--muted)]">
-              <Wallet className="h-4 w-4 text-[var(--accent)]" aria-hidden />
+          {/* 残高 */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-none sm:p-8">
+            <div className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <Wallet className="h-4 w-4 text-blue-600 dark:text-blue-400" aria-hidden />
               残高 (pt)
             </div>
-            <p className="mt-4 text-[40px] font-semibold tabular-nums leading-none text-[var(--brand)]">
+            <p className="mt-5 text-5xl font-extrabold tabular-nums tracking-tight text-blue-600 dark:text-blue-400">
               {(wallet?.balancePt ?? 0).toLocaleString("ja-JP")}
-              <span className="ml-1 text-[18px] font-medium text-[var(--muted)]">
+              <span className="ml-2 text-xl font-semibold text-slate-500 dark:text-slate-400">
                 pt
               </span>
             </p>
-          </div>
+          </section>
 
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-lg ring-1 ring-black/5 dark:shadow-black/40 dark:ring-white/5">
-            <div className="flex items-center gap-2 text-[13px] font-semibold text-[var(--muted)]">
-              <MessageSquare className="h-4 w-4 text-[var(--accent)]" aria-hidden />
+          {/* 最近の会話 */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-none sm:p-8">
+            <div className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" aria-hidden />
               最近の会話
             </div>
+
             {recentLines.length === 0 ? (
-              <p className="mt-4 text-[14px] leading-relaxed text-[var(--muted)]">
-                まだ会話履歴がありません。トップからエージェントを選んでください。
-              </p>
+              <div className="mt-8 flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-6 py-12 text-center dark:border-slate-700 dark:bg-slate-950/50">
+                <div
+                  className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 to-violet-500/15 ring-1 ring-blue-500/20 dark:from-blue-500/20 dark:to-violet-500/10"
+                  aria-hidden
+                >
+                  <div className="relative">
+                    <Bot className="h-10 w-10 text-blue-600 dark:text-blue-400" strokeWidth={1.5} />
+                    <Sparkles className="absolute -right-1 -top-1 h-5 w-5 text-amber-400" strokeWidth={2} />
+                  </div>
+                </div>
+                <p className="mt-5 text-sm font-medium text-slate-600 dark:text-slate-300">
+                  まだ会話がありません
+                </p>
+                <p className="mt-1 max-w-xs text-xs text-slate-500 dark:text-slate-500">
+                  エージェントを選んで、はじめの会話を始めましょう。
+                </p>
+                <Link
+                  href="/"
+                  className="mt-6 inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400"
+                >
+                  最初のエージェントを見つけましょう
+                </Link>
+              </div>
             ) : (
-              <ul className="mt-4 space-y-3">
+              <ul className="mt-6 divide-y divide-slate-100 dark:divide-slate-800">
                 {recentLines.map((a) => (
                   <li key={a.slug}>
                     <Link
                       href={`/agents/${a.slug}`}
-                      className="flex items-center gap-3 rounded-lg border border-transparent px-1 py-1 transition hover:border-[var(--border)] hover:bg-[var(--card-elevated)]"
+                      aria-label={`${a.title} を開く`}
+                      className="group flex items-center gap-4 py-4 pr-1 transition first:pt-0 last:pb-0 hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
                     >
-                      <span className="text-xl" aria-hidden>
+                      <span
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl dark:bg-slate-800"
+                        aria-hidden
+                      >
                         {a.iconEmoji}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[14px] font-medium text-foreground">
+                        <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                           {a.title}
                         </p>
-                        <p className="flex items-center gap-1 text-[11px] text-[var(--muted)]">
-                          <Clock className="h-3 w-3" aria-hidden />
+                        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                          <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
                           {a.lastAt.toLocaleString("ja-JP")}
                         </p>
                       </div>
+                      <ChevronRight
+                        className="h-5 w-5 shrink-0 text-slate-400 transition group-hover:text-blue-600 dark:text-slate-500 dark:group-hover:text-blue-400"
+                        aria-hidden
+                      />
                     </Link>
                   </li>
                 ))}
               </ul>
             )}
-          </div>
+          </section>
         </div>
 
         <div>
           <Link
             href="/wallet#charge"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-6 py-4 text-[15px] font-semibold text-white shadow-lg shadow-[var(--accent)]/25 transition hover:opacity-95 sm:w-auto sm:min-w-[280px]"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-4 text-[15px] font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-500 sm:w-auto sm:min-w-[280px] dark:bg-blue-600 dark:hover:bg-blue-500"
           >
             <CreditCard className="h-5 w-5" aria-hidden />
             クレジットをチャージ
           </Link>
-          <p className="mt-2 text-[12px] text-[var(--muted)]">
+          <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
             Stripe 連携は今後のスプリントで接続予定です（ウォレット画面へ）。
           </p>
         </div>
