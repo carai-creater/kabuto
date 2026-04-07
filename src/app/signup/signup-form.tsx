@@ -8,6 +8,7 @@ export function SignupForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [doneMessage, setDoneMessage] = useState<string | null>(null);
@@ -16,6 +17,12 @@ export function SignupForm() {
     e.preventDefault();
     setError(null);
     setDoneMessage(null);
+
+    if (password !== passwordConfirm) {
+      setError("パスワードが一致しません");
+      return;
+    }
+
     setPending(true);
     try {
       const supabase = createClient();
@@ -24,7 +31,7 @@ export function SignupForm() {
         email: email.trim(),
         password,
         options: {
-          emailRedirectTo: `${origin}/auth/callback`,
+          emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/dashboard")}`,
         },
       });
       if (signErr) {
@@ -77,6 +84,21 @@ export function SignupForm() {
           className="input-apple mt-2 w-full"
         />
       </div>
+      <div>
+        <label htmlFor="signup-password-confirm" className="text-label">
+          パスワード（確認）
+        </label>
+        <input
+          id="signup-password-confirm"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={6}
+          value={passwordConfirm}
+          onChange={(e) => setPasswordConfirm(e.target.value)}
+          className="input-apple mt-2 w-full"
+        />
+      </div>
       {error && (
         <p className="text-[15px] text-[var(--destructive)]" role="alert">
           {error}
@@ -96,7 +118,7 @@ export function SignupForm() {
       </button>
       <p className="text-center text-[14px] text-[var(--muted)]">
         既にアカウントがある方は{" "}
-        <a href="#login-section" className="text-[var(--accent)] underline">
+        <a href="/login#login-section" className="text-[var(--accent)] underline">
           ログイン
         </a>
       </p>

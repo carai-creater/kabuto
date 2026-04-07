@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 
+import { sanitizeInternalPath } from "@/lib/sanitize-redirect";
 import { createClientOrNull } from "@/utils/supabase/server";
 
 /**
- * メール確認・OAuth など PKCE の code をセッションに交換する。
- * Supabase の Redirect URLs に `https://<本番>/auth/callback` を追加すること。
+ * メール確認・OAuth など PKCE の code をセッションに交換し、既定で `/dashboard` へ遷移する。
+ * Supabase の Redirect URLs に `https://<本番>/auth/callback`（および `?next=` 付き）を追加すること。
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+  const next = sanitizeInternalPath(searchParams.get("next"), "/dashboard");
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`);

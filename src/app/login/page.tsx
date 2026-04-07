@@ -64,6 +64,14 @@ export default function LoginPage() {
               <p className="mt-1 text-[14px] text-[var(--muted)]">
                 はじめての方はメールアドレスでアカウントを作成
               </p>
+              <p className="mt-2 text-[14px]">
+                <Link
+                  href="/signup"
+                  className="font-medium text-[var(--accent)] hover:underline"
+                >
+                  新規登録専用ページを開く
+                </Link>
+              </p>
               <div className="mt-4">
                 <SignupForm />
               </div>

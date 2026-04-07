@@ -79,7 +79,7 @@ export function SiteHeader({
             </Link>
             {showCreatorAdminLink ? (
               <Link
-                href="/creator"
+                href="/dashboard/creator"
                 className="link-subtle rounded-full px-2 py-1.5 text-[11px] leading-tight sm:px-3 sm:text-[13px]"
                 title="クリエイター管理画面"
               >

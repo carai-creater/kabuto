@@ -85,7 +85,7 @@ export async function runAgentCompletion(input: {
   });
   revalidatePath("/");
   revalidatePath("/wallet");
-  revalidatePath("/creator");
+    revalidatePath("/dashboard/creator");
   if (slugRow) {
     revalidatePath(`/agents/${slugRow.slug}`);
   }
