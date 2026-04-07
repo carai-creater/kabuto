@@ -5,7 +5,10 @@ import { isDatabaseConfigured } from "@/lib/is-database-configured";
 import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
 
-export default async function DashboardLayout({
+/**
+ * マイページ系: サイドナビ共有（/dashboard, /wallet など）
+ */
+export default async function ShellLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -19,16 +22,14 @@ export default async function DashboardLayout({
     redirect("/demo");
   }
 
-  let isCreator = false;
   try {
-    const profile = await prisma.profile.findUnique({
+    await prisma.profile.findUnique({
       where: { userId },
-      select: { role: true },
+      select: { id: true },
     });
-    isCreator = profile?.role === "creator";
   } catch {
     return <>{children}</>;
   }
 
-  return <DashboardShell isCreator={isCreator}>{children}</DashboardShell>;
+  return <DashboardShell>{children}</DashboardShell>;
 }

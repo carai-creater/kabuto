@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "profiles" ADD COLUMN IF NOT EXISTS "bio" TEXT;
+ALTER TABLE "profiles" ADD COLUMN IF NOT EXISTS "website_url" TEXT;
+ALTER TABLE "profiles" ADD COLUMN IF NOT EXISTS "x_url" TEXT;

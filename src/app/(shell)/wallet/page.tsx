@@ -5,8 +5,6 @@ import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
 import { DbUnavailableMessage } from "@/components/db-unavailable";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
-import { PAGE_SHELL } from "@/lib/page-shell";
-
 const ledgerWithAgent = {
   include: {
     agent: { select: { title: true, slug: true } },
@@ -46,16 +44,15 @@ export default async function WalletPage() {
   }
 
   return (
-    <main className={`relative flex flex-1 flex-col pb-28 pt-12 ${PAGE_SHELL}`}>
-      <div className="relative mx-auto w-full max-w-4xl xl:max-w-5xl">
-        <h1 className="text-[32px] font-semibold tracking-tight text-foreground">
-          ウォレット
-        </h1>
-        <p className="mt-2 text-[17px] leading-relaxed text-[var(--muted)]">
-          プリペイド残高と消費履歴。Stripe 連携は今後のスプリントで接続します。
-        </p>
+    <div className="mx-auto w-full max-w-4xl pb-8">
+      <h1 className="text-[28px] font-semibold tracking-tight text-foreground sm:text-[32px]">
+        ウォレット
+      </h1>
+      <p className="mt-2 text-[15px] leading-relaxed text-[var(--muted)]">
+        プリペイド残高と消費履歴。Stripe 連携は今後のスプリントで接続します。
+      </p>
 
-        <div className="surface-card mt-10 p-8">
+      <div id="charge" className="surface-card mt-10 scroll-mt-24 p-8">
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
             残高
           </p>
@@ -110,7 +107,6 @@ export default async function WalletPage() {
             </ul>
           )}
         </section>
-      </div>
-    </main>
+    </div>
   );
 }

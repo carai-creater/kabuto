@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import { NewAgentForm } from "@/app/dashboard/creator/new/new-agent-form";
+import { NewAgentForm } from "@/app/(shell)/dashboard/creator/new/new-agent-form";
 
 export async function generateMetadata() {
   return { title: "エージェント新規作成 — kabuto" };
@@ -21,7 +21,7 @@ export default function NewAgentPage() {
         新規エージェント
       </h1>
       <p className="mt-2 text-[15px] text-[var(--muted)]">
-        名前・説明・指示・価格を設定します。保存後、エージェントページへ移動します。
+        名前・説明・システムプロンプト・利用価格を設定します。保存後、エージェントページへ移動します。
       </p>
 
       <div className="mt-10 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-lg dark:shadow-black/40 sm:p-8">

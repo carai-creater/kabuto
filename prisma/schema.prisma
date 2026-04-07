@@ -40,6 +40,10 @@ model Profile {
   id        String      @id @default(cuid())
   userId    String      @unique
   role      ProfileRole @default(user)
+  /// クリエイター紹介など（エージェント一覧・プロフィールで利用想定）
+  bio         String? @db.Text
+  websiteUrl  String? @map("website_url")
+  xUrl        String? @map("x_url")
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SiteHeaderWrapper } from "@/components/site-header-wrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 import { HeaderVisibility } from "@/components/header-visibility";
+import { AppToaster } from "@/components/app-toaster";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -38,6 +39,7 @@ export default function RootLayout({
             <SiteHeaderWrapper />
           </HeaderVisibility>
           {children}
+          <AppToaster />
         </ThemeProvider>
       </body>
     </html>

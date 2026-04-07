@@ -26,7 +26,9 @@ export function SignupForm() {
     setPending(true);
     try {
       const supabase = createClient();
-      const origin = window.location.origin;
+      const origin =
+        process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+        window.location.origin;
       const { data, error: signErr } = await supabase.auth.signUp({
         email: email.trim(),
         password,
@@ -44,7 +46,7 @@ export function SignupForm() {
         return;
       }
       setDoneMessage(
-        "確認メールを送信しました。メール内のリンクを開くと登録が完了します。"
+        "確認メールを送信しました。リンクをクリックしてログインしてください"
       );
     } catch {
       setError("登録に失敗しました。");

@@ -8,11 +8,11 @@ import { makeUniqueAgentSlug } from "@/lib/slug";
 import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
 
+/** データは Supabase Postgres（DATABASE_URL）へ Prisma 経由で保存 */
 const createSchema = z.object({
   title: z.string().min(1, "名前を入力してください").max(200),
   description: z.string().min(1, "説明を入力してください").max(4000),
-  iconEmoji: z.string().min(1).max(16),
-  systemPrompt: z.string().min(1, "指示を入力してください").max(100_000),
+  systemPrompt: z.string().min(1, "システムプロンプトを入力してください").max(100_000),
   pricePerUsePt: z.coerce.number().int().min(0).max(10_000_000),
 });
 
@@ -38,7 +38,6 @@ export async function createAgent(
   const parsed = createSchema.safeParse({
     title: formData.get("title"),
     description: formData.get("description"),
-    iconEmoji: formData.get("iconEmoji"),
     systemPrompt: formData.get("systemPrompt"),
     pricePerUsePt: formData.get("pricePerUsePt"),
   });
@@ -54,8 +53,7 @@ export async function createAgent(
     return { error: msg };
   }
 
-  const { title, description, iconEmoji, systemPrompt, pricePerUsePt } =
-    parsed.data;
+  const { title, description, systemPrompt, pricePerUsePt } = parsed.data;
 
   let slug = makeUniqueAgentSlug(title);
   for (let attempt = 0; attempt < 8; attempt++) {
@@ -73,7 +71,7 @@ export async function createAgent(
       creatorId: userId,
       title: title.trim(),
       description: description.trim(),
-      iconEmoji: iconEmoji.trim(),
+      iconEmoji: "🤖",
       systemPrompt: systemPrompt.trim(),
       pricePerUsePt,
       isPublished: false,
