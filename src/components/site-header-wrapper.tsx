@@ -20,34 +20,25 @@ export async function SiteHeaderWrapper() {
 
   try {
     const userId = await getSessionUserId();
-    const [user, balance, profile] = await Promise.all([
-      userId
-        ? prisma.user.findUnique({
-            where: { id: userId },
-            select: { name: true, email: true },
-          })
-        : null,
-      userId
-        ? prisma.wallet.findUnique({
-            where: { userId },
-            select: { balancePt: true },
-          })
-        : null,
-      userId
-        ? prisma.profile.findUnique({
-            where: { userId },
-            select: { role: true },
-          })
-        : null,
-    ]);
+    const row = userId
+      ? await prisma.user.findUnique({
+          where: { id: userId },
+          select: {
+            name: true,
+            email: true,
+            wallet: { select: { balancePt: true } },
+            profile: { select: { role: true } },
+          },
+        })
+      : null;
 
-    const showCreatorAdminLink = profile?.role === "creator";
+    const showCreatorAdminLink = row?.profile?.role === "creator";
 
     return (
       <SiteHeader
-        email={user?.email ?? null}
-        displayName={user?.name ?? user?.email ?? null}
-        balancePt={balance?.balancePt ?? null}
+        email={row?.email ?? null}
+        displayName={row?.name ?? row?.email ?? null}
+        balancePt={row?.wallet?.balancePt ?? null}
         demoLoginEnabled={isDemoLoginEnabled()}
         showCreatorAdminLink={showCreatorAdminLink}
       />

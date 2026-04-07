@@ -38,9 +38,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-[calc(100vh-52px)] w-full flex-col md:flex-row">
-      <aside className="shrink-0 border-b border-slate-800 bg-slate-900 md:w-48 md:border-b-0 md:border-r md:border-slate-800">
+      <aside className="shrink-0 border-b border-slate-200 bg-white md:w-[11.5rem] md:border-b-0 md:border-r md:border-slate-200 dark:border-slate-800 dark:bg-slate-950">
         <div className="px-4 py-5 md:px-3 md:py-8">
-          <p className="mb-4 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 md:mb-5">
+          <p className="mb-4 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500 md:mb-5">
             メニュー
           </p>
           <nav className="flex flex-row gap-0.5 overflow-x-auto pb-1 md:flex-col md:overflow-visible md:pb-0 md:pr-0">
@@ -58,10 +58,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex shrink-0 items-center gap-3 rounded-r-lg border-l-4 py-2.5 pl-3 pr-2.5 text-[13px] font-medium transition md:min-w-0 ${
+                  prefetch
+                  className={`touch-manipulation flex shrink-0 items-center gap-3 rounded-r-lg border-l-4 py-2.5 pl-3 pr-2.5 text-[13px] font-medium transition [-webkit-tap-highlight-color:transparent] md:min-w-0 ${
                     active
-                      ? "border-blue-500 bg-slate-800/95 text-white shadow-sm"
-                      : "border-transparent text-slate-400 hover:bg-slate-800/60 hover:text-slate-100"
+                      ? "border-blue-600 bg-blue-50 text-slate-900 shadow-sm dark:border-blue-500 dark:bg-slate-800/90 dark:text-white"
+                      : "border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-100"
                   }`}
                 >
                   <Icon

@@ -4,6 +4,7 @@ import { SiteHeaderWrapper } from "@/components/site-header-wrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 import { HeaderVisibility } from "@/components/header-visibility";
 import { AppToaster } from "@/components/app-toaster";
+import { NavigationProgress } from "@/components/navigation-progress";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,6 +36,7 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-background text-foreground">
         <ThemeProvider>
+          <NavigationProgress />
           <HeaderVisibility>
             <SiteHeaderWrapper />
           </HeaderVisibility>

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 
 import { ensurePrismaUserFromAuth } from "@/lib/auth/resolve-prisma-user";
@@ -10,8 +11,10 @@ export const SESSION_COOKIE = "kabuto_uid";
  * ログイン中の Prisma `User.id`。
  * 1) Supabase Auth セッション（優先）
  * 2) デモ有効時のみ Cookie `kabuto_uid`
+ *
+ * React cache により同一リクエスト内の重複呼び出しを 1 回にまとめる（レイアウト + ページ + ヘッダー）。
  */
-export async function getSessionUserId(): Promise<string | null> {
+async function resolveSessionUserId(): Promise<string | null> {
   const supabase = await createClientOrNull();
   if (supabase) {
     const {
@@ -30,3 +33,5 @@ export async function getSessionUserId(): Promise<string | null> {
 
   return null;
 }
+
+export const getSessionUserId = cache(resolveSessionUserId);

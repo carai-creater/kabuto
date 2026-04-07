@@ -2,11 +2,11 @@ import { redirect } from "next/navigation";
 
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
-import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
 
 /**
  * マイページ系: サイドナビ共有（/dashboard, /wallet など）
+ * DB の余計なヘルスチェックは省略し、ヘッダー・各ページと getSessionUserId を cache で共有する。
  */
 export default async function ShellLayout({
   children,
@@ -20,15 +20,6 @@ export default async function ShellLayout({
   const userId = await getSessionUserId();
   if (!userId) {
     redirect("/demo");
-  }
-
-  try {
-    await prisma.profile.findUnique({
-      where: { userId },
-      select: { id: true },
-    });
-  } catch {
-    return <>{children}</>;
   }
 
   return <DashboardShell>{children}</DashboardShell>;
