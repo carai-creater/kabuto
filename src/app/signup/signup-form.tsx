@@ -1,7 +1,6 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -97,9 +96,9 @@ export function SignupForm() {
       </button>
       <p className="text-center text-[14px] text-[var(--muted)]">
         既にアカウントがある方は{" "}
-        <Link href="/login" className="text-[var(--accent)] underline">
+        <a href="#login-section" className="text-[var(--accent)] underline">
           ログイン
-        </Link>
+        </a>
       </p>
     </form>
   );

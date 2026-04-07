@@ -12,6 +12,7 @@ export async function SiteHeaderWrapper() {
         displayName={null}
         balancePt={null}
         demoLoginEnabled={isDemoLoginEnabled()}
+        showCreatorAdminLink={false}
         configWarning="DATABASE_URL が未設定です（Vercel の Environment Variables を確認）"
       />
     );
@@ -19,7 +20,7 @@ export async function SiteHeaderWrapper() {
 
   try {
     const userId = await getSessionUserId();
-    const [user, balance] = await Promise.all([
+    const [user, balance, profile] = await Promise.all([
       userId
         ? prisma.user.findUnique({
             where: { id: userId },
@@ -32,7 +33,15 @@ export async function SiteHeaderWrapper() {
             select: { balancePt: true },
           })
         : null,
+      userId
+        ? prisma.profile.findUnique({
+            where: { userId },
+            select: { role: true },
+          })
+        : null,
     ]);
+
+    const showCreatorAdminLink = profile?.role === "creator";
 
     return (
       <SiteHeader
@@ -40,6 +49,7 @@ export async function SiteHeaderWrapper() {
         displayName={user?.name ?? user?.email ?? null}
         balancePt={balance?.balancePt ?? null}
         demoLoginEnabled={isDemoLoginEnabled()}
+        showCreatorAdminLink={showCreatorAdminLink}
       />
     );
   } catch (err) {
@@ -54,6 +64,7 @@ export async function SiteHeaderWrapper() {
           displayName={null}
           balancePt={null}
           demoLoginEnabled={isDemoLoginEnabled()}
+          showCreatorAdminLink={false}
         />
       );
     }
@@ -64,6 +75,7 @@ export async function SiteHeaderWrapper() {
         displayName={null}
         balancePt={null}
         demoLoginEnabled={isDemoLoginEnabled()}
+        showCreatorAdminLink={false}
         configWarning="データベースに接続できません（接続文字列・マイグレーション・ファイアウォールを確認）"
       />
     );

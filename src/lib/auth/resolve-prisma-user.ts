@@ -1,5 +1,6 @@
 import type { User as SupabaseAuthUser } from "@supabase/supabase-js";
 
+import { ensureProfileForUser } from "@/lib/auth/profile";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -16,7 +17,10 @@ export async function ensurePrismaUserFromAuth(
     where: { authUserId: authUser.id },
     select: { id: true },
   });
-  if (existingByAuth) return existingByAuth.id;
+  if (existingByAuth) {
+    await ensureProfileForUser(existingByAuth.id);
+    return existingByAuth.id;
+  }
 
   const existingByEmail = await prisma.user.findUnique({
     where: { email },
@@ -55,6 +59,7 @@ export async function ensurePrismaUserFromAuth(
         },
       });
     }
+    await ensureProfileForUser(existingByEmail.id);
     return existingByEmail.id;
   }
 
@@ -66,6 +71,7 @@ export async function ensurePrismaUserFromAuth(
         (authUser.user_metadata?.avatar_url as string | undefined) ?? null,
       authUserId: authUser.id,
       wallet: { create: { balancePt: 0 } },
+      profile: { create: { role: "user" } },
     },
     select: { id: true },
   });

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { AgentCard } from "@/components/agent-card";
+import { AgentDirectory } from "@/components/agent-directory";
 import { DbConnectionTips } from "@/components/db-connection-tips";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
 import { PAGE_SHELL } from "@/lib/page-shell";
@@ -72,11 +72,16 @@ export default async function Home() {
               id="agent-list-heading"
               className="text-[28px] font-semibold leading-tight tracking-tight text-foreground sm:text-[32px]"
             >
-              すべてのエージェント
+              エージェントを探す
             </h2>
-            {!loadError && (
+            {!loadError && agents.length > 0 && (
               <p className="mt-2 text-[15px] text-[var(--muted)]">
-                {agents.length > 0 ? `${agents.length} 件` : "公開中のエージェント"}
+                検索するか、下の一覧から選べます
+              </p>
+            )}
+            {!loadError && agents.length === 0 && (
+              <p className="mt-2 text-[15px] text-[var(--muted)]">
+                公開中のエージェント
               </p>
             )}
           </div>
@@ -89,13 +94,9 @@ export default async function Home() {
               </code>
             </p>
           ) : !loadError ? (
-            <ul className="mx-auto mt-8 grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-              {agents.map((a) => (
-                <li key={a.id}>
-                  <AgentCard agent={a} />
-                </li>
-              ))}
-            </ul>
+            <div className="mt-8 w-full">
+              <AgentDirectory agents={agents} />
+            </div>
           ) : null}
         </section>
       </main>

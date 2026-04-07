@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import { getSessionWalletBalance } from "@/app/actions/wallet";
+import { GuestLimitModal } from "@/components/guest-limit-modal";
 
 const LLMS = [
   { id: "gpt-4o", label: "GPT-4o" },
@@ -47,6 +48,8 @@ type ToolRow = { name: string; type?: string };
 
 type Props = {
   agentId: string;
+  /** ログイン済みなら true（ウォレット更新・課金あり） */
+  isLoggedIn?: boolean;
   /** DB の defaultLlm など。未指定時は LLMS[0] */
   defaultModelId?: string;
   pricePerUsePt: number;
@@ -59,6 +62,7 @@ type Props = {
 
 export function RunAgentPanel({
   agentId,
+  isLoggedIn = false,
   defaultModelId,
   pricePerUsePt,
   starters,
@@ -72,6 +76,7 @@ export function RunAgentPanel({
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
+  const [guestLimitOpen, setGuestLimitOpen] = useState(false);
 
   const transport = useMemo(
     () =>
@@ -82,6 +87,19 @@ export function RunAgentPanel({
             typeof url === "string" ? url : url.toString(),
             init
           );
+          if (res.status === 429) {
+            const text = await res.text();
+            let code: string | undefined;
+            try {
+              code = (JSON.parse(text) as { code?: string }).code;
+            } catch {
+              code = undefined;
+            }
+            if (code === "GUEST_LIMIT") {
+              throw new Error("KABUTO_GUEST_LIMIT");
+            }
+            throw new Error(text || "Too many requests");
+          }
           if (res.status === 401) {
             throw new Error("KABUTO_UNAUTHORIZED");
           }
@@ -109,16 +127,21 @@ export function RunAgentPanel({
   );
 
   const { messages, sendMessage, status, clearError } = useChat({
-    id: agentId,
+    id: `${agentId}-${isLoggedIn ? "auth" : "guest"}`,
     transport,
     onFinish: async () => {
+      if (!isLoggedIn) return;
       const b = await getSessionWalletBalance();
       setBalance(b);
       router.refresh();
     },
     onError: (err) => {
+      if (err.message === "KABUTO_GUEST_LIMIT") {
+        setGuestLimitOpen(true);
+        return;
+      }
       if (err.message === "KABUTO_UNAUTHORIZED") {
-        setError("デモでユーザーを選んでから実行してください（/demo）。");
+        setError("ログインが必要です（/login）。");
         return;
       }
       if (err.message.startsWith("KABUTO_INSUFFICIENT:")) {
@@ -143,12 +166,13 @@ export function RunAgentPanel({
   const pending = status === "submitted" || status === "streaming";
 
   useEffect(() => {
+    if (!isLoggedIn) return;
     const run = async () => {
       const b = await getSessionWalletBalance();
       setBalance(b);
     };
     void run();
-  }, []);
+  }, [isLoggedIn]);
 
   const toolRows = useMemo(() => {
     if (!Array.isArray(tools)) return [] as ToolRow[];
@@ -168,6 +192,11 @@ export function RunAgentPanel({
   }, [message, sendMessage, clearError]);
 
   return (
+    <>
+      <GuestLimitModal
+        open={guestLimitOpen}
+        onClose={() => setGuestLimitOpen(false)}
+      />
     <section
       className={
         fullScreenChat
@@ -347,6 +376,11 @@ export function RunAgentPanel({
               <span className="block text-[11px] text-[var(--muted)]">
                 消費はトークンに応じて変動（完了時に確定）
               </span>
+              {!isLoggedIn && (
+                <span className="mt-1 block text-[11px] text-[var(--muted)]">
+                  未ログインは 1 日 3 回まで。ログインでウォレットから継続できます。
+                </span>
+              )}
             </div>
           </div>
         </>
@@ -433,5 +467,6 @@ export function RunAgentPanel({
         </>
       )}
     </section>
+    </>
   );
 }

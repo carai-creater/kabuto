@@ -10,6 +10,12 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum ProfileRole {
+  user
+  creator
+  admin
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -20,12 +26,38 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  profile              Profile?
   wallet               Wallet?
   creatorWallet        CreatorWallet?
   agentsCreated        Agent[]              @relation("CreatorAgents")
   reviews              Review[]
   usageLedgers         UsageLedger[]
   walletTransactions   WalletTransaction[]
+}
+
+/// ユーザーごとのロール（DB テーブル名は `profiles`）
+model Profile {
+  id        String      @id @default(cuid())
+  userId    String      @unique
+  role      ProfileRole @default(user)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+/// ゲスト（未ログイン）チャットの IP ベース日次枠（UTC 日付）
+model GuestChatUsage {
+  id        String   @id @default(cuid())
+  ipHash    String
+  dayUtc    String
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@unique([ipHash, dayUtc])
+  @@index([ipHash])
 }
 
 /// 利用者のプリペイド残高（pt）

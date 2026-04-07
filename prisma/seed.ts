@@ -19,6 +19,7 @@ async function main() {
       email: "alice@demo.kabuto",
       name: "Alice",
       wallet: { create: { balancePt: 1000 } },
+      profile: { create: { role: "user" } },
     },
   });
 
@@ -28,6 +29,7 @@ async function main() {
       name: "Bob（クリエイター）",
       wallet: { create: { balancePt: 500 } },
       creatorWallet: { create: { balancePt: 0 } },
+      profile: { create: { role: "creator" } },
     },
   });
 

@@ -14,6 +14,7 @@ import {
 } from "@/lib/chat/billing";
 import { searchKnowledgeForAgent } from "@/lib/chat/knowledge";
 import { getLanguageModel } from "@/lib/chat/providers";
+import { tryConsumeGuestChatSlot } from "@/lib/guest-rate-limit";
 import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
 
@@ -50,11 +51,6 @@ function buildSystemPrompt(
 }
 
 export async function POST(req: Request) {
-  const userId = await getSessionUserId();
-  if (!userId) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   let json: unknown;
   try {
     json = await req.json();
@@ -70,6 +66,25 @@ export async function POST(req: Request) {
     );
   }
 
+  const userId = await getSessionUserId();
+
+  if (!userId) {
+    if (!parsed.data.agentId?.trim()) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const guest = await tryConsumeGuestChatSlot(req);
+    if (!guest.ok) {
+      return Response.json(
+        {
+          error: "Guest daily limit reached",
+          code: "GUEST_LIMIT",
+          message: "ログインして継続",
+        },
+        { status: 429 }
+      );
+    }
+  }
+
   const headerKey = req.headers.get("x-idempotency-key");
   const idempotencyKey =
     parsed.data.idempotencyKey?.trim() ||
@@ -79,25 +94,27 @@ export async function POST(req: Request) {
   const modelId = parsed.data.modelId?.trim() || "gpt-4o";
   const rates = await loadModelRates(modelId);
 
-  const wallet = await prisma.wallet.findUnique({ where: { userId } });
-  if (!wallet) {
-    return Response.json({ error: "Wallet not found" }, { status: 400 });
-  }
+  if (userId) {
+    const wallet = await prisma.wallet.findUnique({ where: { userId } });
+    if (!wallet) {
+      return Response.json({ error: "Wallet not found" }, { status: 400 });
+    }
 
-  const estimate = estimateMinPointsForRequest(
-    JSON.stringify(parsed.data.messages).length,
-    rates
-  );
-  if (wallet.balancePt < Math.max(1, estimate)) {
-    return Response.json(
-      {
-        error: "Insufficient balance",
-        code: "INSUFFICIENT_BALANCE",
-        requiredPt: Math.max(1, estimate),
-        balancePt: wallet.balancePt,
-      },
-      { status: 402 }
+    const estimate = estimateMinPointsForRequest(
+      JSON.stringify(parsed.data.messages).length,
+      rates
     );
+    if (wallet.balancePt < Math.max(1, estimate)) {
+      return Response.json(
+        {
+          error: "Insufficient balance",
+          code: "INSUFFICIENT_BALANCE",
+          requiredPt: Math.max(1, estimate),
+          balancePt: wallet.balancePt,
+        },
+        { status: 402 }
+      );
+    }
   }
 
   let agent: {
@@ -159,9 +176,9 @@ export async function POST(req: Request) {
     system,
     messages: modelMessages,
     tools: { searchKnowledge },
-    // ReAct 相当: ツール呼び出しを含むステップを最大 5 回（AI SDK 6 は maxSteps の代わりに stopWhen を使用）
     stopWhen: stepCountIs(5),
     onFinish: async ({ totalUsage }) => {
+      if (!userId) return;
       const charge = await chargeWalletForChatUsage({
         userId,
         agentId: agent?.id ?? null,

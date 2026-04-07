@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { RunAgentPanel } from "@/components/run-agent-panel";
 import { DbUnavailableMessage } from "@/components/db-unavailable";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
+import { getSessionUserId } from "@/lib/session";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -55,10 +56,13 @@ export default async function AgentDetailPage(props: Props) {
     agent.tags.includes("高コスパ") ||
     (agent.reviewCount >= 3 && rating >= 4);
 
+  const sessionUserId = await getSessionUserId();
+
   return (
     <main className="flex min-h-screen w-full flex-1 flex-col">
       <RunAgentPanel
         agentId={agent.id}
+        isLoggedIn={Boolean(sessionUserId)}
         defaultModelId={agent.defaultLlm}
         pricePerUsePt={agent.pricePerUsePt}
         starters={agent.conversationStarters}
