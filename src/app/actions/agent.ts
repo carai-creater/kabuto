@@ -26,9 +26,14 @@ export async function createAgent(
     return { error: parsed.error };
   }
 
-  const { slug } = await createAgentFromPayload(userId, parsed.data);
+  const { slug } = await createAgentFromPayload(
+    userId,
+    parsed.data,
+    parsed.knowledgeFiles,
+  );
 
   revalidatePath("/dashboard/creator");
   revalidatePath("/");
-  redirect(`/agents/${slug}`);
+  revalidatePath(`/agents/${slug}`);
+  redirect(`/dashboard/creator/new?preview=${encodeURIComponent(slug)}`);
 }

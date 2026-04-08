@@ -12,6 +12,10 @@ import {
   estimateMinPointsForRequest,
   loadModelRates,
 } from "@/lib/chat/billing";
+import {
+  buildEditorSystemSupplement,
+  parseKabutoEditor,
+} from "@/lib/agent/editor-config";
 import { searchKnowledgeForAgent } from "@/lib/chat/knowledge";
 import { getLanguageModel } from "@/lib/chat/providers";
 import { tryConsumeGuestChatSlot } from "@/lib/guest-rate-limit";
@@ -33,7 +37,7 @@ function buildSystemPrompt(
     systemPrompt: string;
     instructions: string | null;
     toolConfig: unknown;
-  } | null
+  } | null,
 ): string {
   if (!agent) {
     return "あなたは有用なアシスタントです。必要に応じてツール searchKnowledge でナレッジを確認してください。";
@@ -41,13 +45,52 @@ function buildSystemPrompt(
   const primary =
     agent.instructions?.trim().length ? agent.instructions : agent.systemPrompt;
   const parts = [primary];
-  if (agent.toolConfig != null) {
-    parts.push(`ツール設定メタ: ${JSON.stringify(agent.toolConfig)}`);
+  const editor = parseKabutoEditor(agent.toolConfig);
+  const supplement = buildEditorSystemSupplement(editor);
+  if (supplement) {
+    parts.push(supplement);
   }
   parts.push(
-    "事実確認が必要なときは searchKnowledge ツールでナレッジを検索してから回答してください。"
+    "事実確認が必要なときは searchKnowledge ツールでナレッジを検索してから回答してください。",
   );
   return parts.join("\n\n");
+}
+
+async function fetchWebSearchResults(query: string): Promise<string> {
+  const key = process.env.BRAVE_SEARCH_API_KEY ?? process.env.BRAVE_API_KEY;
+  if (!key?.trim()) {
+    return "Web検索API（環境変数 BRAVE_SEARCH_API_KEY など）が未設定のため、検索結果を取得できません。一般知識で答えてください。";
+  }
+  const url = new URL("https://api.search.brave.com/res/v1/web/search");
+  url.searchParams.set("q", query);
+  url.searchParams.set("count", "8");
+  const res = await fetch(url.toString(), {
+    headers: {
+      Accept: "application/json",
+      "X-Subscription-Token": key.trim(),
+    },
+  });
+  if (!res.ok) {
+    return `検索APIがエラーを返しました (${res.status})。`;
+  }
+  const data = (await res.json()) as {
+    web?: {
+      results?: { title?: string; description?: string; url?: string }[];
+    };
+  };
+  const results = data.web?.results ?? [];
+  if (results.length === 0) {
+    return "該当するウェブ結果が見つかりませんでした。";
+  }
+  return results
+    .slice(0, 8)
+    .map((r, i) => {
+      const title = r.title ?? "(無題)";
+      const desc = r.description ?? "";
+      const link = r.url ?? "";
+      return `${i + 1}. ${title}\n${desc}\n${link}`;
+    })
+    .join("\n\n");
 }
 
 export async function POST(req: Request) {
@@ -177,12 +220,60 @@ export async function POST(req: Request) {
     },
   });
 
+  const editor = agent ? parseKabutoEditor(agent.toolConfig) : null;
+  const caps = editor?.capabilities;
+
+  const webSearch = tool({
+    description:
+      "ウェブ検索。最新情報・ニュース・公式サイトの内容が必要なときに使う。",
+    inputSchema: z.object({
+      query: z.string().describe("検索クエリ"),
+    }),
+    execute: async ({ query }) => {
+      const text = await fetchWebSearchResults(query);
+      return { ok: true as const, results: text };
+    },
+  });
+
+  const generateImage = tool({
+    description:
+      "テキストプロンプトから画像を生成する（プラットフォームで画像APIが有効なとき）。",
+    inputSchema: z.object({
+      prompt: z.string().describe("画像の内容の説明"),
+    }),
+    execute: async () => ({
+      ok: false as const,
+      message:
+        "画像生成APIは運用設定後に接続されます。必要ならテキストでイメージを説明してください。",
+    }),
+  });
+
+  const runPython = tool({
+    description:
+      "Python コードを実行して数値計算や簡単なデータ処理を行う（サンドボックス接続時）。",
+    inputSchema: z.object({
+      code: z.string().describe("実行する Python コード"),
+    }),
+    execute: async ({ code }) => ({
+      ok: false as const,
+      hint: "コード実行環境は未接続です。数式は手計算で示してください。",
+      codePreview: code.slice(0, 400),
+    }),
+  });
+
+  const tools = {
+    searchKnowledge,
+    ...(caps?.webSearch ? { webSearch } : {}),
+    ...(caps?.imageGeneration ? { generateImage } : {}),
+    ...(caps?.codeInterpreter ? { runPython } : {}),
+  };
+
   const result = streamText({
     model: getLanguageModel(modelId),
     system,
     messages: modelMessages,
-    tools: { searchKnowledge },
-    stopWhen: stepCountIs(5),
+    tools,
+    stopWhen: stepCountIs(14),
     onFinish: async ({ totalUsage }) => {
       if (!userId) return;
       const charge = await chargeWalletForChatUsage({

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { parseKabutoEditor } from "@/lib/agent/editor-config";
 import { prisma } from "@/lib/prisma";
 import { RunAgentPanel } from "@/components/run-agent-panel";
 import { DbUnavailableMessage } from "@/components/db-unavailable";
@@ -66,6 +67,8 @@ export default async function AgentDetailPage(props: Props) {
     !agent.isPublished &&
     Boolean(sessionUserId && sessionUserId === agent.creatorId);
 
+  const editor = parseKabutoEditor(agent.toolConfig);
+
   return (
     <main className="flex min-h-screen w-full flex-1 flex-col">
       {isDraftPreview ? (
@@ -80,6 +83,7 @@ export default async function AgentDetailPage(props: Props) {
         agentId={agent.id}
         isLoggedIn={Boolean(sessionUserId)}
         defaultModelId={agent.defaultLlm}
+        useCreatorRecommendedModel={editor?.useRecommendedModel !== false}
         pricePerUsePt={agent.pricePerUsePt}
         starters={agent.conversationStarters}
         tools={agent.tools}

@@ -13,16 +13,13 @@ import {
 
 import { getSessionWalletBalance } from "@/app/actions/wallet";
 import { GuestLimitModal } from "@/components/guest-limit-modal";
-
-const LLMS = [
-  { id: "gpt-4o", label: "GPT-4o" },
-  { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
-  { id: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet" },
-] as const;
+import {
+  AGENT_MODEL_OPTIONS,
+  coerceAgentModelId,
+} from "@/lib/agent/model-options";
 
 function coerceModelId(id: string | undefined): string {
-  if (!id) return LLMS[0].id;
-  return LLMS.some((m) => m.id === id) ? id : LLMS[0].id;
+  return coerceAgentModelId(id);
 }
 
 function uiMessagePlainText(m: UIMessage): string {
@@ -50,8 +47,13 @@ type Props = {
   agentId: string;
   /** ログイン済みなら true（ウォレット更新・課金あり） */
   isLoggedIn?: boolean;
-  /** DB の defaultLlm など。未指定時は LLMS[0] */
+  /** DB の defaultLlm など。未指定時は先頭モデル */
   defaultModelId?: string;
+  /**
+   * false のとき GPT エディタの「推奨モデルを使用しない」相当。
+   * プレビューでは先頭モデルから試し、利用者は常にモデルを選べる。
+   */
+  useCreatorRecommendedModel?: boolean;
   pricePerUsePt: number;
   starters: { id: string; position: number; text: string }[];
   tools: unknown;
@@ -64,6 +66,7 @@ export function RunAgentPanel({
   agentId,
   isLoggedIn = false,
   defaultModelId,
+  useCreatorRecommendedModel = true,
   pricePerUsePt,
   starters,
   tools,
@@ -72,7 +75,11 @@ export function RunAgentPanel({
 }: Props) {
   const panelId = useId();
   const router = useRouter();
-  const [llm, setLlm] = useState(() => coerceModelId(defaultModelId));
+  const [llm, setLlm] = useState(() =>
+    useCreatorRecommendedModel
+      ? coerceModelId(defaultModelId)
+      : coerceModelId(undefined),
+  );
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
@@ -224,7 +231,7 @@ export function RunAgentPanel({
               disabled={pending}
               className="input-apple h-10 w-full py-1 text-[13px]"
             >
-              {LLMS.map((m) => (
+              {AGENT_MODEL_OPTIONS.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.label}
                 </option>
@@ -233,6 +240,12 @@ export function RunAgentPanel({
           </div>
         </div>
       )}
+
+      {fullScreenChat && useCreatorRecommendedModel === false ? (
+        <p className="mb-2 text-[11px] text-[var(--muted)]">
+          推奨モデルなし（利用者がモデルを選択する想定）。プレビューは上の一覧から選んで試せます。
+        </p>
+      ) : null}
 
       {showToolDetails && toolRows.length > 0 && !fullScreenChat && (
         <div className="mt-5">
@@ -266,7 +279,7 @@ export function RunAgentPanel({
               disabled={pending}
               className="input-apple mt-2 w-full"
             >
-              {LLMS.map((m) => (
+              {AGENT_MODEL_OPTIONS.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.label}
                 </option>

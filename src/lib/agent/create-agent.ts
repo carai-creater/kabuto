@@ -1,10 +1,27 @@
 import { z } from "zod";
 
+import {
+  buildKabutoToolConfig,
+  type KabutoEditorActions,
+  type KabutoEditorActionsAuth,
+  type KabutoEditorCapabilities,
+} from "@/lib/agent/editor-config";
+import { attachKnowledgeFilesFromForm } from "@/lib/agent/knowledge-upload";
+import {
+  AGENT_MODEL_OPTIONS,
+  DEFAULT_AGENT_MODEL_ID,
+  type AgentModelId,
+} from "@/lib/agent/model-options";
 import { makeUniqueAgentSlug } from "@/lib/slug";
 import { prisma } from "@/lib/prisma";
 
+const modelIds = AGENT_MODEL_OPTIONS.map((m) => m.id) as [
+  AgentModelId,
+  ...AgentModelId[],
+];
+
 /**
- * ChatGPT の GPTs / Gemini の GEM に相当する作成ペイロード。
+ * ChatGPT の GPT エディタ「構成」に相当する作成ペイロード。
  * フォーム送信・将来の HTTP API の両方で同じ形にまとめられる。
  */
 export const createAgentPayloadSchema = z.object({
@@ -13,18 +30,45 @@ export const createAgentPayloadSchema = z.object({
   /** GPTs の「Instructions」相当 → DB の systemPrompt に保存 */
   instructions: z.string().min(1, "指示を入力してください").max(100_000),
   iconEmoji: z.string().min(1).max(32),
-  conversationStarters: z
-    .array(z.string().min(1).max(500))
-    .max(4),
+  conversationStarters: z.array(z.string().min(1).max(500)).max(4),
   pricePerUsePt: z.coerce.number().int().min(0).max(10_000_000),
+  defaultLlm: z.enum(modelIds),
+  useRecommendedModel: z.boolean(),
+  capabilities: z.object({
+    webSearch: z.boolean(),
+    canvas: z.boolean(),
+    imageGeneration: z.boolean(),
+    codeInterpreter: z.boolean(),
+  }),
+  actions: z.object({
+    authType: z.enum(["none", "api_key", "oauth"]),
+    openApiSchema: z.string().max(200_000),
+    privacyPolicyUrl: z.string().max(2000),
+  }),
 });
 
 export type CreateAgentPayload = z.infer<typeof createAgentPayloadSchema>;
 
+function parseActionsAuth(v: string): KabutoEditorActionsAuth {
+  if (v === "api_key" || v === "oauth") return v;
+  return "none";
+}
+
+function collectKnowledgeFiles(formData: FormData): File[] {
+  const all = formData.getAll("knowledgeFiles");
+  const out: File[] = [];
+  for (const item of all) {
+    if (item instanceof File && item.size > 0) {
+      out.push(item);
+    }
+  }
+  return out.slice(0, 8);
+}
+
 export function parseCreateAgentFormData(
   formData: FormData,
 ):
-  | { ok: true; data: CreateAgentPayload }
+  | { ok: true; data: CreateAgentPayload; knowledgeFiles: File[] }
   | { ok: false; error: string } {
   const starters = [0, 1, 2, 3]
     .map((i) => String(formData.get(`starter${i}`) ?? "").trim())
@@ -33,6 +77,24 @@ export function parseCreateAgentFormData(
 
   const iconRaw = String(formData.get("iconEmoji") ?? "").trim();
 
+  const capabilities: KabutoEditorCapabilities = {
+    webSearch: formData.get("capWebSearch") === "on",
+    canvas: formData.get("capCanvas") === "on",
+    imageGeneration: formData.get("capImageGen") === "on",
+    codeInterpreter: formData.get("capCodeInterpreter") === "on",
+  };
+
+  const actions: KabutoEditorActions = {
+    authType: parseActionsAuth(String(formData.get("actionsAuthType") ?? "")),
+    openApiSchema: String(formData.get("actionsOpenApiSchema") ?? ""),
+    privacyPolicyUrl: String(formData.get("actionsPrivacyPolicyUrl") ?? "").trim(),
+  };
+
+  const defaultLlmRaw = String(formData.get("defaultLlm") ?? "").trim();
+  const defaultLlm = modelIds.includes(defaultLlmRaw as AgentModelId)
+    ? (defaultLlmRaw as AgentModelId)
+    : DEFAULT_AGENT_MODEL_ID;
+
   const raw = {
     title: String(formData.get("title") ?? "").trim(),
     description: String(formData.get("description") ?? "").trim(),
@@ -40,6 +102,10 @@ export function parseCreateAgentFormData(
     iconEmoji: iconRaw.length > 0 ? iconRaw : "🤖",
     conversationStarters: starters,
     pricePerUsePt: formData.get("pricePerUsePt"),
+    defaultLlm,
+    useRecommendedModel: formData.get("useRecommendedModel") === "on",
+    capabilities,
+    actions,
   };
 
   const parsed = createAgentPayloadSchema.safeParse(raw);
@@ -52,16 +118,25 @@ export function parseCreateAgentFormData(
       f.iconEmoji?.[0] ??
       f.conversationStarters?.[0] ??
       f.pricePerUsePt?.[0] ??
+      f.defaultLlm?.[0] ??
+      f.actions?.[0] ??
+      f.capabilities?.[0] ??
       "入力内容を確認してください。";
     return { ok: false, error: msg };
   }
-  return { ok: true, data: parsed.data };
+
+  return {
+    ok: true,
+    data: parsed.data,
+    knowledgeFiles: collectKnowledgeFiles(formData),
+  };
 }
 
 export async function createAgentFromPayload(
   userId: string,
   data: CreateAgentPayload,
-): Promise<{ slug: string }> {
+  knowledgeFiles: File[],
+): Promise<{ slug: string; id: string }> {
   let slug = makeUniqueAgentSlug(data.title);
   for (let attempt = 0; attempt < 8; attempt++) {
     const clash = await prisma.agent.findUnique({
@@ -73,6 +148,11 @@ export async function createAgentFromPayload(
   }
 
   const starters = data.conversationStarters;
+  const toolConfig = buildKabutoToolConfig({
+    capabilities: data.capabilities,
+    actions: data.actions,
+    useRecommendedModel: data.useRecommendedModel,
+  });
 
   const agent = await prisma.agent.create({
     data: {
@@ -82,6 +162,8 @@ export async function createAgentFromPayload(
       description: data.description.trim(),
       iconEmoji: data.iconEmoji,
       systemPrompt: data.instructions.trim(),
+      defaultLlm: data.defaultLlm,
+      toolConfig,
       pricePerUsePt: data.pricePerUsePt,
       isPublished: false,
       tags: [],
@@ -96,8 +178,12 @@ export async function createAgentFromPayload(
           }
         : {}),
     },
-    select: { slug: true },
+    select: { slug: true, id: true },
   });
 
-  return { slug: agent.slug };
+  if (knowledgeFiles.length > 0) {
+    await attachKnowledgeFilesFromForm(userId, agent.id, knowledgeFiles);
+  }
+
+  return { slug: agent.slug, id: agent.id };
 }
