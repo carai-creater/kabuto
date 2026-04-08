@@ -10,9 +10,9 @@ import {
   Store,
 } from "lucide-react";
 
+import { ensureProfileForUser } from "@/lib/auth/profile";
 import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
-import { CreatorOnlyGate } from "@/components/dashboard/creator-only-gate";
 import { DbUnavailableMessage } from "@/components/db-unavailable";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
 
@@ -30,17 +30,10 @@ export default async function CreatorDashboardPage() {
     redirect("/demo");
   }
 
-  let profile: { role: string } | null = null;
   try {
-    profile = await prisma.profile.findUnique({
-      where: { userId },
-      select: { role: true },
-    });
+    await ensureProfileForUser(userId);
   } catch {
     return <DbUnavailableMessage />;
-  }
-  if (profile?.role !== "creator") {
-    return <CreatorOnlyGate />;
   }
 
   let agents: {

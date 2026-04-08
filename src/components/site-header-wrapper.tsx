@@ -33,7 +33,7 @@ export async function SiteHeaderWrapper() {
         })
       : null;
 
-    const showCreatorAdminLink = row?.profile?.role === "creator";
+    const showCreatorAdminLink = !!row;
     const showAdminLink = row?.profile?.role === "admin";
 
     return (

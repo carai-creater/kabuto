@@ -27,14 +27,6 @@ export async function createAgent(
     return { error: "ログインが必要です。" };
   }
 
-  const profile = await prisma.profile.findUnique({
-    where: { userId },
-    select: { role: true },
-  });
-  if (profile?.role !== "creator") {
-    return { error: "クリエイター権限がありません。" };
-  }
-
   const parsed = createSchema.safeParse({
     title: formData.get("title"),
     description: formData.get("description"),

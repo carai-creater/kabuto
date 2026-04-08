@@ -39,7 +39,7 @@ model User {
 model Profile {
   id        String      @id @default(cuid())
   userId    String      @unique
-  role      ProfileRole @default(user)
+  role      ProfileRole @default(creator)
   /// クリエイター紹介など（エージェント一覧・プロフィールで利用想定）
   bio         String? @db.Text
   websiteUrl  String? @map("website_url")

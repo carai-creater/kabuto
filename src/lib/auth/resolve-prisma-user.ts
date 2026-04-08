@@ -71,7 +71,7 @@ export async function ensurePrismaUserFromAuth(
         (authUser.user_metadata?.avatar_url as string | undefined) ?? null,
       authUserId: authUser.id,
       wallet: { create: { balancePt: 0 } },
-      profile: { create: { role: "user" } },
+      profile: { create: { role: "creator" } },
     },
     select: { id: true },
   });

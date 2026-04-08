@@ -19,7 +19,7 @@ async function main() {
       email: "alice@demo.kabuto",
       name: "Alice",
       wallet: { create: { balancePt: 1000 } },
-      profile: { create: { role: "user" } },
+      profile: { create: { role: "creator" } },
     },
   });
 

@@ -57,7 +57,7 @@ export function AdminRoleForm() {
           <option value="admin">管理者 (admin)</option>
         </select>
         <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
-          クリエイターにすると、エージェント作成・クリエイターダッシュボードが利用できます。
+          既定ではログイン済みユーザーはエージェント作成・クリエイターダッシュボードを利用できます。運用上の調整や管理者付与に使います。
         </p>
       </div>
       {state.error ? (
