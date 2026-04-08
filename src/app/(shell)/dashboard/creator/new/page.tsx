@@ -41,7 +41,7 @@ export default async function NewAgentPage() {
         新規エージェント
       </h1>
       <p className="mt-2 text-[15px] text-slate-600 dark:text-slate-400">
-        名前・説明・システムプロンプト・利用価格を設定します。保存後、エージェントページへ移動します。
+        GPTs / GEM と同じ項目構成で定義します。保存後、エージェントページへ移動します。
       </p>
 
       <div className="mt-10 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80 sm:p-8">

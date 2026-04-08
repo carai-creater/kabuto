@@ -31,11 +31,17 @@ export default async function AgentDetailPage(props: Props) {
   }
 
   const { slug } = await props.params;
+  const sessionUserId = await getSessionUserId();
 
   let agent;
   try {
     agent = await prisma.agent.findFirst({
-      where: { slug, isPublished: true },
+      where: sessionUserId
+        ? {
+            slug,
+            OR: [{ isPublished: true }, { creatorId: sessionUserId }],
+          }
+        : { slug, isPublished: true },
       include: {
         conversationStarters: true,
         knowledgeDocuments: { orderBy: { createdAt: "asc" } },
@@ -56,10 +62,20 @@ export default async function AgentDetailPage(props: Props) {
     agent.tags.includes("高コスパ") ||
     (agent.reviewCount >= 3 && rating >= 4);
 
-  const sessionUserId = await getSessionUserId();
+  const isDraftPreview =
+    !agent.isPublished &&
+    Boolean(sessionUserId && sessionUserId === agent.creatorId);
 
   return (
     <main className="flex min-h-screen w-full flex-1 flex-col">
+      {isDraftPreview ? (
+        <div
+          className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-[13px] text-amber-950 dark:bg-amber-500/15 dark:text-amber-100"
+          role="status"
+        >
+          下書きプレビュー（ストアには未公開です）
+        </div>
+      ) : null}
       <RunAgentPanel
         agentId={agent.id}
         isLoggedIn={Boolean(sessionUserId)}

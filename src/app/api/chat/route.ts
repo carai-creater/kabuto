@@ -127,7 +127,13 @@ export async function POST(req: Request) {
 
   if (parsed.data.agentId) {
     const row = await prisma.agent.findFirst({
-      where: { id: parsed.data.agentId, isPublished: true },
+      where: {
+        id: parsed.data.agentId,
+        OR: [
+          { isPublished: true },
+          ...(userId ? [{ creatorId: userId }] : []),
+        ],
+      },
       select: {
         id: true,
         systemPrompt: true,
