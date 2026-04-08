@@ -11,6 +11,8 @@ type Props = {
   demoLoginEnabled?: boolean;
   /** role が creator のとき「クリエイター管理画面」 */
   showCreatorAdminLink?: boolean;
+  /** role が admin のとき「管理者」 */
+  showAdminLink?: boolean;
 };
 
 export function SiteHeader({
@@ -20,6 +22,7 @@ export function SiteHeader({
   configWarning,
   demoLoginEnabled = true,
   showCreatorAdminLink = false,
+  showAdminLink = false,
 }: Props) {
   return (
     <header
@@ -77,6 +80,15 @@ export function SiteHeader({
             >
               ウォレット
             </Link>
+            {showAdminLink ? (
+              <Link
+                href="/dashboard/admin"
+                className="link-subtle rounded-full px-2 py-1.5 text-[11px] leading-tight sm:px-3 sm:text-[13px]"
+                title="ユーザーロール管理"
+              >
+                管理者
+              </Link>
+            ) : null}
             {showCreatorAdminLink ? (
               <Link
                 href="/dashboard/creator"
@@ -84,7 +96,7 @@ export function SiteHeader({
                 title="クリエイター管理画面"
               >
                 <span className="hidden sm:inline">クリエイター管理画面</span>
-                <span className="sm:hidden">管理</span>
+                <span className="sm:hidden">クリエイター</span>
               </Link>
             ) : null}
             {demoLoginEnabled ? (

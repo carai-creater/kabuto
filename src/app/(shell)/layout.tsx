@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
+import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
 
 /**
@@ -22,5 +23,16 @@ export default async function ShellLayout({
     redirect("/demo");
   }
 
-  return <DashboardShell>{children}</DashboardShell>;
+  let isAdmin = false;
+  try {
+    const profile = await prisma.profile.findUnique({
+      where: { userId },
+      select: { role: true },
+    });
+    isAdmin = profile?.role === "admin";
+  } catch {
+    isAdmin = false;
+  }
+
+  return <DashboardShell isAdmin={isAdmin}>{children}</DashboardShell>;
 }

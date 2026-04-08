@@ -6,11 +6,12 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Settings,
+  Shield,
   Sparkles,
   Wallet,
 } from "lucide-react";
 
-const nav = [
+const baseNav = [
   {
     href: "/dashboard",
     label: "マイページ",
@@ -33,8 +34,21 @@ const nav = [
   },
 ] as const;
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+const adminNavItem = {
+  href: "/dashboard/admin",
+  label: "管理",
+  icon: Shield,
+} as const;
+
+export function DashboardShell({
+  children,
+  isAdmin = false,
+}: {
+  children: React.ReactNode;
+  isAdmin?: boolean;
+}) {
   const pathname = usePathname();
+  const nav = isAdmin ? [...baseNav, adminNavItem] : [...baseNav];
 
   return (
     <div className="flex min-h-[calc(100vh-52px)] w-full flex-col md:flex-row">
@@ -51,6 +65,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   : item.href === "/dashboard/settings"
                     ? pathname === "/dashboard/settings" ||
                       pathname.startsWith("/dashboard/settings/")
+                    : item.href === "/dashboard/admin"
+                      ? pathname === "/dashboard/admin" ||
+                        pathname.startsWith("/dashboard/admin/")
                     : pathname === item.href ||
                       pathname.startsWith(`${item.href}/`);
               const Icon = item.icon;

@@ -33,6 +33,15 @@ async function main() {
     },
   });
 
+  await prisma.user.create({
+    data: {
+      email: "admin@demo.kabuto",
+      name: "Admin（管理者）",
+      wallet: { create: { balancePt: 0 } },
+      profile: { create: { role: "admin" } },
+    },
+  });
+
   const toolsResearch: Prisma.InputJsonValue = [
     { name: "web_search", type: "function", config: { engine: "brave" } },
     { name: "summarize", type: "function", config: { maxTokens: 800 } },
@@ -155,7 +164,11 @@ async function main() {
     ],
   });
 
-  console.log("Seed OK:", { alice: alice.email, bob: bob.email });
+  console.log("Seed OK:", {
+    alice: alice.email,
+    bob: bob.email,
+    admin: "admin@demo.kabuto",
+  });
 }
 
 main()

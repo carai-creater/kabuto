@@ -13,6 +13,7 @@ export async function SiteHeaderWrapper() {
         balancePt={null}
         demoLoginEnabled={isDemoLoginEnabled()}
         showCreatorAdminLink={false}
+        showAdminLink={false}
         configWarning="DATABASE_URL が未設定です（Vercel の Environment Variables を確認）"
       />
     );
@@ -33,6 +34,7 @@ export async function SiteHeaderWrapper() {
       : null;
 
     const showCreatorAdminLink = row?.profile?.role === "creator";
+    const showAdminLink = row?.profile?.role === "admin";
 
     return (
       <SiteHeader
@@ -41,6 +43,7 @@ export async function SiteHeaderWrapper() {
         balancePt={row?.wallet?.balancePt ?? null}
         demoLoginEnabled={isDemoLoginEnabled()}
         showCreatorAdminLink={showCreatorAdminLink}
+        showAdminLink={showAdminLink}
       />
     );
   } catch (err) {
@@ -56,6 +59,7 @@ export async function SiteHeaderWrapper() {
           balancePt={null}
           demoLoginEnabled={isDemoLoginEnabled()}
           showCreatorAdminLink={false}
+          showAdminLink={false}
         />
       );
     }
@@ -67,6 +71,7 @@ export async function SiteHeaderWrapper() {
         balancePt={null}
         demoLoginEnabled={isDemoLoginEnabled()}
         showCreatorAdminLink={false}
+        showAdminLink={false}
         configWarning="データベースに接続できません（接続文字列・マイグレーション・ファイアウォールを確認）"
       />
     );
