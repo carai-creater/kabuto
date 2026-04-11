@@ -50,8 +50,8 @@ export default async function Home() {
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <main className="relative flex w-full flex-1 flex-col items-center">
-        {/* ヒーロー：明るく信頼感のある導入 */}
-        <div className="w-full border-b border-[var(--border)] bg-[var(--background-muted)]">
+        {/* ヒーロー */}
+        <div className="w-full border-b border-[var(--border)] bg-[var(--card)]">
           <div className={`${PAGE_SHELL} py-10 sm:py-14`}>
             <div className="mx-auto max-w-3xl text-center">
               <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">
@@ -62,7 +62,7 @@ export default async function Home() {
                 <br className="sm:hidden" />
                 さがしてみましょう
               </h1>
-              <p className="mt-4 text-[15px] leading-relaxed text-[var(--muted)] sm:text-[16px]">
+              <p className="mt-4 text-[15px] leading-[1.7] text-[var(--muted)] sm:text-[16px]">
                 クリエイターが公開した AI エージェントを、ポイントで利用できます。
               </p>
             </div>

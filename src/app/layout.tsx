@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Noto_Sans_JP } from "next/font/google";
+import { Geist_Mono, Inter, Noto_Sans_JP } from "next/font/google";
 import { SiteHeaderWrapper } from "@/components/site-header-wrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 import { HeaderVisibility } from "@/components/header-visibility";
 import { AppToaster } from "@/components/app-toaster";
 import { NavigationProgress } from "@/components/navigation-progress";
 import "./globals.css";
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 const notoSansJp = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -34,9 +40,9 @@ export default function RootLayout({
     <html
       lang="ja"
       suppressHydrationWarning
-      className={`${notoSansJp.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${notoSansJp.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-background text-foreground">
+      <body className="min-h-full bg-background font-sans text-foreground leading-[1.7]">
         <ThemeProvider>
           <NavigationProgress />
           <HeaderVisibility>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PAGE_SHELL } from "@/lib/page-shell";
+import { SiteHeaderNav } from "@/components/site-header-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 type Props = {
@@ -29,7 +30,7 @@ export function SiteHeader({
       className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--header-bg)] backdrop-blur-md backdrop-saturate-150"
     >
       <div
-        className={`flex h-[52px] w-full items-center justify-between gap-2 sm:gap-3 sm:h-14 ${PAGE_SHELL}`}
+        className={`flex h-[52px] w-full items-center gap-4 sm:h-14 sm:gap-8 lg:gap-12 ${PAGE_SHELL}`}
       >
         <Link
           href="/"
@@ -62,65 +63,13 @@ export function SiteHeader({
           </p>
         )}
 
-        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-          <nav className="flex items-center gap-0.5">
-            <Link
-              href="/dashboard"
-              className="link-subtle rounded-full px-2 py-1.5 text-[12px] sm:px-3 sm:text-[13px]"
-            >
-              マイページ
-            </Link>
-            <Link
-              href="/wallet"
-              className="link-subtle rounded-full px-2 py-1.5 text-[12px] sm:px-3 sm:text-[13px]"
-            >
-              ウォレット
-            </Link>
-            {showAdminLink ? (
-              <Link
-                href="/dashboard/admin"
-                className="link-subtle rounded-full px-2 py-1.5 text-[11px] leading-tight sm:px-3 sm:text-[13px]"
-                title="ユーザーロール管理"
-              >
-                管理者
-              </Link>
-            ) : null}
-            {showCreatorAdminLink ? (
-              <Link
-                href="/dashboard/creator"
-                className="link-subtle rounded-full px-2 py-1.5 text-[11px] leading-tight sm:px-3 sm:text-[13px]"
-                title="クリエイター管理画面"
-              >
-                <span className="hidden sm:inline">クリエイター管理画面</span>
-                <span className="sm:hidden">クリエイター</span>
-              </Link>
-            ) : null}
-            {demoLoginEnabled ? (
-              <Link
-                href="/demo"
-                className="link-subtle rounded-full px-2 py-1.5 text-[12px] sm:px-3 sm:text-[13px]"
-              >
-                デモ
-              </Link>
-            ) : null}
-            {email ? (
-              <form action="/auth/signout" method="post" className="inline">
-                <button
-                  type="submit"
-                  className="link-subtle rounded-full px-2 py-1.5 text-[12px] sm:px-3 sm:text-[13px]"
-                >
-                  ログアウト
-                </button>
-              </form>
-            ) : (
-              <Link
-                href="/login"
-                className="link-subtle rounded-full px-2 py-1.5 text-[12px] sm:px-3 sm:text-[13px]"
-              >
-                ログイン
-              </Link>
-            )}
-          </nav>
+        <div className="ml-auto flex min-w-0 shrink-0 items-center gap-2 sm:gap-3 lg:gap-4">
+          <SiteHeaderNav
+            demoLoginEnabled={demoLoginEnabled}
+            showAdminLink={showAdminLink}
+            showCreatorAdminLink={showCreatorAdminLink}
+            email={email}
+          />
           {balancePt != null && (
             <span
               className="tabular-nums text-[12px] font-medium text-[var(--subtle)] sm:text-[13px] sm:px-1"

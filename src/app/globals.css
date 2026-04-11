@@ -1,31 +1,31 @@
 @import "tailwindcss";
 
-/* next-themes は html に .dark を付ける */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/*
-  スキルマーケットプレイス風（ココナラ系）ライト基調:
-  白 #FFFFFF、区切り #F4F4F4、本文 #333、信頼感のあるブルー
-*/
+/* 商用マーケットプレイス: 薄灰背景 #F7F9FB、カード境界 #E2E8F0、Inter + Noto Sans JP */
 :root {
-  --background: #ffffff;
-  --background-muted: #fafafa;
+  --background: #f7f9fb;
+  --background-muted: #f1f5f9;
   --foreground: #333333;
-  --muted: #666666;
-  --subtle: #757575;
+  --muted: #64748b;
+  --subtle: #64748b;
   --card: #ffffff;
-  --card-elevated: #fafafa;
-  --border: #f4f4f4;
-  --border-strong: #e8e8e8;
+  --card-elevated: #f8fafc;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
   --input-bg: #ffffff;
-  --input-border: #e5e5e5;
+  --input-border: #e2e8f0;
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
   --brand: #2563eb;
   --brand-muted: rgb(37 99 235 / 0.08);
+  --tag-pastel-bg: #eff6ff;
+  --tag-pastel-text: #1d4ed8;
+  --tag-neutral-bg: #f1f5f9;
+  --tag-neutral-text: #475569;
   --destructive: #dc2626;
-  --header-bg: rgb(255 255 255 / 0.92);
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04);
+  --header-bg: rgb(255 255 255 / 0.94);
+  --shadow-card: none;
   --radius-card: 12px;
   --radius-control: 10px;
 }
@@ -34,20 +34,24 @@
   --background: #0f1419;
   --background-muted: #151c24;
   --foreground: #f0f3f7;
-  --muted: #9ca3af;
-  --subtle: #8b95a1;
+  --muted: #94a3b8;
+  --subtle: #94a3b8;
   --card: #1a222d;
   --card-elevated: #1f2937;
-  --border: rgb(255 255 255 / 0.08);
-  --border-strong: rgb(255 255 255 / 0.14);
+  --border: rgb(255 255 255 / 0.1);
+  --border-strong: rgb(255 255 255 / 0.16);
   --input-bg: rgb(26 34 45 / 0.95);
   --input-border: rgb(255 255 255 / 0.1);
   --accent: #3b82f6;
   --accent-hover: #60a5fa;
   --brand: #3b82f6;
   --brand-muted: rgb(59 130 246 / 0.15);
+  --tag-pastel-bg: rgb(30 58 138 / 0.35);
+  --tag-pastel-text: #93c5fd;
+  --tag-neutral-bg: rgb(255 255 255 / 0.06);
+  --tag-neutral-text: #cbd5e1;
   --destructive: #f87171;
-  --header-bg: rgb(15 20 25 / 0.88);
+  --header-bg: rgb(15 20 25 / 0.92);
   --shadow-card: none;
 }
 
@@ -58,7 +62,9 @@
   --color-card: var(--card);
   --color-accent: var(--accent);
   --color-brand: var(--brand);
-  --font-sans: var(--font-noto-sans-jp), ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    var(--font-inter), var(--font-noto-sans-jp), ui-sans-serif, system-ui,
+    sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
@@ -69,14 +75,14 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-noto-sans-jp), "Hiragino Sans", "Yu Gothic UI",
-    "Meiryo", sans-serif;
+  font-family: var(--font-inter), var(--font-noto-sans-jp), "Hiragino Sans",
+    "Yu Gothic UI", "Meiryo", sans-serif;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: 0.01em;
 }
 
-/* カード・サーフェス（8px グリッド・角丸 8〜12px） */
 @layer components {
   .surface-card {
     border-radius: var(--radius-card);
@@ -88,18 +94,14 @@ body {
     border-radius: var(--radius-card);
     border: 1px solid var(--border);
     background: var(--card);
-    box-shadow: var(--shadow-card);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: none;
+    transition: border-color 0.2s ease;
   }
   .agent-card-surface:hover {
     border-color: var(--border-strong);
-    box-shadow:
-      0 2px 8px rgb(0 0 0 / 0.06),
-      0 1px 2px rgb(0 0 0 / 0.04);
   }
   .dark .agent-card-surface:hover {
-    border-color: rgb(255 255 255 / 0.12);
-    box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+    border-color: rgb(255 255 255 / 0.18);
   }
   .surface-card-elevated {
     border-radius: var(--radius-card);
@@ -117,10 +119,11 @@ body {
     background: var(--input-bg);
     border-color: var(--input-border);
     color: var(--foreground);
+    line-height: 1.7;
   }
   .input-apple:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.15);
+    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.12);
   }
   .dark .input-apple:focus {
     box-shadow: 0 0 0 3px rgb(59 130 246 / 0.2);
