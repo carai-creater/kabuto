@@ -19,10 +19,11 @@ export default function Error({
         読み込み中にエラーが発生しました
       </p>
       <p className="max-w-md text-[15px] text-[var(--muted)]">
+        しばらくしてから再試行するか、
         <code className="rounded-md bg-[var(--card-elevated)] px-2 py-0.5 text-[13px] ring-1 ring-[var(--border)]">
           DATABASE_URL
-        </code>{" "}
-        や接続を確認してください。
+        </code>
+        などサーバー設定を確認してください。
       </p>
       {error.digest && (
         <p className="font-mono text-[11px] text-[var(--muted)]">

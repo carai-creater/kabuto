@@ -19,7 +19,7 @@ export type AgentListItem = Pick<
   | "reviewCount"
   | "firstThreeFree"
   | "tags"
->;
+> & { createdAt?: Date };
 
 type Props = {
   agents: AgentListItem[];

@@ -89,6 +89,19 @@ export async function AgentEditorPreview({ userId, previewSlug }: Props) {
 
   const editor = parseKabutoEditor(agent.toolConfig);
 
+  /** RSC → Client 境界で Flight が落ちないよう、JSON 互換のプレーン値にする */
+  let safeTools: unknown = [];
+  try {
+    safeTools = JSON.parse(JSON.stringify(agent.tools ?? [])) as unknown;
+  } catch {
+    safeTools = [];
+  }
+  const safeStarters = agent.conversationStarters.map((s) => ({
+    id: s.id,
+    position: s.position,
+    text: s.text,
+  }));
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
@@ -96,7 +109,7 @@ export async function AgentEditorPreview({ userId, previewSlug }: Props) {
           プレビュー
         </p>
         <a
-          href={`/agents/${agent.slug}`}
+          href={`/agents/${encodeURIComponent(agent.slug)}`}
           className="text-[12px] font-medium text-blue-600 hover:underline dark:text-blue-400"
         >
           公開ページへ →
@@ -108,9 +121,9 @@ export async function AgentEditorPreview({ userId, previewSlug }: Props) {
           isLoggedIn
           defaultModelId={agent.defaultLlm}
           useCreatorRecommendedModel={editor?.useRecommendedModel !== false}
-          pricePerUsePt={agent.pricePerUsePt}
-          starters={agent.conversationStarters}
-          tools={agent.tools}
+          pricePerUsePt={Number(agent.pricePerUsePt)}
+          starters={safeStarters}
+          tools={safeTools}
           showToolDetails
           fullScreenChat
         />

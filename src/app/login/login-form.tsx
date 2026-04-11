@@ -1,7 +1,6 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type Props = {
@@ -10,7 +9,6 @@ type Props = {
 };
 
 export function LoginForm({ redirectTo = "/dashboard" }: Props) {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -30,8 +28,8 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
         setError(signErr.message);
         return;
       }
-      router.push(redirectTo);
-      router.refresh();
+      // クライアントで Cookie が書き込まれた直後に RSC 遷移するとミドルウェアが未ログインとみなすことがあるため、フルナビで確実に送る
+      window.location.assign(redirectTo);
     } catch {
       setError("ログインに失敗しました。");
     } finally {

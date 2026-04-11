@@ -57,10 +57,10 @@ function buildEditInitial(
 
   return {
     slug: agent.slug,
-    title: agent.title,
-    description: agent.description,
-    iconEmoji: agent.iconEmoji,
-    instructions: agent.systemPrompt,
+    title: String(agent.title),
+    description: String(agent.description),
+    iconEmoji: String(agent.iconEmoji),
+    instructions: String(agent.systemPrompt),
     starters,
     defaultLlm: coerceAgentModelId(agent.defaultLlm),
     useRecommendedModel: editor?.useRecommendedModel !== false,
@@ -71,7 +71,7 @@ function buildEditInitial(
     actionsAuthType,
     actionsOpenApiSchema: act?.openApiSchema ?? "",
     actionsPrivacyPolicyUrl: act?.privacyPolicyUrl ?? "",
-    pricePerUsePt: agent.pricePerUsePt,
+    pricePerUsePt: Number(agent.pricePerUsePt),
   };
 }
 
@@ -79,6 +79,9 @@ type PageProps = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ saved?: string }>;
 };
+
+/** 編集後の再検証・ログイン戻りでキャッシュずれを避ける */
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(props: PageProps) {
   const { slug: raw } = await props.params;
@@ -91,21 +94,22 @@ export default async function EditAgentPage(props: PageProps) {
     return <DbUnavailableMessage />;
   }
 
+  const { slug: raw } = await props.params;
+  const slug = normalizeSlug(raw);
+  if (!slug) {
+    notFound();
+  }
+
   const userId = await getSessionUserId();
   if (!userId) {
-    redirect("/login?next=%2Fdashboard%2Fcreator");
+    const backToEdit = `/dashboard/creator/edit/${slug}`;
+    redirect(`/login?next=${encodeURIComponent(backToEdit)}`);
   }
 
   try {
     await ensureProfileForUser(userId);
   } catch {
     return <DbUnavailableMessage />;
-  }
-
-  const { slug: raw } = await props.params;
-  const slug = normalizeSlug(raw);
-  if (!slug) {
-    notFound();
   }
 
   let agent;
@@ -124,8 +128,15 @@ export default async function EditAgentPage(props: PageProps) {
     notFound();
   }
 
-  const initial = buildEditInitial(agent);
-  const saved = (await props.searchParams).saved;
+  let initial: EditAgentFormInitial;
+  let saved: string | undefined;
+  try {
+    initial = buildEditInitial(agent);
+    saved = (await props.searchParams).saved;
+  } catch (e) {
+    console.error("[EditAgentPage] buildEditInitial/searchParams", e);
+    return <DbUnavailableMessage />;
+  }
 
   return (
     <div className="mx-auto w-full max-w-[1600px] px-0">

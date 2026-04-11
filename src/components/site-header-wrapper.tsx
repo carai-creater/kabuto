@@ -14,7 +14,6 @@ export async function SiteHeaderWrapper() {
         demoLoginEnabled={isDemoLoginEnabled()}
         showCreatorAdminLink={false}
         showAdminLink={false}
-        configWarning="DATABASE_URL が未設定です（Vercel の Environment Variables を確認）"
       />
     );
   }
@@ -72,7 +71,6 @@ export async function SiteHeaderWrapper() {
         demoLoginEnabled={isDemoLoginEnabled()}
         showCreatorAdminLink={false}
         showAdminLink={false}
-        configWarning="データベースに接続できません（接続文字列・マイグレーション・ファイアウォールを確認）"
       />
     );
   }
