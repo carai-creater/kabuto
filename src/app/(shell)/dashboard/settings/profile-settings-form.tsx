@@ -64,16 +64,15 @@ export function ProfileSettingsForm({
         .from("avatars")
         .upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) {
-        toast.error(
-          "ストレージへのアップロードに失敗しました。Supabase でバケット `avatars` を作成するか、画像 URL を直接入力してください。",
-          { duration: 6000 },
-        );
+        toast.error("アップロードに失敗しました（バケット avatars または URL を確認）", {
+          duration: 5000,
+        });
         return;
       }
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
       if (data.publicUrl) {
         setAvatarUrl(data.publicUrl);
-        toast.success("画像をアップロードしました。保存ボタンで確定してください。");
+        toast.success("アップロード済み。保存で反映します。");
       }
     } catch {
       toast.error("アップロードに失敗しました");
@@ -87,7 +86,7 @@ export function ProfileSettingsForm({
       <section className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-lg ring-1 ring-black/5 dark:shadow-black/40 dark:ring-white/5">
         <h2 className="text-[15px] font-semibold text-foreground">アバター</h2>
         <p className="mt-1 text-[13px] text-[var(--muted)]">
-          画像をアップロードするか、公開 URL を入力してください。
+          アップロードまたは URL
         </p>
         <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-start">
           <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card-elevated)] ring-1 ring-black/5 dark:ring-white/10">
@@ -136,7 +135,7 @@ export function ProfileSettingsForm({
                 {uploading ? "アップロード中…" : "ファイルをアップロード"}
               </button>
               <span className="text-[12px] text-[var(--muted)]">
-                バケット <code className="rounded bg-[var(--card-elevated)] px-1">avatars</code> が必要です
+                Storage バケット <code className="rounded bg-[var(--card-elevated)] px-1">avatars</code>
               </span>
             </div>
           </div>
@@ -164,9 +163,6 @@ export function ProfileSettingsForm({
             <label htmlFor="bio" className="text-label">
               自己紹介
             </label>
-            <p className="mt-1 text-[12px] text-[var(--muted)]">
-              クリエイターの場合、エージェント一覧などで利用できる想定です。
-            </p>
             <textarea
               id="bio"
               name="bio"
@@ -195,13 +191,10 @@ export function ProfileSettingsForm({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--accent)] hover:underline"
               >
-                Auth での変更は Supabase ダッシュボード
+                Supabase でメール変更
                 <ExternalLink className="h-3.5 w-3.5" aria-hidden />
               </a>
             </div>
-            <p className="mt-2 text-[12px] text-[var(--muted)]">
-              メールの変更は Supabase Authentication 側のフローに従ってください。
-            </p>
           </div>
         </div>
       </section>

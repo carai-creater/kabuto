@@ -22,15 +22,18 @@ function isActive(pathname: string, href: string): boolean {
 
 function NavLink({
   href,
+  matchHref,
   children,
   title,
 }: {
   href: string;
+  /** アクティブ判定に使うパス（未ログイン時は login?next= になるため別指定） */
+  matchHref?: string;
   children: ReactNode;
   title?: string;
 }) {
   const pathname = usePathname();
-  const active = isActive(pathname, href);
+  const active = isActive(pathname, matchHref ?? href);
 
   return (
     <Link
@@ -60,10 +63,22 @@ export function SiteHeaderNav({
   showAdminLink = false,
   email,
 }: Props) {
+  const loggedIn = Boolean(email);
+
   return (
     <nav className="flex flex-wrap items-center justify-end gap-x-1 gap-y-1 sm:gap-x-2">
-      <NavLink href="/dashboard">マイページ</NavLink>
-      <NavLink href="/wallet">ウォレット</NavLink>
+      <NavLink
+        href={loggedIn ? "/dashboard" : "/login?next=%2Fdashboard"}
+        matchHref="/dashboard"
+      >
+        マイページ
+      </NavLink>
+      <NavLink
+        href={loggedIn ? "/wallet" : "/login?next=%2Fwallet"}
+        matchHref="/wallet"
+      >
+        ウォレット
+      </NavLink>
       {showAdminLink ? (
         <NavLink href="/dashboard/admin" title="ユーザーロール管理">
           <span className="hidden sm:inline">管理者</span>

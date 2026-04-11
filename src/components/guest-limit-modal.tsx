@@ -24,8 +24,8 @@ export function GuestLimitModal({ open, onClose }: Props) {
         >
           本日のお試し回数に達しました
         </h2>
-        <p className="mt-3 text-[15px] leading-relaxed text-[var(--muted)]">
-          未ログインでの利用は 1 日 3 回までです。ログインするとウォレット残高の範囲で継続できます。
+        <p className="mt-3 text-[15px] text-[var(--muted)]">
+          未ログインは 1 日 3 回まで。ログインで継続できます。
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link

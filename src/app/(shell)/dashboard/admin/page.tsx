@@ -59,9 +59,9 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
         <p className="mt-4 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
-          登録済みユーザー（Prisma{" "}
-          <code className="rounded bg-slate-100 px-1 text-xs dark:bg-slate-800">User</code> に存在するメール）の{" "}
-          <code className="rounded bg-slate-100 px-1 text-xs dark:bg-slate-800">profiles.role</code> を変更します。対象は少なくとも一度ログインし、アカウントが作成されている必要があります。
+          ログイン済みユーザーの{" "}
+          <code className="rounded bg-slate-100 px-1 text-xs dark:bg-slate-800">profiles.role</code>{" "}
+          を変更
         </p>
       </header>
 

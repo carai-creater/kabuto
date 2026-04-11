@@ -41,16 +41,11 @@ export default async function DemoPage() {
         <h1 className="text-[32px] font-semibold tracking-tight text-foreground">
           デモログイン
         </h1>
-        <p className="mt-3 text-[17px] leading-relaxed text-[var(--muted)]">
-          開発用の仮ログインです（本番では無効）。ユーザーを選ぶと Cookie{" "}
-          <code className="rounded-lg bg-[var(--card-elevated)] px-2 py-0.5 text-[13px] ring-1 ring-[var(--border)]">
-            kabuto_uid
-          </code>{" "}
-          が設定されます。本番利用は{" "}
+        <p className="mt-3 text-[17px] text-[var(--muted)]">
+          開発用（本番では無効）。本番は{" "}
           <a href="/login" className="text-[var(--accent)] underline">
             ログイン
-          </a>{" "}
-          を使ってください。
+          </a>
         </p>
 
         {users.length === 0 ? (

@@ -391,7 +391,7 @@ export function RunAgentPanel({
               </span>
               {!isLoggedIn && (
                 <span className="mt-1 block text-[11px] text-[var(--muted)]">
-                  未ログインは 1 日 3 回まで。ログインでウォレットから継続できます。
+                  未ログインは 1 日 3 回まで（ログインで継続）
                 </span>
               )}
             </div>

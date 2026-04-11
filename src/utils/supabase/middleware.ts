@@ -1,15 +1,29 @@
 import { createServerClient } from "@supabase/ssr";
+import type { User } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
 import { getSupabasePublicEnv } from "@/utils/supabase/env";
 
-export async function updateSession(request: NextRequest) {
+export type UpdateSessionResult = {
+  response: NextResponse;
+  /** Supabase が未設定のときは null（認証状態は未判定） */
+  user: User | null;
+  authConfigured: boolean;
+};
+
+export async function updateSession(
+  request: NextRequest,
+): Promise<UpdateSessionResult> {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
   const { url, key } = getSupabasePublicEnv();
   if (!url || !key) {
-    return supabaseResponse;
+    return {
+      response: supabaseResponse,
+      user: null,
+      authConfigured: false,
+    };
   }
 
   const supabase = createServerClient(url, key, {
@@ -34,7 +48,13 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return supabaseResponse;
+  return {
+    response: supabaseResponse,
+    user: user ?? null,
+    authConfigured: true,
+  };
 }

@@ -62,20 +62,21 @@ export function AgentDirectory({ agents }: Props) {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="名前・説明・タグで検索…"
+            placeholder="検索…"
             autoComplete="off"
             className="h-14 w-full rounded-full border border-[var(--border)] bg-[var(--card)] pl-14 pr-6 text-[16px] leading-[1.7] text-[#333333] shadow-none outline-none ring-0 transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 dark:text-[var(--foreground)]"
           />
         </div>
-        <p className="mt-4 text-[14px] leading-[1.7] text-[var(--muted)]">
+        <p className="mt-4 text-[14px] text-[var(--muted)]">
           {filtered.length === agents.length ? (
-            <>{agents.length} 件を表示</>
+            <>{agents.length} 件</>
           ) : (
             <>
               <span className="font-semibold tabular-nums text-[#333333] dark:text-[var(--foreground)]">
                 {filtered.length}
               </span>
-              件が該当（全 {agents.length} 件）
+              {" / "}
+              {agents.length} 件
             </>
           )}
         </p>
@@ -84,8 +85,8 @@ export function AgentDirectory({ agents }: Props) {
       {/* カード一覧: 白コンテナで区切りを明確に */}
       <div className="mt-8 rounded-[12px] border border-[var(--border)] bg-[var(--card)] p-5 sm:p-8">
         {filtered.length === 0 ? (
-          <p className="py-12 text-center text-[15px] leading-[1.7] text-[var(--muted)]">
-            該当するエージェントがありません。別のキーワードを試してください。
+          <p className="py-12 text-center text-[15px] text-[var(--muted)]">
+            該当なし
           </p>
         ) : (
           <ul className="grid grid-cols-1 gap-6 md:grid-cols-2">

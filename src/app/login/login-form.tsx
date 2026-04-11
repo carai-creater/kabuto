@@ -4,7 +4,12 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function LoginForm() {
+type Props = {
+  /** ログイン成功後の遷移先（相対パスのみ想定） */
+  redirectTo?: string;
+};
+
+export function LoginForm({ redirectTo = "/dashboard" }: Props) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +30,7 @@ export function LoginForm() {
         setError(signErr.message);
         return;
       }
-      router.push("/dashboard");
+      router.push(redirectTo);
       router.refresh();
     } catch {
       setError("ログインに失敗しました。");

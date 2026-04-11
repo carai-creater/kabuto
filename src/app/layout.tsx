@@ -27,8 +27,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "kabuto — AIエージェント・マーケットプレイス",
-  description:
-    "目的特化のAIエージェントをクリエイターが販売し、ユーザーがクレジットで利用できるプラットフォーム。",
+  description: "クリエイターが公開した AI エージェントをポイントで利用。",
 };
 
 export default function RootLayout({

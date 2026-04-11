@@ -27,7 +27,7 @@ export default async function CreatorDashboardPage() {
 
   const userId = await getSessionUserId();
   if (!userId) {
-    redirect("/demo");
+    redirect("/login?next=%2Fdashboard%2Fcreator");
   }
 
   try {
@@ -98,7 +98,7 @@ export default async function CreatorDashboardPage() {
             クリエイターダッシュボード
           </h1>
           <p className="mt-2 max-w-xl text-slate-600 dark:text-slate-400">
-            あなたが作成したエージェントの公開状況と売上をまとめて確認できます。
+            公開状況と売上
           </p>
         </div>
         <Link
@@ -106,7 +106,7 @@ export default async function CreatorDashboardPage() {
           className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500"
         >
           <Plus className="h-5 w-5" aria-hidden />
-          新しいエージェントを作成
+          新規作成
         </Link>
       </header>
 
@@ -134,9 +134,6 @@ export default async function CreatorDashboardPage() {
               pt
             </span>
           </p>
-          <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-500">
-            利用確定ごとのクリエイター取り分の累計
-          </p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-none">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -153,8 +150,8 @@ export default async function CreatorDashboardPage() {
           </p>
           <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-500">
             {totalReviews > 0
-              ? `レビュー ${totalReviews.toLocaleString("ja-JP")} 件を反映`
-              : "レビューがまだありません"}
+              ? `レビュー ${totalReviews.toLocaleString("ja-JP")} 件`
+              : "レビューなし"}
           </p>
         </div>
       </section>
@@ -179,17 +176,14 @@ export default async function CreatorDashboardPage() {
               </div>
             </div>
             <p className="mt-6 text-base font-semibold text-slate-800 dark:text-slate-100">
-              まだエージェントがありません。作成を開始しましょう！
-            </p>
-            <p className="mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-              新規作成から名前・説明・システムプロンプトを登録すると、ストアに並べられます。
+              エージェントはまだありません
             </p>
             <Link
               href="/dashboard/creator/new"
               className="mt-8 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-500"
             >
               <Plus className="h-5 w-5" aria-hidden />
-              新しいエージェントを作成
+              新規作成
             </Link>
           </div>
         ) : (
@@ -207,7 +201,7 @@ export default async function CreatorDashboardPage() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <Link
-                          href={`/agents/${a.slug}`}
+                          href={`/dashboard/creator/agents/${encodeURIComponent(a.slug)}`}
                           className="truncate text-base font-semibold text-slate-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
                         >
                           {a.title}
@@ -230,7 +224,7 @@ export default async function CreatorDashboardPage() {
                     </div>
                     <div className="flex shrink-0 items-center justify-end gap-2 sm:justify-center">
                       <Link
-                        href={`/agents/${a.slug}`}
+                        href={`/dashboard/creator/agents/${encodeURIComponent(a.slug)}`}
                         className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-blue-500/50 dark:hover:bg-slate-700 dark:hover:text-blue-300"
                       >
                         <Pencil className="h-4 w-4" aria-hidden />

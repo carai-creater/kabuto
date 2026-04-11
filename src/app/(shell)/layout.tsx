@@ -20,7 +20,7 @@ export default async function ShellLayout({
 
   const userId = await getSessionUserId();
   if (!userId) {
-    redirect("/demo");
+    redirect("/login");
   }
 
   let isAdmin = false;

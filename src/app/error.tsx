@@ -18,12 +18,11 @@ export default function Error({
       <p className="text-[21px] font-bold text-[#333333] dark:text-[var(--foreground)]">
         読み込み中にエラーが発生しました
       </p>
-      <p className="max-w-md text-[15px] leading-relaxed text-[var(--muted)]">
-        本番の{" "}
+      <p className="max-w-md text-[15px] text-[var(--muted)]">
         <code className="rounded-md bg-[var(--card-elevated)] px-2 py-0.5 text-[13px] ring-1 ring-[var(--border)]">
           DATABASE_URL
         </code>{" "}
-        未設定や DB 接続失敗のことがあります。Vercel のログと環境変数を確認してください。
+        や接続を確認してください。
       </p>
       {error.digest && (
         <p className="font-mono text-[11px] text-[var(--muted)]">

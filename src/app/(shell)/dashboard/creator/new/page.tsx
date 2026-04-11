@@ -23,7 +23,7 @@ export default async function NewAgentPage(props: PageProps) {
 
   const userId = await getSessionUserId();
   if (!userId) {
-    redirect("/demo");
+    redirect("/login?next=%2Fdashboard%2Fcreator%2Fnew");
   }
 
   try {
@@ -47,7 +47,7 @@ export default async function NewAgentPage(props: PageProps) {
         エージェントを作成
       </h1>
       <p className="mt-2 max-w-3xl text-[15px] text-slate-600 dark:text-slate-400">
-        ChatGPT の GPT エディタのように、左で構成を編集し、保存後は右でプレビューできます。
+        左で入力 → 保存後、右でプレビュー
       </p>
 
       <div className="mt-10 grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(320px,420px)] xl:items-start">

@@ -20,7 +20,7 @@ export default async function WalletPage() {
 
   const userId = await getSessionUserId();
   if (!userId) {
-    redirect("/demo");
+    redirect("/login?next=%2Fwallet");
   }
 
   let wallet: { balancePt: number } | null = null;
@@ -48,8 +48,8 @@ export default async function WalletPage() {
       <h1 className="text-[28px] font-semibold tracking-tight text-foreground sm:text-[32px]">
         ウォレット
       </h1>
-      <p className="mt-2 text-[15px] leading-relaxed text-[var(--muted)]">
-        プリペイド残高と消費履歴。Stripe 連携は今後のスプリントで接続します。
+      <p className="mt-2 text-[15px] text-[var(--muted)]">
+        残高と履歴（Stripe は準備中）
       </p>
 
       <div id="charge" className="surface-card mt-10 scroll-mt-24 p-8">
@@ -62,8 +62,8 @@ export default async function WalletPage() {
               pt
             </span>
           </p>
-          <p className="mt-4 text-[13px] leading-relaxed text-[var(--muted)]">
-            例: 500 円 = 500pt、1,000 円 = 1,100pt（ボーナス）は Stripe 決済で実装予定。
+          <p className="mt-4 text-[13px] text-[var(--muted)]">
+            チャージは Stripe 接続後に利用可能
           </p>
         </div>
 

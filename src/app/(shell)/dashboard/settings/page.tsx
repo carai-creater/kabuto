@@ -19,7 +19,7 @@ export default async function DashboardSettingsPage() {
 
   const userId = await getSessionUserId();
   if (!userId) {
-    redirect("/demo");
+    redirect("/login?next=%2Fdashboard%2Fsettings");
   }
 
   await ensureProfileForUser(userId);
@@ -41,7 +41,7 @@ export default async function DashboardSettingsPage() {
   });
 
   if (!row) {
-    redirect("/demo");
+    redirect("/login?next=%2Fdashboard%2Fsettings");
   }
 
   return (
@@ -53,11 +53,7 @@ export default async function DashboardSettingsPage() {
         プロフィール設定
       </h1>
       <p className="mt-2 text-[15px] text-[var(--muted)]">
-        表示名・自己紹介・リンクを更新します。表示名・アバター URL は{" "}
-        <code className="rounded bg-[var(--card-elevated)] px-1 text-[13px]">User</code>{" "}
-        、自己紹介・SNS は{" "}
-        <code className="rounded bg-[var(--card-elevated)] px-1 text-[13px]">profiles</code>{" "}
-        に保存されます（いずれも Supabase Postgres）。
+        表示名・自己紹介・リンク
       </p>
 
       <div className="mt-10">

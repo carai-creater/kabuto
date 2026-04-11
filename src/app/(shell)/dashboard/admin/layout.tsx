@@ -15,7 +15,7 @@ export default async function AdminSectionLayout({
 
   const userId = await getSessionUserId();
   if (!userId) {
-    redirect("/demo");
+    redirect("/login?next=%2Fdashboard%2Fadmin");
   }
 
   const profile = await prisma.profile.findUnique({

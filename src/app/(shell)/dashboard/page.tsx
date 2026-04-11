@@ -22,7 +22,7 @@ export default async function UserDashboardPage() {
 
   const userId = await getSessionUserId();
   if (!userId) {
-    redirect("/demo");
+    redirect("/login?next=%2Fdashboard");
   }
 
   let user: { name: string | null; email: string } | null = null;
@@ -86,7 +86,7 @@ export default async function UserDashboardPage() {
           Welcome back, {displayName}!
         </h1>
         <p className="mt-3 max-w-2xl text-base text-slate-600 dark:text-slate-400">
-          残高と最近の会話をひと目で確認できます。
+          残高と直近の会話
         </p>
       </header>
 
@@ -125,16 +125,13 @@ export default async function UserDashboardPage() {
                   </div>
                 </div>
                 <p className="mt-5 text-sm font-medium text-slate-600 dark:text-slate-300">
-                  まだ会話がありません
-                </p>
-                <p className="mt-1 max-w-xs text-xs text-slate-500 dark:text-slate-500">
-                  エージェントを選んで、はじめの会話を始めましょう。
+                  会話はまだありません
                 </p>
                 <Link
                   href="/"
                   className="mt-6 inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400"
                 >
-                  最初のエージェントを見つけましょう
+                  エージェントを見る
                 </Link>
               </div>
             ) : (
@@ -182,7 +179,7 @@ export default async function UserDashboardPage() {
             クレジットをチャージ
           </Link>
           <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
-            Stripe 連携は今後のスプリントで接続予定です（ウォレット画面へ）。
+            Stripe 連携は準備中
           </p>
         </div>
       </div>

@@ -1,8 +1,11 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 import { AgentDetailView } from "@/components/agent-detail-view";
-import { agentDetailInclude } from "@/lib/agent/agent-detail-include";
+import {
+  agentDetailInclude,
+} from "@/lib/agent/agent-detail-include";
+import { ensureProfileForUser } from "@/lib/auth/profile";
 import { prisma } from "@/lib/prisma";
 import { DbUnavailableMessage } from "@/components/db-unavailable";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
@@ -22,8 +25,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   try {
     const { slug: raw } = await props.params;
     const slug = normalizeSlug(raw);
-    const agent = await prisma.agent.findUnique({
-      where: { slug },
+    const userId = await getSessionUserId();
+    if (!userId) return { title: "エージェント" };
+    const agent = await prisma.agent.findFirst({
+      where: { slug, creatorId: userId },
       select: { title: true, description: true },
     });
     if (!agent) return { title: "エージェント" };
@@ -36,8 +41,19 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 }
 
-export default async function AgentDetailPage(props: Props) {
+export default async function CreatorAgentDetailPage(props: Props) {
   if (!isDatabaseConfigured()) {
+    return <DbUnavailableMessage />;
+  }
+
+  const userId = await getSessionUserId();
+  if (!userId) {
+    redirect("/login?next=%2Fdashboard%2Fcreator");
+  }
+
+  try {
+    await ensureProfileForUser(userId);
+  } catch {
     return <DbUnavailableMessage />;
   }
 
@@ -47,17 +63,10 @@ export default async function AgentDetailPage(props: Props) {
     notFound();
   }
 
-  const sessionUserId = await getSessionUserId();
-
   let agent;
   try {
     agent = await prisma.agent.findFirst({
-      where: sessionUserId
-        ? {
-            slug,
-            OR: [{ isPublished: true }, { creatorId: sessionUserId }],
-          }
-        : { slug, isPublished: true },
+      where: { slug, creatorId: userId },
       include: agentDetailInclude,
     });
   } catch {
@@ -69,6 +78,6 @@ export default async function AgentDetailPage(props: Props) {
   }
 
   return (
-    <AgentDetailView agent={agent} sessionUserId={sessionUserId} />
+    <AgentDetailView agent={agent} sessionUserId={userId} />
   );
 }

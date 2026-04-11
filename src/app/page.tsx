@@ -18,12 +18,11 @@ export default async function Home() {
             <h1 className="text-[18px] font-semibold tracking-tight text-foreground">
               データベースが未設定です
             </h1>
-            <p className="mt-3 text-[14px] leading-relaxed text-[var(--muted)]">
-              Vercel に{" "}
+            <p className="mt-3 text-[14px] text-[var(--muted)]">
               <code className="rounded-md bg-[var(--card-elevated)] px-1.5 py-0.5 text-[12px] ring-1 ring-[var(--border)]">
                 DATABASE_URL
               </code>{" "}
-              を追加して再デプロイし、次を実行してください。
+              を設定して再デプロイ後:
             </p>
             <pre className="mt-5 rounded-xl border border-[var(--border)] bg-[var(--card-elevated)] px-4 py-3 text-left text-[12px] leading-relaxed text-foreground">
               npx prisma migrate deploy{"\n"}npm run db:seed
@@ -62,8 +61,8 @@ export default async function Home() {
                 <br className="sm:hidden" />
                 さがしてみましょう
               </h1>
-              <p className="mt-4 text-[15px] leading-[1.7] text-[var(--muted)] sm:text-[16px]">
-                クリエイターが公開した AI エージェントを、ポイントで利用できます。
+              <p className="mt-4 text-[15px] text-[var(--muted)] sm:text-[16px]">
+                公開エージェントをポイントで利用できます。
               </p>
             </div>
           </div>
@@ -94,20 +93,15 @@ export default async function Home() {
               エージェント一覧
             </h2>
             {!loadError && agents.length > 0 && (
-              <p className="mt-3 text-[15px] leading-relaxed text-[var(--muted)]">
-                検索するか、カードから選んで詳細へ進めます
-              </p>
-            )}
-            {!loadError && agents.length === 0 && (
               <p className="mt-3 text-[15px] text-[var(--muted)]">
-                公開中のエージェント
+                検索またはカードから選択
               </p>
             )}
           </div>
 
           {!loadError && agents.length === 0 ? (
             <p className={`${CENTER} mt-12 max-w-md text-[14px] text-[var(--muted)]`}>
-              まだありません。{" "}
+              データなし。{" "}
               <code className="rounded-lg bg-[var(--card-elevated)] px-2 py-1 text-[12px] ring-1 ring-[var(--border)]">
                 npm run db:seed
               </code>

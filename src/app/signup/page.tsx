@@ -23,8 +23,8 @@ export default function SignupPage() {
         <h1 className="text-[32px] font-semibold tracking-tight text-foreground">
           新規登録
         </h1>
-        <p className="mt-3 text-[17px] leading-relaxed text-[var(--muted)]">
-          Supabase Auth を使用します。メール確認が有効な場合は、登録後に届くリンクから完了してください。
+        <p className="mt-3 text-[17px] text-[var(--muted)]">
+          メール確認が有効なら、届いたリンクから完了してください。
         </p>
 
         {!supabaseOk ? (
@@ -37,7 +37,7 @@ export default function SignupPage() {
               <code className="rounded-md bg-[var(--card-elevated)] px-2 py-0.5 text-[13px] ring-1 ring-[var(--border)]">
                 NEXT_PUBLIC_SUPABASE_ANON_KEY
               </code>{" "}
-              （または publishable）を設定してください。
+              を設定
             </p>
             <p className="mt-4">
               <Link href="/" className="text-[var(--accent)] underline">

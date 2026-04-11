@@ -15,9 +15,8 @@ export function NewAgentForm() {
 
   return (
     <form action={formAction} encType="multipart/form-data" className="space-y-10">
-      <p className="text-[14px] leading-relaxed text-[var(--muted)]">
-        ChatGPT の GPT エディタ「構成」に近い項目です。保存すると 1
-        回のリクエストで登録され、右のプレビューで試行できます。
+      <p className="text-[14px] text-[var(--muted)]">
+        保存すると登録され、右でプレビューできます。
       </p>
 
       <section className="space-y-6">
@@ -44,9 +43,6 @@ export function NewAgentForm() {
           <label htmlFor="description" className="text-label">
             説明
           </label>
-          <p className="mt-1 text-[12px] text-[var(--muted)]">
-            ストアや一覧に表示される短い説明
-          </p>
           <textarea
             id="description"
             name="description"
@@ -72,7 +68,7 @@ export function NewAgentForm() {
             aria-describedby="icon-hint"
           />
           <p id="icon-hint" className="mt-1 text-[12px] text-[var(--muted)]">
-            未入力のときは 🤖 を使います
+            未入力時は 🤖
           </p>
         </div>
       </section>
@@ -85,9 +81,6 @@ export function NewAgentForm() {
           <label htmlFor="instructions" className="text-label">
             指示（Instructions）
           </label>
-          <p className="mt-1 text-[12px] text-[var(--muted)]">
-            役割・口調・ルール（システムプロンプトとして渡します）
-          </p>
           <textarea
             id="instructions"
             name="instructions"
@@ -101,11 +94,8 @@ export function NewAgentForm() {
 
       <section className="space-y-6">
         <h2 className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-          会話のきっかけ（任意・最大 4）
+          スターター（任意・最大 4）
         </h2>
-        <p className="text-[13px] text-[var(--muted)]">
-          チャット開始時の候補メッセージ
-        </p>
         {[0, 1, 2, 3].map((i) => (
           <div key={i}>
             <label htmlFor={`starter${i}`} className="text-label">
@@ -128,11 +118,7 @@ export function NewAgentForm() {
           知識
         </h2>
         <p className="text-[13px] text-[var(--muted)]">
-          参照用ファイル（最大 8 件・各 8MB まで）。Supabase Storage のバケット{" "}
-          <code className="rounded bg-slate-100 px-1 text-[12px] dark:bg-slate-800">
-            agent-knowledge
-          </code>{" "}
-          とサービスロールキーがあるとアップロードされます。未設定時はメタのみ保存されます。
+          PDF/テキストなど（各 8MB・最大 8 件）。Storage 未設定時はメタのみ保存。
         </p>
         <input
           name="knowledgeFiles"
@@ -173,11 +159,10 @@ export function NewAgentForm() {
           />
           <span>
             <span className="text-[14px] font-medium text-foreground">
-              このモデルをエージェントの推奨として保存する
+              推奨モデルとして保存
             </span>
             <span className="mt-1 block text-[12px] text-[var(--muted)]">
-              オフにすると「推奨モデルなし」となり、利用者がチャットでモデルを選ぶ想定です（GPT
-              エディタの「推奨モデルを使用しない」に相当）。
+              オフのときは利用側がモデルを選択
             </span>
           </span>
         </label>
@@ -187,9 +172,6 @@ export function NewAgentForm() {
         <h2 className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
           機能
         </h2>
-        <p className="text-[13px] text-[var(--muted)]">
-          有効にした機能に応じてチャット API 側のツールが切り替わります。
-        </p>
         <ul className="space-y-3">
           <li className="flex items-start gap-3">
             <input
@@ -201,7 +183,7 @@ export function NewAgentForm() {
             <label htmlFor="capWebSearch" className="text-[14px] leading-snug">
               <span className="font-medium">ウェブ検索</span>
               <span className="mt-0.5 block text-[12px] text-[var(--muted)]">
-                BRAVE_SEARCH_API_KEY 設定時は Brave Search を利用。未設定時はツールがヒントのみ返します。
+                Brave は API キー設定時
               </span>
             </label>
           </li>
@@ -214,9 +196,6 @@ export function NewAgentForm() {
             />
             <label htmlFor="capCanvas" className="text-[14px] leading-snug">
               <span className="font-medium">Canvas</span>
-              <span className="mt-0.5 block text-[12px] text-[var(--muted)]">
-                長文・構造化出力を指示に追加します。
-              </span>
             </label>
           </li>
           <li className="flex items-start gap-3">
@@ -228,9 +207,6 @@ export function NewAgentForm() {
             />
             <label htmlFor="capImageGen" className="text-[14px] leading-snug">
               <span className="font-medium">画像生成</span>
-              <span className="mt-0.5 block text-[12px] text-[var(--muted)]">
-                ツール枠を有効化（画像 API 接続は運用設定後）。
-              </span>
             </label>
           </li>
           <li className="flex items-start gap-3">
@@ -245,9 +221,6 @@ export function NewAgentForm() {
               className="text-[14px] leading-snug"
             >
               <span className="font-medium">コードインタープリター</span>
-              <span className="mt-0.5 block text-[12px] text-[var(--muted)]">
-                実行ツール枠を有効化（サンドボックス接続は運用設定後）。
-              </span>
             </label>
           </li>
         </ul>
@@ -258,7 +231,7 @@ export function NewAgentForm() {
           アクション（OpenAPI）
         </h2>
         <p className="text-[13px] text-[var(--muted)]">
-          外部 API を OpenAPI で定義します（実行パイプラインは段階的に接続可能）。認証方式とスキーマを保存します。
+          OpenAPI で外部 API を定義（実行は別途接続）
         </p>
         <div>
           <label htmlFor="actionsAuthType" className="text-label">
@@ -311,9 +284,6 @@ export function NewAgentForm() {
           <label htmlFor="pricePerUsePt" className="text-label">
             利用価格 (pt)
           </label>
-          <p className="mt-1 text-[12px] text-[var(--muted)]">
-            目安の掲載価格（実際の消費はトークンに応じて変動）
-          </p>
           <input
             id="pricePerUsePt"
             name="pricePerUsePt"
@@ -334,7 +304,7 @@ export function NewAgentForm() {
       ) : null}
 
       <button type="submit" className="btn-primary px-8">
-        保存してプレビューを有効にする
+        保存
       </button>
     </form>
   );
