@@ -1,46 +1,54 @@
 @import "tailwindcss";
 
-/* next-themes は html に .dark を付ける。既定の dark: は prefers-color-scheme なので上書きする */
+/* next-themes は html に .dark を付ける */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Apple 風: 余白・ヘアライン・システムフォント。ライト既定 + .dark */
+/*
+  スキルマーケットプレイス風（ココナラ系）ライト基調:
+  白 #FFFFFF、区切り #F4F4F4、本文 #333、信頼感のあるブルー
+*/
 :root {
-  --background: #f5f5f7;
-  --foreground: #1d1d1f;
-  --muted: #86868b;
-  --subtle: #6e6e73;
+  --background: #ffffff;
+  --background-muted: #fafafa;
+  --foreground: #333333;
+  --muted: #666666;
+  --subtle: #757575;
   --card: #ffffff;
   --card-elevated: #fafafa;
-  --border: rgb(0 0 0 / 0.06);
-  --border-strong: rgb(0 0 0 / 0.1);
-  --input-bg: rgb(255 255 255 / 0.92);
-  --input-border: rgb(0 0 0 / 0.08);
-  --accent: #0071e3;
-  --accent-hover: #0077ed;
-  /* ポイント表示など：白・黒・青のトーンに統一 */
-  --brand: #0071e3;
-  --brand-muted: rgb(0 113 227 / 0.1);
-  --destructive: #ff3b30;
-  --header-bg: rgb(245 245 247 / 0.72);
+  --border: #f4f4f4;
+  --border-strong: #e8e8e8;
+  --input-bg: #ffffff;
+  --input-border: #e5e5e5;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --brand: #2563eb;
+  --brand-muted: rgb(37 99 235 / 0.08);
+  --destructive: #dc2626;
+  --header-bg: rgb(255 255 255 / 0.92);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04);
+  --radius-card: 12px;
+  --radius-control: 10px;
 }
 
 .dark {
-  --background: #000000;
-  --foreground: #f5f5f7;
-  --muted: #a1a1a6;
-  --subtle: #8e8e93;
-  --card: #1c1c1e;
-  --card-elevated: #2c2c2e;
-  --border: rgb(255 255 255 / 0.1);
-  --border-strong: rgb(255 255 255 / 0.16);
-  --input-bg: rgb(28 28 30 / 0.85);
-  --input-border: rgb(255 255 255 / 0.12);
-  --accent: #0a84ff;
-  --accent-hover: #409cff;
-  --brand: #0a84ff;
-  --brand-muted: rgb(10 132 255 / 0.16);
-  --destructive: #ff453a;
-  --header-bg: rgb(0 0 0 / 0.65);
+  --background: #0f1419;
+  --background-muted: #151c24;
+  --foreground: #f0f3f7;
+  --muted: #9ca3af;
+  --subtle: #8b95a1;
+  --card: #1a222d;
+  --card-elevated: #1f2937;
+  --border: rgb(255 255 255 / 0.08);
+  --border-strong: rgb(255 255 255 / 0.14);
+  --input-bg: rgb(26 34 45 / 0.95);
+  --input-border: rgb(255 255 255 / 0.1);
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --brand: #3b82f6;
+  --brand-muted: rgb(59 130 246 / 0.15);
+  --destructive: #f87171;
+  --header-bg: rgb(15 20 25 / 0.88);
+  --shadow-card: none;
 }
 
 @theme inline {
@@ -50,8 +58,8 @@
   --color-card: var(--card);
   --color-accent: var(--accent);
   --color-brand: var(--brand);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-noto-sans-jp), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 html {
@@ -61,65 +69,65 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family:
-    var(--font-geist-sans),
-    -apple-system,
-    BlinkMacSystemFont,
-    "SF Pro Text",
-    "SF Pro Display",
-    system-ui,
-    sans-serif;
+  font-family: var(--font-noto-sans-jp), "Hiragino Sans", "Yu Gothic UI",
+    "Meiryo", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.015em;
+  letter-spacing: 0.01em;
 }
 
-/* カード・サーフェス共通（コンポーネントから参照） */
+/* カード・サーフェス（8px グリッド・角丸 8〜12px） */
 @layer components {
   .surface-card {
-    @apply rounded-[22px] border bg-card shadow-sm dark:shadow-none;
-    border-color: var(--border);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    background: var(--card);
+    box-shadow: var(--shadow-card);
   }
-  /* エージェントカード：Apple 風の薄い影とヘアライン */
   .agent-card-surface {
-    @apply rounded-2xl border bg-card transition duration-300 ease-out;
-    border-color: var(--border);
-    box-shadow:
-      0 1px 2px rgb(0 0 0 / 0.04),
-      0 4px 12px rgb(0 0 0 / 0.04);
-  }
-  .dark .agent-card-surface {
-    box-shadow: none;
-    border-color: rgb(255 255 255 / 0.08);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
   .agent-card-surface:hover {
     border-color: var(--border-strong);
     box-shadow:
       0 2px 8px rgb(0 0 0 / 0.06),
-      0 12px 32px rgb(0 0 0 / 0.06);
+      0 1px 2px rgb(0 0 0 / 0.04);
   }
   .dark .agent-card-surface:hover {
-    border-color: rgb(255 255 255 / 0.14);
-    box-shadow: 0 8px 32px rgb(0 0 0 / 0.45);
+    border-color: rgb(255 255 255 / 0.12);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
   }
   .surface-card-elevated {
-    @apply rounded-[22px] border bg-[var(--card-elevated)] shadow-sm dark:shadow-none;
-    border-color: var(--border);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    background: var(--card-elevated);
+    box-shadow: var(--shadow-card);
   }
   .text-label {
-    @apply text-[13px] font-medium text-[var(--muted)];
+    @apply text-[13px] font-medium;
+    color: var(--muted);
   }
   .input-apple {
-    @apply rounded-2xl border px-3 py-2.5 text-[15px] outline-none transition;
+    border-radius: var(--radius-control);
+    @apply border px-3 py-2.5 text-[15px] outline-none transition;
     background: var(--input-bg);
     border-color: var(--input-border);
     color: var(--foreground);
   }
   .input-apple:focus {
     border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.15);
+  }
+  .dark .input-apple:focus {
+    box-shadow: 0 0 0 3px rgb(59 130 246 / 0.2);
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-full px-5 py-2.5 text-[15px] font-medium text-white transition;
+    border-radius: var(--radius-control);
+    @apply inline-flex items-center justify-center px-5 py-2.5 text-[15px] font-semibold text-white transition;
     background: var(--accent);
   }
   .btn-primary:hover {
@@ -133,6 +141,6 @@ body {
     color: var(--muted);
   }
   .link-subtle:hover {
-    color: var(--foreground);
+    color: var(--accent);
   }
 }

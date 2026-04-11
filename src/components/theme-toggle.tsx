@@ -61,7 +61,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-sm transition hover:opacity-90 dark:shadow-none"
+      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--shadow-card)] transition hover:border-[var(--border-strong)] dark:shadow-none"
       aria-label={isDark ? "ライトモードに切り替え" : "ダークモードに切り替え"}
     >
       {isDark ? <SunIcon /> : <MoonIcon />}

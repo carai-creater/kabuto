@@ -50,51 +50,70 @@ export default async function Home() {
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <main className="relative flex w-full flex-1 flex-col items-center">
+        {/* ヒーロー：明るく信頼感のある導入 */}
+        <div className="w-full border-b border-[var(--border)] bg-[var(--background-muted)]">
+          <div className={`${PAGE_SHELL} py-10 sm:py-14`}>
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">
+                AI スキルマーケット
+              </p>
+              <h1 className="mt-3 text-[26px] font-bold leading-tight tracking-tight text-[#333333] sm:text-[32px] dark:text-[var(--foreground)]">
+                目的に合うエージェントを、
+                <br className="sm:hidden" />
+                さがしてみましょう
+              </h1>
+              <p className="mt-4 text-[15px] leading-relaxed text-[var(--muted)] sm:text-[16px]">
+                クリエイターが公開した AI エージェントを、ポイントで利用できます。
+              </p>
+            </div>
+          </div>
+        </div>
+
         <section
           id="agent-list"
-          className={`w-full scroll-mt-20 pb-20 pt-10 sm:pt-12 ${PAGE_SHELL} flex flex-col items-center`}
+          className={`w-full scroll-mt-20 bg-[var(--background)] pb-24 pt-10 sm:pt-14 ${PAGE_SHELL} flex flex-col items-center`}
           aria-labelledby="agent-list-heading"
         >
           {loadError && (
             <div
-              className={`${CENTER} max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--card-elevated)] px-5 py-4 text-[14px] leading-relaxed text-[var(--muted)]`}
+              className={`${CENTER} max-w-lg rounded-xl border border-[var(--border)] bg-[var(--card)] px-6 py-5 text-[14px] leading-relaxed text-[var(--muted)] shadow-[var(--shadow-card)]`}
               role="alert"
             >
-              <p className="font-medium text-foreground">
+              <p className="font-semibold text-[#333333] dark:text-[var(--foreground)]">
                 データベースに接続できません
               </p>
               <DbConnectionTips />
             </div>
           )}
 
-          <div className={`${CENTER} max-w-2xl`}>
+          <div className={`${CENTER} max-w-3xl`}>
             <h2
               id="agent-list-heading"
-              className="text-[28px] font-semibold leading-tight tracking-tight text-foreground sm:text-[32px]"
+              className="text-[22px] font-bold leading-tight text-[#333333] sm:text-[26px] dark:text-[var(--foreground)]"
             >
-              エージェントを探す
+              エージェント一覧
             </h2>
             {!loadError && agents.length > 0 && (
-              <p className="mt-2 text-[15px] text-[var(--muted)]">
-                検索するか、下の一覧から選べます
+              <p className="mt-3 text-[15px] leading-relaxed text-[var(--muted)]">
+                検索するか、カードから選んで詳細へ進めます
               </p>
             )}
             {!loadError && agents.length === 0 && (
-              <p className="mt-2 text-[15px] text-[var(--muted)]">
+              <p className="mt-3 text-[15px] text-[var(--muted)]">
                 公開中のエージェント
               </p>
             )}
           </div>
 
           {!loadError && agents.length === 0 ? (
-            <p className={`${CENTER} mt-10 max-w-md text-[14px] text-[var(--muted)]`}>
+            <p className={`${CENTER} mt-12 max-w-md text-[14px] text-[var(--muted)]`}>
               まだありません。{" "}
-              <code className="rounded-md bg-[var(--card-elevated)] px-1.5 py-0.5 text-[12px] ring-1 ring-[var(--border)]">
+              <code className="rounded-lg bg-[var(--card-elevated)] px-2 py-1 text-[12px] ring-1 ring-[var(--border)]">
                 npm run db:seed
               </code>
             </p>
           ) : !loadError ? (
-            <div className="mt-8 w-full">
+            <div className="mt-10 w-full">
               <AgentDirectory agents={agents} />
             </div>
           ) : null}

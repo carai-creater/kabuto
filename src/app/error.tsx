@@ -14,8 +14,8 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-5 px-5 text-center">
-      <p className="text-[21px] font-semibold text-foreground">
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-5 bg-[var(--background)] px-5 text-center">
+      <p className="text-[21px] font-bold text-[#333333] dark:text-[var(--foreground)]">
         読み込み中にエラーが発生しました
       </p>
       <p className="max-w-md text-[15px] leading-relaxed text-[var(--muted)]">

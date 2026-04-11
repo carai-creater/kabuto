@@ -26,11 +26,7 @@ export function SiteHeader({
 }: Props) {
   return (
     <header
-      className="sticky top-0 z-50 border-b backdrop-blur-xl backdrop-saturate-150"
-      style={{
-        background: "var(--header-bg)",
-        borderColor: "var(--border)",
-      }}
+      className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--header-bg)] backdrop-blur-md backdrop-saturate-150"
     >
       <div
         className={`flex h-[52px] w-full items-center justify-between gap-2 sm:gap-3 sm:h-14 ${PAGE_SHELL}`}
@@ -39,7 +35,7 @@ export function SiteHeader({
           href="/"
           className="group flex shrink-0 items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
         >
-          <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-transparent ring-1 ring-black/[0.06] dark:bg-[#0a0a0a] dark:shadow-sm dark:ring-white/[0.08]">
+          <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] dark:bg-[var(--card)]">
             <img
               src="/kabuto-logo-light.png"
               alt=""
@@ -55,7 +51,7 @@ export function SiteHeader({
               className="hidden h-8 w-8 object-contain dark:block"
             />
           </span>
-          <span className="text-[17px] font-semibold tracking-tight text-foreground">
+          <span className="text-[17px] font-bold tracking-tight text-[#333333] dark:text-[var(--foreground)]">
             kabuto
           </span>
         </Link>

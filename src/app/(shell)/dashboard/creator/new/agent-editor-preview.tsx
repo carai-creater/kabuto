@@ -1,11 +1,51 @@
-import { prisma } from "@/lib/prisma";
 import { parseKabutoEditor } from "@/lib/agent/editor-config";
+import { prisma } from "@/lib/prisma";
 import { RunAgentPanel } from "@/components/run-agent-panel";
 
 type Props = {
   userId: string;
   previewSlug: string | null;
 };
+
+function PreviewDbError({ detail }: { detail?: string }) {
+  return (
+    <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-left dark:bg-red-950/30">
+      <p className="text-[14px] font-semibold text-red-950 dark:text-red-100">
+        プレビューを読み込めませんでした
+      </p>
+      <p className="mt-2 text-[13px] leading-relaxed text-red-900/90 dark:text-red-200/90">
+        データベースへの接続に失敗した可能性があります。Vercel の{" "}
+        <code className="rounded bg-red-500/15 px-1.5 py-0.5 text-[12px]">
+          DATABASE_URL
+        </code>{" "}
+        （Supabase の <strong>Transaction pooler</strong> 用 URL 推奨）と{" "}
+        <code className="rounded bg-red-500/15 px-1.5 py-0.5 text-[12px]">
+          DIRECT_URL
+        </code>
+        、ファイアウォール、および本番への{" "}
+        <code className="rounded bg-red-500/15 px-1.5 py-0.5 text-[12px]">
+          prisma migrate deploy
+        </code>{" "}
+        を確認してください。
+      </p>
+      {detail ? (
+        <p className="mt-3 font-mono text-[11px] text-red-800/80 dark:text-red-300/70">
+          {detail}
+        </p>
+      ) : null}
+      <p className="mt-4 text-[12px] text-red-800/80 dark:text-red-300/80">
+        左のフォームはそのまま使えます。保存済みなら{" "}
+        <a
+          href="/dashboard/creator"
+          className="font-medium underline underline-offset-2"
+        >
+          クリエイター一覧
+        </a>
+        からエージェントを開いてください。
+      </p>
+    </div>
+  );
+}
 
 export async function AgentEditorPreview({ userId, previewSlug }: Props) {
   if (!previewSlug?.trim()) {
@@ -22,12 +62,23 @@ export async function AgentEditorPreview({ userId, previewSlug }: Props) {
     );
   }
 
-  const agent = await prisma.agent.findFirst({
-    where: { slug: previewSlug.trim(), creatorId: userId },
-    include: {
-      conversationStarters: true,
-    },
-  });
+  let agent;
+  try {
+    agent = await prisma.agent.findFirst({
+      where: { slug: previewSlug.trim(), creatorId: userId },
+      include: {
+        conversationStarters: true,
+      },
+    });
+  } catch (e) {
+    const msg =
+      e instanceof Error
+        ? e.message
+        : typeof e === "string"
+          ? e
+          : "Unknown error";
+    return <PreviewDbError detail={msg} />;
+  }
 
   if (!agent) {
     return (

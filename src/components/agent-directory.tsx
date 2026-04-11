@@ -1,6 +1,7 @@
 "use client";
 
 import type { Agent } from "@prisma/client";
+import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { AgentCard } from "@/components/agent-card";
@@ -41,7 +42,7 @@ export function AgentDirectory({ agents }: Props) {
 
   const filtered = useMemo(
     () => agents.filter((a) => matchesQuery(a, query)),
-    [agents, query]
+    [agents, query],
   );
 
   return (
@@ -51,12 +52,11 @@ export function AgentDirectory({ agents }: Props) {
           エージェントを検索
         </label>
         <div className="relative">
-          <span
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[18px] opacity-50"
+          <Search
+            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--muted)] opacity-70"
+            strokeWidth={2}
             aria-hidden
-          >
-            🔍
-          </span>
+          />
           <input
             id="agent-search"
             type="search"
@@ -64,15 +64,15 @@ export function AgentDirectory({ agents }: Props) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="名前・説明・タグで検索…"
             autoComplete="off"
-            className="input-apple h-12 w-full rounded-2xl border-[var(--border)] bg-[var(--card)] pl-12 pr-4 text-[16px] shadow-sm ring-1 ring-black/[0.04] placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/25 dark:ring-white/[0.06]"
+            className="input-apple h-12 w-full rounded-xl border-[var(--border)] bg-[var(--card)] pl-12 pr-4 text-[16px] placeholder:text-[var(--muted)]"
           />
         </div>
-        <p className="mt-3 text-[15px] text-[var(--muted)]">
+        <p className="mt-4 text-[14px] text-[var(--muted)]">
           {filtered.length === agents.length ? (
             <>{agents.length} 件を表示</>
           ) : (
             <>
-              <span className="font-medium tabular-nums text-foreground">
+              <span className="font-semibold tabular-nums text-[#333333] dark:text-[var(--foreground)]">
                 {filtered.length}
               </span>
               件が該当（全 {agents.length} 件）
@@ -82,11 +82,11 @@ export function AgentDirectory({ agents }: Props) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="mx-auto mt-10 max-w-md text-center text-[15px] text-[var(--muted)]">
+        <p className="mx-auto mt-12 max-w-md text-center text-[15px] text-[var(--muted)]">
           該当するエージェントがありません。別のキーワードを試してください。
         </p>
       ) : (
-        <ul className="mx-auto mt-8 grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+        <ul className="mx-auto mt-8 grid w-full max-w-5xl grid-cols-1 gap-6 md:grid-cols-2">
           {filtered.map((a) => (
             <li key={a.id}>
               <AgentCard agent={a} />
