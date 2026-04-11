@@ -12,6 +12,7 @@ export async function ensurePrismaUserFromAuth(
 ): Promise<string | null> {
   const email = authUser.email?.trim();
   if (!email) return null;
+  console.log("[ensurePrismaUser] start", { email, authId: authUser.id });
 
   const existingByAuth = await prisma.user.findUnique({
     where: { authUserId: authUser.id },
@@ -63,6 +64,7 @@ export async function ensurePrismaUserFromAuth(
     return existingByEmail.id;
   }
 
+  console.log("[ensurePrismaUser] creating new user", email);
   const created = await prisma.user.create({
     data: {
       email,
@@ -74,6 +76,9 @@ export async function ensurePrismaUserFromAuth(
       profile: { create: { role: "creator" } },
     },
     select: { id: true },
+  }).catch((e: unknown) => {
+    console.error("[ensurePrismaUser] create failed", String(e));
+    throw e;
   });
 
   return created.id;
