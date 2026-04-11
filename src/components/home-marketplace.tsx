@@ -30,11 +30,9 @@ function byNewest(a: AgentListItem, b: AgentListItem) {
 
 type Props = {
   agents: AgentListItem[];
-  /** デモデータ表示中（控えめな注記用） */
-  isSampleCatalog?: boolean;
 };
 
-export function HomeMarketplace({ agents, isSampleCatalog }: Props) {
+export function HomeMarketplace({ agents }: Props) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(
@@ -68,14 +66,6 @@ export function HomeMarketplace({ agents, isSampleCatalog }: Props) {
               <br className="sm:hidden" />
               さがしてみましょう
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-pretty text-[16px] leading-relaxed text-[var(--muted)] sm:text-[17px]">
-              公開エージェントをポイントで利用できます。気になるスキルから選ぶか、検索して見つけてください。
-            </p>
-            {isSampleCatalog && (
-              <p className="mt-6 text-[13px] text-[var(--muted)]">
-                サンプルカタログを表示しています。接続後は公開エージェントがここに並びます。
-              </p>
-            )}
           </div>
         </div>
       </header>

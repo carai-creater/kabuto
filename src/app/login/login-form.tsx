@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient } from "@/utils/supabase/client";
+import { loginWithPassword } from "@/app/actions/auth-login";
 import { useState } from "react";
 
 type Props = {
@@ -19,17 +19,17 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
     setError(null);
     setPending(true);
     try {
-      const supabase = createClient();
-      const { error: signErr } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+      const result = await loginWithPassword(
+        email,
         password,
-      });
-      if (signErr) {
-        setError(signErr.message);
+        redirectTo,
+      );
+      if (!result.ok) {
+        setError(result.error);
         return;
       }
-      // クライアントで Cookie が書き込まれた直後に RSC 遷移するとミドルウェアが未ログインとみなすことがあるため、フルナビで確実に送る
-      window.location.assign(redirectTo);
+      // Server Action の Set-Cookie を確実に載せたうえでフルナビ（ミドルウェアがセッションを読める）
+      window.location.assign(result.redirectTo);
     } catch {
       setError("ログインに失敗しました。");
     } finally {

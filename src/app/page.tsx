@@ -21,11 +21,9 @@ const agentSelect = {
 
 export default async function Home() {
   let agents: AgentListItem[] = [];
-  let isSampleCatalog = false;
 
   if (!isDatabaseConfigured()) {
     agents = getMarketplaceDemoAgents();
-    isSampleCatalog = true;
   } else {
     try {
       const rows = await prisma.agent.findMany({
@@ -36,18 +34,16 @@ export default async function Home() {
       agents = rows;
       if (rows.length === 0) {
         agents = getMarketplaceDemoAgents();
-        isSampleCatalog = true;
       }
     } catch (err) {
       console.error("[Home] database error:", err);
       agents = getMarketplaceDemoAgents();
-      isSampleCatalog = true;
     }
   }
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <HomeMarketplace agents={agents} isSampleCatalog={isSampleCatalog} />
+      <HomeMarketplace agents={agents} />
     </div>
   );
 }
