@@ -28,7 +28,6 @@ export async function loginWithPassword(
   const cookieStore = await cookies();
 
   const supabase = createServerClient(url, key, {
-    cookieEncoding: "base64url",
     cookies: {
       getAll() {
         return cookieStore.getAll();

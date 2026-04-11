@@ -11,7 +11,7 @@ function needsLogin(pathname: string): boolean {
   );
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { response, user, authConfigured } = await updateSession(request);
 
   if (!authConfigured) {
