@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -78,6 +79,16 @@ export default async function CreatorAgentDetailPage(props: Props) {
   }
 
   return (
-    <AgentDetailView agent={agent} sessionUserId={userId} />
+    <div className="flex min-h-0 w-full flex-1 flex-col">
+      <div className="border-b border-[var(--border)] bg-[var(--card)] px-4 py-2 text-center text-[13px] text-[var(--muted)]">
+        <Link
+          href={`/dashboard/creator/edit/${encodeURIComponent(slug)}`}
+          className="font-medium text-[var(--accent)] hover:underline"
+        >
+          設定・公開は編集ページへ
+        </Link>
+      </div>
+      <AgentDetailView agent={agent} sessionUserId={userId} />
+    </div>
   );
 }

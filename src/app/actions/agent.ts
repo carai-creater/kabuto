@@ -8,12 +8,16 @@ import {
   createAgentFromPayload,
   parseCreateAgentFormData,
 } from "@/lib/agent/create-agent";
+import { updateAgentFromPayload } from "@/lib/agent/update-agent";
 import { getSessionUserId } from "@/lib/session";
 
 /** データは Supabase Postgres（DATABASE_URL）へ Prisma 経由で保存 */
 export type CreateAgentState = { error: string | null };
 
-function messageForCreateFailure(e: unknown): string {
+function messageForAgentSaveFailure(e: unknown): string {
+  if (e instanceof Error && e.message === "AGENT_NOT_FOUND") {
+    return "エージェントが見つかりません。一覧から開き直してください。";
+  }
   if (e instanceof Prisma.PrismaClientKnownRequestError) {
     if (["P1001", "P1002", "P1017"].includes(e.code)) {
       return "データベースに接続できませんでした。Vercel の DATABASE_URL（Supabase のプーラー URL）と DIRECT_URL を確認してください。";
@@ -25,7 +29,7 @@ function messageForCreateFailure(e: unknown): string {
   if (e instanceof Prisma.PrismaClientValidationError) {
     return "保存内容の形式が正しくありません。入力を確認してください。";
   }
-  console.error("[createAgent]", e);
+  console.error("[agent action]", e);
   return "保存に失敗しました。しばらくしてから再度お試しください。";
 }
 
@@ -52,11 +56,56 @@ export async function createAgent(
     );
     slug = created.slug;
   } catch (e) {
-    return { error: messageForCreateFailure(e) };
+    return { error: messageForAgentSaveFailure(e) };
   }
 
   revalidatePath("/dashboard/creator");
   revalidatePath("/");
   revalidatePath(`/agents/${slug}`);
   redirect(`/dashboard/creator/new?preview=${encodeURIComponent(slug)}`);
+}
+
+export async function updateAgent(
+  _prev: CreateAgentState,
+  formData: FormData,
+): Promise<CreateAgentState> {
+  const userId = await getSessionUserId();
+  if (!userId) {
+    return { error: "ログインが必要です。" };
+  }
+
+  const slug = String(formData.get("agentSlug") ?? "").trim();
+  if (!slug) {
+    return { error: "エージェントを特定できません。" };
+  }
+
+  const intent = String(formData.get("intent") ?? "draft");
+  const isPublished = intent === "publish";
+
+  const parsed = parseCreateAgentFormData(formData);
+  if (!parsed.ok) {
+    return { error: parsed.error };
+  }
+
+  try {
+    await updateAgentFromPayload(
+      userId,
+      slug,
+      parsed.data,
+      parsed.knowledgeFiles,
+      { isPublished },
+    );
+  } catch (e) {
+    return { error: messageForAgentSaveFailure(e) };
+  }
+
+  revalidatePath("/dashboard/creator");
+  revalidatePath("/");
+  revalidatePath(`/agents/${slug}`);
+  revalidatePath(`/dashboard/creator/edit/${slug}`);
+  revalidatePath(`/dashboard/creator/agents/${slug}`);
+
+  redirect(
+    `/dashboard/creator/edit/${encodeURIComponent(slug)}?saved=${isPublished ? "published" : "draft"}`,
+  );
 }

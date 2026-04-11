@@ -201,7 +201,7 @@ export default async function CreatorDashboardPage() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <Link
-                          href={`/dashboard/creator/agents/${encodeURIComponent(a.slug)}`}
+                          href={`/dashboard/creator/edit/${encodeURIComponent(a.slug)}`}
                           className="truncate text-base font-semibold text-slate-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
                         >
                           {a.title}
@@ -224,7 +224,7 @@ export default async function CreatorDashboardPage() {
                     </div>
                     <div className="flex shrink-0 items-center justify-end gap-2 sm:justify-center">
                       <Link
-                        href={`/dashboard/creator/agents/${encodeURIComponent(a.slug)}`}
+                        href={`/dashboard/creator/edit/${encodeURIComponent(a.slug)}`}
                         className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-blue-500/50 dark:hover:bg-slate-700 dark:hover:text-blue-300"
                       >
                         <Pencil className="h-4 w-4" aria-hidden />
