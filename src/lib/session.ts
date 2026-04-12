@@ -17,24 +17,36 @@ export const SESSION_COOKIE = "kabuto_uid";
 async function resolveSessionUserId(): Promise<string | null> {
   try {
     const supabase = await createClientOrNull();
-    if (supabase) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        return await ensurePrismaUserFromAuth(user);
-      }
+    if (!supabase) {
+      console.log("[session] supabase client null (env not configured)");
+      return null;
+    }
+
+    const jar = await cookies();
+    const sbCookieCount = jar.getAll().filter((c) => c.name.startsWith("sb-")).length;
+    console.log("[session] sb-cookie count", sbCookieCount);
+
+    const {
+      data: { user },
+      error: getUserError,
+    } = await supabase.auth.getUser();
+
+    console.log("[session] getUser result", { hasUser: !!user, error: getUserError?.message });
+
+    if (user) {
+      const uid = await ensurePrismaUserFromAuth(user);
+      console.log("[session] ensurePrismaUser result", { uid });
+      return uid;
     }
 
     if (isDemoLoginEnabled()) {
-      const jar = await cookies();
       const v = jar.get(SESSION_COOKIE)?.value;
       return v && v.length > 0 ? v : null;
     }
 
     return null;
   } catch (e) {
-    console.error("[session] resolveSessionUserId", e);
+    console.error("[session] resolveSessionUserId error", e);
     return null;
   }
 }
