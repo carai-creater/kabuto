@@ -7,6 +7,27 @@ import { cookies } from "next/headers";
 import { sanitizeInternalPath } from "@/lib/sanitize-redirect";
 import { getSupabasePublicEnv } from "@/utils/supabase/env";
 
+/** onAuthStateChange 内の applyServerStorage が非同期のため、sb-* が載るまで待つ */
+async function waitForSupabaseAuthCookies(
+  maxAttempts = 150,
+): Promise<boolean> {
+  for (let i = 0; i < maxAttempts; i++) {
+    const jar = await cookies();
+    const has = jar
+      .getAll()
+      .some((c) => c.name.startsWith("sb-") && c.value.length > 0);
+    if (has) return true;
+    await new Promise<void>((resolve) => {
+      if (i % 3 === 2) {
+        setImmediate(resolve);
+      } else {
+        queueMicrotask(resolve);
+      }
+    });
+  }
+  return false;
+}
+
 export type LoginPasswordResult =
   | { ok: true; redirectTo: string }
   | { ok: false; error: string };
@@ -49,6 +70,15 @@ export async function loginWithPassword(
 
   if (error) {
     return { ok: false, error: error.message };
+  }
+
+  const cookiesWritten = await waitForSupabaseAuthCookies();
+  if (!cookiesWritten) {
+    return {
+      ok: false,
+      error:
+        "セッション用の Cookie を保存できませんでした。ページを再読み込みして再度お試しください。",
+    };
   }
 
   revalidatePath("/", "layout");
