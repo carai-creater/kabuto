@@ -24,6 +24,7 @@ export async function middleware(request: NextRequest) {
       pathname + (request.nextUrl.search ? request.nextUrl.search : "");
     const loginUrl = new URL("/login", request.nextUrl.origin);
     loginUrl.searchParams.set("next", nextPath);
+    loginUrl.searchParams.set("login_error", "need_auth");
     return NextResponse.redirect(loginUrl);
   }
 

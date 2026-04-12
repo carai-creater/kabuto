@@ -28,8 +28,12 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
       // redirect() だとクライアントへの Cookie 伝播が完了する前にナビゲートが始まる場合があるため
       // window.location.assign を使い、ブラウザが Set-Cookie を処理してから GET /dashboard を送る。
       window.location.assign(result.redirectTo);
-    } catch {
-      setError("ログインに失敗しました。");
+    } catch (err) {
+      const msg =
+        err instanceof Error
+          ? `予期しないエラー: ${err.message}`
+          : "ログインに失敗しました。";
+      setError(msg);
     } finally {
       setPending(false);
     }
@@ -66,9 +70,17 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
         />
       </div>
       {error && (
-        <p className="text-[15px] text-[var(--destructive)]" role="alert">
-          {error}
-        </p>
+        <div
+          className="rounded-xl border border-[var(--destructive)]/35 bg-[var(--card-elevated)] px-4 py-3 text-left"
+          role="alert"
+        >
+          <p className="text-[13px] font-semibold text-[var(--destructive)]">
+            エラー
+          </p>
+          <p className="mt-2 whitespace-pre-wrap break-words text-[14px] leading-relaxed text-foreground">
+            {error}
+          </p>
+        </div>
       )}
       <button
         type="submit"
