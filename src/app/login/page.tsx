@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LoginForm } from "@/app/login/login-form";
 import { SignupForm } from "@/app/signup/signup-form";
 import { DbUnavailableMessage } from "@/components/db-unavailable";
+import { messageForLoginErrorCode } from "@/lib/login-error-messages";
 import { sanitizeInternalPath } from "@/lib/sanitize-redirect";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
 import { PAGE_SHELL } from "@/lib/page-shell";
@@ -12,15 +13,19 @@ export async function generateMetadata() {
   return { title: "ログイン・新規登録 — kabuto" };
 }
 
-type PageProps = { searchParams: Promise<{ next?: string }> };
+type PageProps = {
+  searchParams: Promise<{ next?: string; login_error?: string }>;
+};
 
 export default async function LoginPage({ searchParams }: PageProps) {
   if (!isDatabaseConfigured()) {
     return <DbUnavailableMessage />;
   }
 
-  const nextRaw = (await searchParams).next;
+  const sp = await searchParams;
+  const nextRaw = sp.next;
   const redirectAfterLogin = sanitizeInternalPath(nextRaw, "/dashboard");
+  const loginErrorBanner = messageForLoginErrorCode(sp.login_error);
 
   const supabaseOk = isSupabaseConfigured();
 
@@ -33,6 +38,18 @@ export default async function LoginPage({ searchParams }: PageProps) {
         <p className="mt-3 text-[17px] text-[var(--muted)]">
           メール確認が有効なら、届いたリンクから登録を完了してください。
         </p>
+
+        {loginErrorBanner && (
+          <div
+            className="mt-6 rounded-xl border border-[var(--border)] bg-[var(--card-elevated)] px-4 py-3 text-[14px] leading-relaxed text-[var(--foreground)] ring-1 ring-[var(--border)]"
+            role="alert"
+          >
+            <p className="font-medium text-[var(--destructive)]">
+              マイページに進めませんでした
+            </p>
+            <p className="mt-2 text-[var(--muted)]">{loginErrorBanner}</p>
+          </div>
+        )}
 
         {!supabaseOk ? (
           <div className="surface-card mt-10 p-6 text-[15px] text-[var(--muted)]">

@@ -20,7 +20,7 @@ export default async function ShellLayout({
 
   const userId = await getSessionUserId();
   if (!userId) {
-    redirect("/login");
+    redirect("/login?login_error=no_app_user");
   }
 
   let isAdmin = false;

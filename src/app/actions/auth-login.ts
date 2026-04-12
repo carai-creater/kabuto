@@ -69,7 +69,17 @@ export async function loginWithPassword(
   });
 
   if (error) {
-    return { ok: false, error: error.message };
+    const code =
+      "code" in error && typeof (error as { code?: string }).code === "string"
+        ? (error as { code: string }).code
+        : "";
+    const detail = [error.message, code && `code: ${code}`]
+      .filter(Boolean)
+      .join(" · ");
+    return {
+      ok: false,
+      error: `ログインに失敗しました。${detail}`,
+    };
   }
 
   const cookiesWritten = await waitForSupabaseAuthCookies();
