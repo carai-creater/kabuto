@@ -6,6 +6,7 @@ function createServerClientWithStore(cookieStore: Awaited<ReturnType<typeof cook
   const { url, key } = getSupabasePublicEnv();
   if (!url || !key) return null;
   return createServerClient(url, key, {
+    cookieEncoding: "base64url",
     cookies: {
       getAll() {
         return cookieStore.getAll();
