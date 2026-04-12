@@ -19,16 +19,14 @@ export function LoginForm({ redirectTo = "/dashboard" }: Props) {
     setError(null);
     setPending(true);
     try {
-      const result = await loginWithPassword(
-        email,
-        password,
-        redirectTo,
-      );
+      const result = await loginWithPassword(email, password, redirectTo);
       if (!result.ok) {
         setError(result.error);
         return;
       }
-      // Server Action の Set-Cookie を確実に載せたうえでフルナビ（ミドルウェアがセッションを読める）
+      // Server Action が Set-Cookie をレスポンスに乗せた後にフルナビする。
+      // redirect() だとクライアントへの Cookie 伝播が完了する前にナビゲートが始まる場合があるため
+      // window.location.assign を使い、ブラウザが Set-Cookie を処理してから GET /dashboard を送る。
       window.location.assign(result.redirectTo);
     } catch {
       setError("ログインに失敗しました。");

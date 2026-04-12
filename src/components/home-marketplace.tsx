@@ -59,12 +59,10 @@ export function HomeMarketplace({ agents }: Props) {
         <div className={`${PAGE_SHELL} py-12 sm:py-16 lg:py-20`}>
           <div className="mx-auto max-w-4xl text-center">
             <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--accent)] sm:text-[13px]">
-              AI スキルマーケット
+              AI マーケット
             </p>
             <h1 className="mt-4 text-balance text-[clamp(1.75rem,4vw,2.75rem)] font-semibold leading-[1.15] tracking-tight text-[#1e293b] dark:text-[var(--foreground)]">
-              目的に合うエージェントを、
-              <br className="sm:hidden" />
-              さがしてみましょう
+              エージェントをさがす
             </h1>
           </div>
         </div>

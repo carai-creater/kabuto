@@ -27,14 +27,16 @@ export async function updateSession(
   }
 
   const supabase = createServerClient(url, key, {
+    cookieEncoding: "base64url",
     cookies: {
       getAll() {
         return request.cookies.getAll();
       },
       setAll(cookiesToSet, headers) {
-        cookiesToSet.forEach(({ name, value }) =>
-          request.cookies.set(name, value),
-        );
+        // RequestCookies は name/value のみ（Edge の型）。レスポンス側で options を付与する。
+        cookiesToSet.forEach(({ name, value }) => {
+          request.cookies.set(name, value);
+        });
         supabaseResponse = NextResponse.next({
           request,
         });
