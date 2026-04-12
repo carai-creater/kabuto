@@ -4,6 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
+import { ensureAppUserForAuthUser } from "@/lib/auth/ensure-app-user";
 import { sanitizeInternalPath } from "@/lib/sanitize-redirect";
 import { getSupabasePublicEnv } from "@/utils/supabase/env";
 
@@ -29,6 +30,7 @@ export async function loginWithPassword(
   const cookieStore = await cookies();
 
   const supabase = createServerClient(url, key, {
+    cookieEncoding: "base64url",
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -58,6 +60,22 @@ export async function loginWithPassword(
       ok: false,
       error: `ログインに失敗しました。${detail}`,
     };
+  }
+
+  const {
+    data: { user },
+    error: getUserError,
+  } = await supabase.auth.getUser();
+  if (getUserError || !user) {
+    return {
+      ok: false,
+      error: `ログイン後にユーザー情報を取得できませんでした。${getUserError?.message ?? ""}`,
+    };
+  }
+
+  const appUser = await ensureAppUserForAuthUser(user);
+  if (!appUser.ok) {
+    return { ok: false, error: appUser.error };
   }
 
   revalidatePath("/", "layout");

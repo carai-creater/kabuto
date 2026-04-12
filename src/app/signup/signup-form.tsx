@@ -1,5 +1,6 @@
 "use client";
 
+import { syncPrismaUserAfterAuth } from "@/app/actions/sync-prisma-user";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -41,6 +42,11 @@ export function SignupForm() {
         return;
       }
       if (data.session) {
+        const synced = await syncPrismaUserAfterAuth();
+        if (!synced.ok) {
+          setError(synced.error);
+          return;
+        }
         router.push("/dashboard");
         router.refresh();
         return;
