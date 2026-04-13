@@ -17,6 +17,9 @@ function isActive(pathname: string, href: string): boolean {
   if (href === "/wallet") {
     return pathname === "/wallet" || pathname.startsWith("/wallet/");
   }
+  if (href === "/agents") {
+    return pathname === "/agents" || pathname.startsWith("/agents/");
+  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -67,6 +70,9 @@ export function SiteHeaderNav({
 
   return (
     <nav className="flex flex-wrap items-center justify-end gap-x-1 gap-y-1 sm:gap-x-2">
+      <NavLink href="/agents" title="エージェント一覧・検索">
+        探す
+      </NavLink>
       <NavLink
         href={loggedIn ? "/dashboard" : "/login?next=%2Fdashboard"}
         matchHref="/dashboard"

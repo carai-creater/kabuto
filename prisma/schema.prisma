@@ -37,6 +37,21 @@ model User {
   walletTransactions   WalletTransaction[]
   pointPurchases       PointPurchase[]
   chatSessions         ChatSession[]
+  walletPromoClaims    WalletPromoClaim[]
+}
+
+/// 期間限定ウォレットキャンペーンの受け取り記録（同一 slug はユーザーにつき 1 回）
+model WalletPromoClaim {
+  id        String   @id @default(cuid())
+  userId    String
+  slug      String
+  pointsPt  Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, slug])
+  @@index([userId])
 }
 
 /// ユーザーごとのロール（DB テーブル名は `profiles`）

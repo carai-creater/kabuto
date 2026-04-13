@@ -3,6 +3,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.walletPromoClaim.deleteMany();
   await prisma.walletTransaction.deleteMany();
   await prisma.modelConfig.deleteMany();
   await prisma.usageLedger.deleteMany();

@@ -3,6 +3,7 @@
 import type { AgentListItem } from "@/components/agent-directory";
 import { MarketplaceAgentCard } from "@/components/marketplace-agent-card";
 import { PAGE_SHELL } from "@/lib/page-shell";
+import Link from "next/link";
 import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -30,9 +31,14 @@ function byNewest(a: AgentListItem, b: AgentListItem) {
 
 type Props = {
   agents: AgentListItem[];
+  /** トップ: マーケ向けコピー / browse: 一覧ページ向け */
+  variant?: "home" | "browse";
 };
 
-export function HomeMarketplace({ agents }: Props) {
+const tagBaseClass =
+  "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[14px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]";
+
+export function HomeMarketplace({ agents, variant = "home" }: Props) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(
@@ -59,18 +65,41 @@ export function HomeMarketplace({ agents }: Props) {
         <div className={`${PAGE_SHELL} py-12 sm:py-16 lg:py-20`}>
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="text-balance text-[clamp(1.75rem,4vw,2.75rem)] font-semibold leading-[1.15] tracking-tight text-[#1e293b] dark:text-[var(--foreground)]">
-              世界中のスキルを、ひとつの場所で
+              {variant === "browse"
+                ? "エージェントを探す"
+                : "世界中のスキルを、ひとつの場所で"}
             </h1>
             <p className="mt-4 text-[17px] text-[var(--muted)]">
-              専門家が作った自動化ツールをすぐに利用できます
+              {variant === "browse"
+                ? "キーワードで絞り込み、気になるスキルを選べます"
+                : "専門家が作った自動化ツールをすぐに利用できます"}
             </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+              <Link
+                href={variant === "browse" ? "#marketplace-search" : "/agents"}
+                className={`${tagBaseClass} border-[var(--border)] bg-[var(--card)] text-[#334155] hover:border-[var(--accent)]/40 hover:bg-[var(--accent)]/5 dark:text-[var(--foreground)]`}
+              >
+                エージェントを探す
+              </Link>
+              <Link
+                href="/wallet"
+                className={`${tagBaseClass} border-amber-400/50 bg-gradient-to-r from-amber-50 to-orange-50 text-amber-950 hover:border-amber-500/60 dark:border-amber-500/35 dark:from-amber-950/40 dark:to-orange-950/30 dark:text-amber-100`}
+              >
+                <span className="text-[13px] opacity-90">今だけ</span>
+                <span className="font-semibold tabular-nums">1,000pt</span>
+                <span className="text-[13px] opacity-90">付与</span>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
 
-      <div className={`${PAGE_SHELL} flex flex-1 flex-col pb-24 pt-10 sm:pt-12`}>
+      <div
+        id="marketplace-search"
+        className={`${PAGE_SHELL} flex flex-1 flex-col pb-24 pt-10 sm:pt-12`}
+      >
         <div className="mx-auto w-full max-w-6xl">
-          <label htmlFor="marketplace-search" className="sr-only">
+          <label htmlFor="marketplace-search-input" className="sr-only">
             スキルを検索
           </label>
           <div className="relative mx-auto max-w-2xl">
@@ -80,7 +109,7 @@ export function HomeMarketplace({ agents }: Props) {
               aria-hidden
             />
             <input
-              id="marketplace-search"
+              id="marketplace-search-input"
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
