@@ -4,6 +4,7 @@ import { SiteHeaderWrapper } from "@/components/site-header-wrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 import { HeaderVisibility } from "@/components/header-visibility";
 import { AppToaster } from "@/components/app-toaster";
+import { IdleAgentNudge } from "@/components/idle-agent-nudge";
 import { NavigationProgress } from "@/components/navigation-progress";
 import "./globals.css";
 
@@ -54,6 +55,7 @@ export default function RootLayout({
             <SiteHeaderWrapper />
           </HeaderVisibility>
           {children}
+          <IdleAgentNudge />
           <AppToaster />
         </ThemeProvider>
       </body>

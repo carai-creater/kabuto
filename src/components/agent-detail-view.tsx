@@ -1,6 +1,8 @@
 import { parseKabutoEditor } from "@/lib/agent/editor-config";
 import type { AgentDetailPayload } from "@/lib/agent/agent-detail-include";
 import { RunAgentPanel } from "@/components/run-agent-panel";
+import { SetLastVisitedAgent } from "@/components/set-last-visited-agent";
+import { TaskWorkspacePanel } from "@/components/task-workspace-panel";
 import { FavoriteButton } from "@/components/favorite-button";
 
 type Props = {
@@ -9,9 +11,17 @@ type Props = {
   initialMessages?: { role: "user" | "assistant"; content: string }[];
   chatSessionId?: string;
   initialFavorited?: boolean;
+  linkedAgents?: { id: string; slug: string; title: string }[];
 };
 
-export function AgentDetailView({ agent, sessionUserId, initialMessages, chatSessionId, initialFavorited = false }: Props) {
+export function AgentDetailView({
+  agent,
+  sessionUserId,
+  initialMessages,
+  chatSessionId,
+  initialFavorited = false,
+  linkedAgents = [],
+}: Props) {
   const rating = Number(agent.ratingAvg);
   const hasRating = agent.reviewCount > 0;
   const highValue =
@@ -24,8 +34,14 @@ export function AgentDetailView({ agent, sessionUserId, initialMessages, chatSes
 
   const editor = parseKabutoEditor(agent.toolConfig);
 
+  const firstStarter = [...agent.conversationStarters].sort(
+    (a, b) => a.position - b.position,
+  )[0];
+  const idleHint =
+    firstStarter?.text?.trim() ?? `「${agent.title}」の相談をはじめられます`;
+
   return (
-    <main className="flex min-h-screen w-full flex-1 flex-col">
+    <main className="flex min-h-screen w-full min-h-0 flex-1 flex-col">
       {isDraftPreview ? (
         <div
           className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-[13px] text-amber-950 dark:bg-amber-500/15 dark:text-amber-100"
@@ -34,18 +50,36 @@ export function AgentDetailView({ agent, sessionUserId, initialMessages, chatSes
           下書きプレビュー（ストアには未公開です）
         </div>
       ) : null}
-      <RunAgentPanel
-        agentId={agent.id}
-        isLoggedIn={Boolean(sessionUserId)}
-        defaultModelId={agent.defaultLlm}
-        useCreatorRecommendedModel={editor?.useRecommendedModel !== false}
-        pricePerUsePt={agent.pricePerUsePt}
-        starters={agent.conversationStarters}
-        tools={agent.tools}
-        fullScreenChat
-        initialMessages={initialMessages}
-        chatSessionId={chatSessionId}
+      <SetLastVisitedAgent
+        slug={agent.slug}
+        title={agent.title}
+        hint={idleHint}
       />
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row lg:items-stretch">
+        <div className="order-2 flex min-h-0 min-w-0 flex-1 flex-col lg:order-1">
+          <RunAgentPanel
+            agentId={agent.id}
+            agentSlug={agent.slug}
+            isLoggedIn={Boolean(sessionUserId)}
+            defaultModelId={agent.defaultLlm}
+            useCreatorRecommendedModel={editor?.useRecommendedModel !== false}
+            pricePerUsePt={agent.pricePerUsePt}
+            starters={agent.conversationStarters}
+            tools={agent.tools}
+            fullScreenChat
+            initialMessages={initialMessages}
+            chatSessionId={chatSessionId}
+          />
+        </div>
+        <aside className="order-1 w-full shrink-0 lg:order-2 lg:max-w-[min(100%,400px)] lg:shrink-0">
+          <TaskWorkspacePanel
+            agentId={agent.id}
+            agentTitle={agent.title}
+            starters={agent.conversationStarters}
+            linkedAgents={linkedAgents}
+          />
+        </aside>
+      </div>
       <section className="mx-auto w-full max-w-4xl px-4 pb-6 sm:px-6">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-[15px] font-semibold text-foreground">{agent.title}</p>

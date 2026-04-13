@@ -77,15 +77,21 @@ export default async function AgentDetailPage(props: Props) {
   }
 
   // ログイン中のみ履歴・お気に入り状態をロード（並列）
-  const [chatHistory, favoriteRow] = sessionUserId
+  const [chatHistory, favoriteRow, linkedAgents] = sessionUserId
     ? await Promise.all([
         getLatestChatSession(agent.id),
         prisma.agentFavorite.findUnique({
           where: { userId_agentId: { userId: sessionUserId, agentId: agent.id } },
           select: { id: true },
         }),
+        prisma.agent.findMany({
+          where: { creatorId: sessionUserId, id: { not: agent.id } },
+          orderBy: [{ isPublished: "desc" }, { updatedAt: "desc" }],
+          select: { id: true, slug: true, title: true },
+          take: 6,
+        }),
       ])
-    : [null, null];
+    : [null, null, []];
 
   return (
     <AgentDetailView
@@ -94,6 +100,7 @@ export default async function AgentDetailPage(props: Props) {
       initialMessages={chatHistory?.messages}
       chatSessionId={chatHistory?.sessionId}
       initialFavorited={Boolean(favoriteRow)}
+      linkedAgents={linkedAgents}
     />
   );
 }

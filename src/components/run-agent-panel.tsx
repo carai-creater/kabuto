@@ -73,6 +73,7 @@ function ChatNavLinks({
 
 type Props = {
   agentId: string;
+  agentSlug?: string;
   /** ログイン済みなら true（ウォレット更新・課金あり） */
   isLoggedIn?: boolean;
   /** DB の defaultLlm など。未指定時は先頭モデル */
@@ -96,6 +97,7 @@ type Props = {
 
 export function RunAgentPanel({
   agentId,
+  agentSlug,
   isLoggedIn = false,
   defaultModelId,
   useCreatorRecommendedModel = true,
@@ -235,6 +237,42 @@ export function RunAgentPanel({
     void run();
   }, [isLoggedIn]);
 
+  useEffect(() => {
+    if (!agentSlug) return;
+    try {
+      const raw = sessionStorage.getItem("kabuto_agent_handoff_draft");
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as {
+        toSlug?: string;
+        fromTitle?: string;
+        text?: string;
+      };
+      if (parsed.toSlug !== agentSlug || !parsed.text?.trim()) return;
+
+      const prefix = parsed.fromTitle?.trim()
+        ? `前の担当エージェント（${parsed.fromTitle}）からの引き継ぎです。\n`
+        : "前の担当エージェントからの引き継ぎです。\n";
+      setMessage(`${prefix}${parsed.text.trim()}`);
+      sessionStorage.removeItem("kabuto_agent_handoff_draft");
+    } catch {
+      // ignore malformed payload
+    }
+  }, [agentSlug]);
+
+  useEffect(() => {
+    const onPrefill = (e: Event) => {
+      const ce = e as CustomEvent<{ agentId?: string; text?: string }>;
+      const targetAgentId = ce.detail?.agentId;
+      const text = ce.detail?.text?.trim();
+      if (!targetAgentId || targetAgentId !== agentId || !text) return;
+      setMessage(text);
+    };
+    window.addEventListener("kabuto-chat-prefill", onPrefill as EventListener);
+    return () => {
+      window.removeEventListener("kabuto-chat-prefill", onPrefill as EventListener);
+    };
+  }, [agentId]);
+
   const toolRows = useMemo(() => {
     if (!Array.isArray(tools)) return [] as ToolRow[];
     return tools.filter((t): t is ToolRow => t != null && typeof t === "object");
@@ -261,7 +299,7 @@ export function RunAgentPanel({
     <section
       className={
         fullScreenChat
-          ? "mx-auto flex min-h-screen w-full max-w-4xl flex-col px-4 py-3 sm:px-6"
+          ? "flex min-h-[100dvh] w-full min-w-0 flex-1 flex-col px-4 py-3 sm:px-6 lg:min-h-0 lg:min-h-[min(100dvh,100vh)]"
           : "surface-card p-6 sm:p-8"
       }
       aria-labelledby={fullScreenChat ? undefined : `${panelId}-heading`}
