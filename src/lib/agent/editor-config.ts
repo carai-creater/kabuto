@@ -17,9 +17,20 @@ export type KabutoEditorActions = {
   privacyPolicyUrl: string;
 };
 
+export type KabutoEditorMcpConfig = {
+  enabled: boolean;
+  /** 例: github, slack, notion など */
+  serverKey: string;
+  /** 例: https://mcp.example.com */
+  endpointUrl: string;
+  /** モデルへの利用ルール（任意） */
+  instruction: string;
+};
+
 export type KabutoEditorConfig = {
   capabilities: KabutoEditorCapabilities;
   actions: KabutoEditorActions;
+  mcp: KabutoEditorMcpConfig;
   /** false のとき「推奨モデルなし」— 利用者がチャットでモデルを選ぶ（GPT エディタと同様） */
   useRecommendedModel: boolean;
 };
@@ -35,6 +46,13 @@ const defaultActions: KabutoEditorActions = {
   authType: "none",
   openApiSchema: "",
   privacyPolicyUrl: "",
+};
+
+const defaultMcp: KabutoEditorMcpConfig = {
+  enabled: false,
+  serverKey: "",
+  endpointUrl: "",
+  instruction: "",
 };
 
 export function parseKabutoEditor(
@@ -78,23 +96,52 @@ export function parseKabutoEditor(
         ? String((act as { privacyPolicyUrl?: unknown }).privacyPolicyUrl ?? "")
         : "",
   };
+  const mcpRaw = k.mcp;
+  const mcp: KabutoEditorMcpConfig = {
+    enabled:
+      typeof mcpRaw === "object" &&
+      mcpRaw !== null &&
+      "enabled" in mcpRaw
+        ? Boolean((mcpRaw as { enabled?: unknown }).enabled)
+        : defaultMcp.enabled,
+    serverKey:
+      typeof mcpRaw === "object" &&
+      mcpRaw !== null &&
+      "serverKey" in mcpRaw
+        ? String((mcpRaw as { serverKey?: unknown }).serverKey ?? "")
+        : defaultMcp.serverKey,
+    endpointUrl:
+      typeof mcpRaw === "object" &&
+      mcpRaw !== null &&
+      "endpointUrl" in mcpRaw
+        ? String((mcpRaw as { endpointUrl?: unknown }).endpointUrl ?? "")
+        : defaultMcp.endpointUrl,
+    instruction:
+      typeof mcpRaw === "object" &&
+      mcpRaw !== null &&
+      "instruction" in mcpRaw
+        ? String((mcpRaw as { instruction?: unknown }).instruction ?? "")
+        : defaultMcp.instruction,
+  };
   const useRecommendedModel =
     typeof k.useRecommendedModel === "boolean"
       ? k.useRecommendedModel
       : true;
 
-  return { capabilities, actions, useRecommendedModel };
+  return { capabilities, actions, mcp, useRecommendedModel };
 }
 
 export function buildKabutoToolConfig(input: {
   capabilities: KabutoEditorCapabilities;
   actions: KabutoEditorActions;
+  mcp: KabutoEditorMcpConfig;
   useRecommendedModel: boolean;
 }): Prisma.InputJsonValue {
   return {
     kabutoEditor: {
       capabilities: input.capabilities,
       actions: input.actions,
+      mcp: input.mcp,
       useRecommendedModel: input.useRecommendedModel,
     },
   };
@@ -135,6 +182,17 @@ export function buildEditorSystemSupplement(editor: KabutoEditorConfig | null): 
   const privacy = editor.actions.privacyPolicyUrl.trim();
   if (privacy.length > 0) {
     lines.push(`【プライバシー】外部アクション利用時のポリシー URL: ${privacy}`);
+  }
+  if (editor.mcp.enabled) {
+    const endpoint = editor.mcp.endpointUrl.trim();
+    const server = editor.mcp.serverKey.trim();
+    lines.push(
+      `【MCP連携】MCP 接続が有効です。${server ? `サーバー: ${server}` : "サーバー: custom"}${endpoint ? ` / エンドポイント: ${endpoint}` : ""}。MCP の用途が明確なときは優先して使ってください。`,
+    );
+    const inst = editor.mcp.instruction.trim();
+    if (inst.length > 0) {
+      lines.push(`【MCP運用ルール】${inst}`);
+    }
   }
   return lines.join("\n\n");
 }

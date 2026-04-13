@@ -246,18 +246,27 @@ export function RunAgentPanel({
         toSlug?: string;
         fromTitle?: string;
         text?: string;
+        autoSend?: boolean;
       };
       if (parsed.toSlug !== agentSlug || !parsed.text?.trim()) return;
 
       const prefix = parsed.fromTitle?.trim()
         ? `前の担当エージェント（${parsed.fromTitle}）からの引き継ぎです。\n`
         : "前の担当エージェントからの引き継ぎです。\n";
-      setMessage(`${prefix}${parsed.text.trim()}`);
+      const handoffText = `${prefix}${parsed.text.trim()}`;
+      if (parsed.autoSend && isLoggedIn) {
+        setError(null);
+        clearError();
+        setMessage("");
+        void sendMessage({ text: handoffText });
+      } else {
+        setMessage(handoffText);
+      }
       sessionStorage.removeItem("kabuto_agent_handoff_draft");
     } catch {
       // ignore malformed payload
     }
-  }, [agentSlug]);
+  }, [agentSlug, clearError, isLoggedIn, sendMessage]);
 
   useEffect(() => {
     const onPrefill = (e: Event) => {

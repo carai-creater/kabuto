@@ -5,6 +5,7 @@ import {
   type KabutoEditorActions,
   type KabutoEditorActionsAuth,
   type KabutoEditorCapabilities,
+  type KabutoEditorMcpConfig,
 } from "@/lib/agent/editor-config";
 import { attachKnowledgeFilesFromForm } from "@/lib/agent/knowledge-upload";
 import {
@@ -44,6 +45,12 @@ export const createAgentPayloadSchema = z.object({
     authType: z.enum(["none", "api_key", "oauth"]),
     openApiSchema: z.string().max(200_000),
     privacyPolicyUrl: z.string().max(2000),
+  }),
+  mcp: z.object({
+    enabled: z.boolean(),
+    serverKey: z.string().max(100),
+    endpointUrl: z.string().max(2000),
+    instruction: z.string().max(5000),
   }),
 });
 
@@ -89,6 +96,12 @@ export function parseCreateAgentFormData(
     openApiSchema: String(formData.get("actionsOpenApiSchema") ?? ""),
     privacyPolicyUrl: String(formData.get("actionsPrivacyPolicyUrl") ?? "").trim(),
   };
+  const mcp: KabutoEditorMcpConfig = {
+    enabled: formData.get("mcpEnabled") === "on",
+    serverKey: String(formData.get("mcpServerKey") ?? "").trim(),
+    endpointUrl: String(formData.get("mcpEndpointUrl") ?? "").trim(),
+    instruction: String(formData.get("mcpInstruction") ?? "").trim(),
+  };
 
   const defaultLlmRaw = String(formData.get("defaultLlm") ?? "").trim();
   const defaultLlm = modelIds.includes(defaultLlmRaw as AgentModelId)
@@ -106,6 +119,7 @@ export function parseCreateAgentFormData(
     useRecommendedModel: formData.get("useRecommendedModel") === "on",
     capabilities,
     actions,
+    mcp,
   };
 
   const parsed = createAgentPayloadSchema.safeParse(raw);
@@ -151,6 +165,7 @@ export async function createAgentFromPayload(
   const toolConfig = buildKabutoToolConfig({
     capabilities: data.capabilities,
     actions: data.actions,
+    mcp: data.mcp,
     useRecommendedModel: data.useRecommendedModel,
   });
 

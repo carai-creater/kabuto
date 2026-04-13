@@ -40,6 +40,7 @@ function buildEditInitial(
   const editor = parseKabutoEditor(agent.toolConfig);
   const cap = editor?.capabilities;
   const act = editor?.actions;
+  const mcp = editor?.mcp;
 
   const byPos = new Map(
     agent.conversationStarters.map((s) => [s.position, s.text]),
@@ -71,6 +72,10 @@ function buildEditInitial(
     actionsAuthType,
     actionsOpenApiSchema: act?.openApiSchema ?? "",
     actionsPrivacyPolicyUrl: act?.privacyPolicyUrl ?? "",
+    mcpEnabled: mcp?.enabled ?? false,
+    mcpServerKey: mcp?.serverKey ?? "",
+    mcpEndpointUrl: mcp?.endpointUrl ?? "",
+    mcpInstruction: mcp?.instruction ?? "",
     pricePerUsePt: Number(agent.pricePerUsePt),
   };
 }

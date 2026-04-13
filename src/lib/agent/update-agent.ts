@@ -21,6 +21,7 @@ export async function updateAgentFromPayload(
   const toolConfig = buildKabutoToolConfig({
     capabilities: data.capabilities,
     actions: data.actions,
+    mcp: data.mcp,
     useRecommendedModel: data.useRecommendedModel,
   });
 

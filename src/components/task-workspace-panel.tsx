@@ -186,6 +186,7 @@ export function TaskWorkspacePanel({
             toSlug: target.slug,
             fromTitle: agentTitle,
             text,
+            autoSend: true,
             ts: Date.now(),
           }),
         );
@@ -306,7 +307,7 @@ export function TaskWorkspacePanel({
               自分のエージェントへ引き継ぐ
             </p>
             <p className="mt-1 text-[11px] leading-relaxed text-[var(--muted)]">
-              いま整理した依頼内容を、別エージェントに渡して続けられます。
+              いま整理した依頼内容を、別エージェントに渡して自動送信します。
             </p>
             <div className="mt-2.5 flex flex-wrap gap-2">
               {linkedAgents.map((a) => (

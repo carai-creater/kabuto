@@ -7,6 +7,7 @@ import {
   createAgent,
   type CreateAgentState,
 } from "@/app/actions/agent";
+import { McpQuickConnect } from "@/components/mcp-quick-connect";
 
 const initialState: CreateAgentState = { error: null };
 
@@ -225,6 +226,8 @@ export function NewAgentForm() {
           </li>
         </ul>
       </section>
+
+      <McpQuickConnect />
 
       <section className="space-y-6">
         <h2 className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">

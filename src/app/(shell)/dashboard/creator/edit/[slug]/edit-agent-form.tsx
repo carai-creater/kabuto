@@ -7,6 +7,7 @@ import {
   updateAgent,
   type CreateAgentState,
 } from "@/app/actions/agent";
+import { McpQuickConnect } from "@/components/mcp-quick-connect";
 
 const initialState: CreateAgentState = { error: null };
 
@@ -26,6 +27,10 @@ export type EditAgentFormInitial = {
   actionsAuthType: string;
   actionsOpenApiSchema: string;
   actionsPrivacyPolicyUrl: string;
+  mcpEnabled: boolean;
+  mcpServerKey: string;
+  mcpEndpointUrl: string;
+  mcpInstruction: string;
   pricePerUsePt: number;
 };
 
@@ -252,6 +257,15 @@ export function EditAgentForm({ initial }: Props) {
           </li>
         </ul>
       </section>
+
+      <McpQuickConnect
+        initial={{
+          enabled: initial.mcpEnabled,
+          serverKey: initial.mcpServerKey,
+          endpointUrl: initial.mcpEndpointUrl,
+          instruction: initial.mcpInstruction,
+        }}
+      />
 
       <section className="space-y-6">
         <h2 className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
