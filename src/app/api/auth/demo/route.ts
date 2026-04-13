@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { ensureDemoWalletMinBalance } from "@/lib/demo-wallet";
 import { isDemoLoginEnabled } from "@/lib/demo";
 import { SESSION_COOKIE } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
@@ -25,6 +26,8 @@ export async function POST(req: Request) {
   if (!exists) {
     return NextResponse.json({ ok: false, error: "unknown user" }, { status: 404 });
   }
+
+  await ensureDemoWalletMinBalance(userId);
 
   const jar = await cookies();
   jar.set(SESSION_COOKIE, userId, {

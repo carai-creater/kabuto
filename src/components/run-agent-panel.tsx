@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import { getSessionWalletBalance } from "@/app/actions/wallet";
+import { saveChatMessages } from "@/app/actions/chat-history";
 import { GuestLimitModal } from "@/components/guest-limit-modal";
 import {
   AGENT_MODEL_OPTIONS,
@@ -33,9 +34,9 @@ function uiMessagePlainText(m: UIMessage): string {
     } else if (p.type === "step-start") {
       continue;
     } else if (p.type === "dynamic-tool") {
-      lines.push(`[ツール ${p.toolName}]`);
+      lines.push(`[処理中: ${p.toolName}]`);
     } else if (typeof p.type === "string" && p.type.startsWith("tool-")) {
-      lines.push(`[ツール ${p.type.slice("tool-".length)}]`);
+      lines.push(`[処理中]`);
     }
   }
   return lines.join("\n");
@@ -60,6 +61,10 @@ type Props = {
   /** 作成者のみ true。false のときツール名は表示しない */
   showToolDetails?: boolean;
   fullScreenChat?: boolean;
+  /** チャット履歴（初期メッセージ） */
+  initialMessages?: { role: "user" | "assistant"; content: string }[];
+  /** 履歴保存用セッションID */
+  chatSessionId?: string;
 };
 
 export function RunAgentPanel({
@@ -72,6 +77,8 @@ export function RunAgentPanel({
   tools,
   showToolDetails = false,
   fullScreenChat = false,
+  initialMessages,
+  chatSessionId,
 }: Props) {
   const panelId = useId();
   const router = useRouter();
@@ -84,6 +91,18 @@ export function RunAgentPanel({
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
   const [guestLimitOpen, setGuestLimitOpen] = useState(false);
+  const [showModelSelect, setShowModelSelect] = useState(false);
+
+  // initialMessages を ai SDK の形式に変換
+  const initialAiMessages = useMemo(() => {
+    if (!initialMessages?.length) return undefined;
+    return initialMessages.map((m, i) => ({
+      id: `hist-${i}`,
+      role: m.role,
+      content: m.content,
+      parts: [{ type: "text" as const, text: m.content }],
+    }));
+  }, [initialMessages]);
 
   const transport = useMemo(
     () =>
@@ -136,11 +155,19 @@ export function RunAgentPanel({
   const { messages, sendMessage, status, clearError } = useChat({
     id: `${agentId}-${isLoggedIn ? "auth" : "guest"}`,
     transport,
-    onFinish: async () => {
+    messages: initialAiMessages,
+    onFinish: async ({ finishReason }) => {
       if (!isLoggedIn) return;
       const b = await getSessionWalletBalance();
       setBalance(b);
       router.refresh();
+      // チャット履歴を保存
+      if (finishReason === "stop" || finishReason === "length") {
+        await saveChatMessages(agentId, chatSessionId ?? null, messages.map((m) => ({
+          role: m.role as "user" | "assistant",
+          content: uiMessagePlainText(m),
+        })));
+      }
     },
     onError: (err) => {
       if (err.message === "KABUTO_GUEST_LIMIT") {
@@ -218,34 +245,42 @@ export function RunAgentPanel({
           id={`${panelId}-heading`}
           className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]"
         >
-          チャット
+          試してみる
         </h2>
       ) : (
         <div className="mb-3 flex items-center justify-between gap-4 border-b border-[var(--border)] pb-3">
-          <p className="text-[14px] font-semibold text-foreground">チャット</p>
-          <div className="w-[12rem]">
-            <select
-              id={`${panelId}-llm`}
-              value={llm}
-              onChange={(e) => setLlm(e.target.value)}
-              disabled={pending}
-              className="input-apple h-10 w-full py-1 text-[13px]"
-            >
-              {AGENT_MODEL_OPTIONS.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <p className="text-[14px] font-semibold text-foreground">メッセージ</p>
+          {/* モデル選択は詳細オプションとして折りたたむ */}
+          <button
+            type="button"
+            onClick={() => setShowModelSelect((v) => !v)}
+            className="text-[12px] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+          >
+            {showModelSelect ? "▲ オプションを隠す" : "▼ 詳細オプション"}
+          </button>
         </div>
       )}
 
-      {fullScreenChat && useCreatorRecommendedModel === false ? (
-        <p className="mb-2 text-[11px] text-[var(--muted)]">
-          推奨モデルなし（利用者がモデルを選択する想定）。プレビューは上の一覧から選んで試せます。
-        </p>
-      ) : null}
+      {fullScreenChat && showModelSelect && (
+        <div className="mb-3 rounded-xl border border-[var(--border)] bg-[var(--card-elevated)] px-4 py-3">
+          <label htmlFor={`${panelId}-llm`} className="text-label block mb-1.5">
+            モデル
+          </label>
+          <select
+            id={`${panelId}-llm`}
+            value={llm}
+            onChange={(e) => setLlm(e.target.value)}
+            disabled={pending}
+            className="input-apple h-10 w-full max-w-[14rem] py-1 text-[13px]"
+          >
+            {AGENT_MODEL_OPTIONS.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {showToolDetails && toolRows.length > 0 && !fullScreenChat && (
         <div className="mt-5">
@@ -287,12 +322,8 @@ export function RunAgentPanel({
             </select>
           </div>
           <div className="text-right text-[13px] text-[var(--muted)] sm:pb-2">
-            掲載{" "}
             <span className="font-semibold tabular-nums text-[var(--brand)]">
               {pricePerUsePt} pt/回
-            </span>
-            <span className="block text-[11px] text-[var(--muted)]">
-              実際はトークン従量
             </span>
           </div>
         </div>
@@ -302,8 +333,14 @@ export function RunAgentPanel({
         <>
           <div className="flex-1 overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--card-elevated)]/40 p-4 sm:p-5">
             {messages.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-[14px] text-[var(--muted)]">
-                メッセージを入力して開始
+              <div className="flex h-full flex-col items-center justify-center gap-3">
+                <p className="text-[15px] text-[var(--muted)]">
+                  何でも聞いてください
+                </p>
+                <p className="text-[12px] text-[var(--muted)]/70">
+                  {pricePerUsePt} pt / 利用
+                  {!isLoggedIn && " · 未ログインは1日3回まで"}
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -312,12 +349,12 @@ export function RunAgentPanel({
                     key={m.id}
                     className={
                       m.role === "user"
-                        ? "ml-auto max-w-[92%] rounded-2xl bg-[var(--card)] px-4 py-3 text-[15px] leading-relaxed text-[var(--foreground)] ring-1 ring-[var(--border)]"
-                        : "mr-auto max-w-[92%] rounded-2xl bg-[var(--brand-muted)] px-4 py-3 text-[15px] leading-relaxed text-[var(--foreground)]"
+                        ? "ml-auto max-w-[85%] rounded-2xl bg-[var(--accent)] px-4 py-3 text-[15px] leading-relaxed text-white"
+                        : "mr-auto max-w-[85%] rounded-2xl bg-[var(--card)] px-4 py-3 text-[15px] leading-relaxed text-[var(--foreground)] ring-1 ring-[var(--border)]"
                     }
                   >
                     {m.role === "assistant" ? (
-                      <pre className="whitespace-pre-wrap">
+                      <pre className="whitespace-pre-wrap font-sans">
                         {uiMessagePlainText(m)}
                       </pre>
                     ) : (
@@ -325,6 +362,15 @@ export function RunAgentPanel({
                     )}
                   </div>
                 ))}
+                {pending && (
+                  <div className="mr-auto max-w-[85%] rounded-2xl bg-[var(--card)] px-4 py-3 ring-1 ring-[var(--border)]">
+                    <span className="inline-flex gap-1">
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--muted)] [animation-delay:0ms]" />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--muted)] [animation-delay:150ms]" />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--muted)] [animation-delay:300ms]" />
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -337,7 +383,7 @@ export function RunAgentPanel({
             </p>
           )}
           <div className="mt-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3">
-            {starters.length > 0 && (
+            {starters.length > 0 && messages.length === 0 && (
               <div className="mb-3 flex flex-wrap gap-2">
                 {starters
                   .sort((a, b) => a.position - b.position)
@@ -347,7 +393,7 @@ export function RunAgentPanel({
                       type="button"
                       disabled={pending}
                       onClick={() => setMessage(s.text)}
-                      className="max-w-full rounded-full border border-[var(--border)] bg-[var(--card-elevated)] px-3 py-1.5 text-left text-[12px] leading-snug text-[var(--foreground)] transition hover:border-[var(--accent)] disabled:opacity-50"
+                      className="max-w-full rounded-full border border-[var(--border)] bg-[var(--card-elevated)] px-3 py-1.5 text-left text-[13px] leading-snug text-[var(--foreground)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-50"
                     >
                       {s.text}
                     </button>
@@ -359,41 +405,34 @@ export function RunAgentPanel({
                 id={`${panelId}-msg`}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey && !pending) {
+                    e.preventDefault();
+                    void run();
+                  }
+                }}
                 rows={2}
-                placeholder="メッセージを入力..."
+                placeholder="メッセージを入力… (Shift+Enter で改行)"
                 className="input-apple min-h-[44px] w-full resize-y border-none bg-transparent px-3 py-2 shadow-none ring-0"
               />
               <button
                 type="button"
-                disabled={pending}
+                disabled={pending || !message.trim()}
                 onClick={() => void run()}
                 className="btn-primary h-10 shrink-0 px-4 py-0 text-[14px]"
               >
                 {pending ? "送信中…" : "送信"}
               </button>
             </div>
-            <div className="mt-2 text-right text-[12px] text-[var(--muted)]">
-              掲載{" "}
-              <span className="font-semibold tabular-nums text-[var(--brand)]">
-                {pricePerUsePt} pt/回
+            <div className="mt-2 flex items-center justify-between text-[12px] text-[var(--muted)]">
+              <span>
+                {balance != null && (
+                  <>残高 <span className="font-medium tabular-nums text-foreground">{balance.toLocaleString("ja-JP")} pt</span></>
+                )}
               </span>
-              {balance != null && (
-                <>
-                  {" "}
-                  · 残高{" "}
-                  <span className="font-medium tabular-nums text-foreground">
-                    {balance} pt
-                  </span>
-                </>
-              )}
-              <span className="block text-[11px] text-[var(--muted)]">
-                消費はトークンに応じて変動（完了時に確定）
+              <span className="tabular-nums">
+                {pricePerUsePt} pt / 利用
               </span>
-              {!isLoggedIn && (
-                <span className="mt-1 block text-[11px] text-[var(--muted)]">
-                  未ログインは 1 日 3 回まで（ログインで継続）
-                </span>
-              )}
             </div>
           </div>
         </>
@@ -414,7 +453,7 @@ export function RunAgentPanel({
           </div>
           {starters.length > 0 && (
             <div className="mt-5">
-              <p className="text-label">会話スターター</p>
+              <p className="text-label">よくある質問</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {starters
                   .sort((a, b) => a.position - b.position)
@@ -439,7 +478,7 @@ export function RunAgentPanel({
               onClick={() => void run()}
               className="btn-primary min-w-[120px]"
             >
-              {pending ? "送信中…" : "送信"}
+              {pending ? "処理中…" : "送信"}
             </button>
             {balance != null && (
               <span className="text-[13px] text-[var(--muted)]">
@@ -461,15 +500,15 @@ export function RunAgentPanel({
           {messages.length > 0 && (
             <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--card-elevated)] p-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--muted)]">
-                会話ログ
+                やりとり
               </p>
               <div className="mt-2 space-y-3">
                 {messages.map((m) => (
                   <div key={m.id}>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]">
-                      {m.role === "user" ? "ユーザー" : "応答"}
+                      {m.role === "user" ? "あなた" : "返答"}
                     </p>
-                    <pre className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--foreground)]">
+                    <pre className="mt-1 whitespace-pre-wrap font-sans text-[15px] leading-relaxed text-[var(--foreground)]">
                       {uiMessagePlainText(m)}
                     </pre>
                   </div>

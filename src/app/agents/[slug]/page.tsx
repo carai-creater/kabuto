@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { DbUnavailableMessage } from "@/components/db-unavailable";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
 import { getSessionUserId } from "@/lib/session";
+import { getLatestChatSession } from "@/app/actions/chat-history";
 
 function normalizeSlug(raw: string): string {
   try {
@@ -68,7 +69,17 @@ export default async function AgentDetailPage(props: Props) {
     notFound();
   }
 
+  // ログイン中のみ履歴をロード
+  const chatHistory = sessionUserId
+    ? await getLatestChatSession(agent.id)
+    : null;
+
   return (
-    <AgentDetailView agent={agent} sessionUserId={sessionUserId} />
+    <AgentDetailView
+      agent={agent}
+      sessionUserId={sessionUserId}
+      initialMessages={chatHistory?.messages}
+      chatSessionId={chatHistory?.sessionId}
+    />
   );
 }

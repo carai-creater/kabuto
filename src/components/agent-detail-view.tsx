@@ -5,9 +5,11 @@ import { RunAgentPanel } from "@/components/run-agent-panel";
 type Props = {
   agent: AgentDetailPayload;
   sessionUserId: string | null;
+  initialMessages?: { role: "user" | "assistant"; content: string }[];
+  chatSessionId?: string;
 };
 
-export function AgentDetailView({ agent, sessionUserId }: Props) {
+export function AgentDetailView({ agent, sessionUserId, initialMessages, chatSessionId }: Props) {
   const rating = Number(agent.ratingAvg);
   const hasRating = agent.reviewCount > 0;
   const highValue =
@@ -39,11 +41,13 @@ export function AgentDetailView({ agent, sessionUserId }: Props) {
         starters={agent.conversationStarters}
         tools={agent.tools}
         fullScreenChat
+        initialMessages={initialMessages}
+        chatSessionId={chatSessionId}
       />
       <section className="mx-auto w-full max-w-4xl px-4 pb-6 sm:px-6">
         <details className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4">
           <summary className="cursor-pointer text-[13px] font-semibold text-[var(--muted)]">
-            エージェント情報を表示
+            サービス詳細
           </summary>
           <div className="mt-4 space-y-4">
             <div className="grid grid-cols-2 gap-3 text-[13px] sm:grid-cols-4">

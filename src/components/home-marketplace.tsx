@@ -58,12 +58,12 @@ export function HomeMarketplace({ agents }: Props) {
       <header className="relative w-full overflow-hidden border-b border-[var(--border)] bg-gradient-to-b from-white to-[var(--background)] dark:from-[var(--card)] dark:to-[var(--background)]">
         <div className={`${PAGE_SHELL} py-12 sm:py-16 lg:py-20`}>
           <div className="mx-auto max-w-4xl text-center">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--accent)] sm:text-[13px]">
-              AI マーケット
-            </p>
-            <h1 className="mt-4 text-balance text-[clamp(1.75rem,4vw,2.75rem)] font-semibold leading-[1.15] tracking-tight text-[#1e293b] dark:text-[var(--foreground)]">
-              エージェントをさがす
+            <h1 className="text-balance text-[clamp(1.75rem,4vw,2.75rem)] font-semibold leading-[1.15] tracking-tight text-[#1e293b] dark:text-[var(--foreground)]">
+              世界中のスキルを、ひとつの場所で
             </h1>
+            <p className="mt-4 text-[17px] text-[var(--muted)]">
+              専門家が作った自動化ツールをすぐに利用できます
+            </p>
           </div>
         </div>
       </header>
@@ -71,7 +71,7 @@ export function HomeMarketplace({ agents }: Props) {
       <div className={`${PAGE_SHELL} flex flex-1 flex-col pb-24 pt-10 sm:pt-12`}>
         <div className="mx-auto w-full max-w-6xl">
           <label htmlFor="marketplace-search" className="sr-only">
-            エージェントを検索
+            スキルを検索
           </label>
           <div className="relative mx-auto max-w-2xl">
             <Search
@@ -91,7 +91,7 @@ export function HomeMarketplace({ agents }: Props) {
           </div>
           <p className="mt-3 text-center text-[13px] text-[var(--muted)]">
             {filtered.length === agents.length ? (
-              <>{agents.length} 件のエージェント</>
+              <>{agents.length} 件のサービス</>
             ) : (
               <>
                 <span className="font-semibold tabular-nums text-[#334155] dark:text-[var(--foreground)]">
@@ -106,7 +106,7 @@ export function HomeMarketplace({ agents }: Props) {
 
         {filtered.length === 0 ? (
           <p className="mx-auto mt-16 max-w-md text-center text-[15px] text-[var(--muted)]">
-            該当するエージェントがありません。別のキーワードで試してください。
+            該当するサービスがありません。別のキーワードで試してください。
           </p>
         ) : (
           <div className="mx-auto mt-14 flex w-full max-w-6xl flex-col gap-16 sm:gap-20">
@@ -116,7 +116,7 @@ export function HomeMarketplace({ agents }: Props) {
                   id="section-featured"
                   className="text-[22px] font-bold tracking-tight text-[#0f172a] dark:text-[var(--foreground)] sm:text-[24px]"
                 >
-                  注目のエージェント
+                  注目のサービス
                 </h2>
                 <p className="text-[14px] text-[var(--muted)]">
                   利用実績の多いスキル
@@ -140,7 +140,7 @@ export function HomeMarketplace({ agents }: Props) {
                   人気のスキル
                 </h2>
                 <p className="text-[14px] text-[var(--muted)]">
-                  よく使われているエージェント
+                  よく利用されているサービス
                 </p>
               </div>
               <ul className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -161,7 +161,7 @@ export function HomeMarketplace({ agents }: Props) {
                   新着
                 </h2>
                 <p className="text-[14px] text-[var(--muted)]">
-                  最近追加されたスキル
+                  最近追加されたサービス
                 </p>
               </div>
               <ul className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">

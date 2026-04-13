@@ -26,6 +26,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  stripeCustomerId     String?              @unique
+
   profile              Profile?
   wallet               Wallet?
   creatorWallet        CreatorWallet?
@@ -33,6 +35,8 @@ model User {
   reviews              Review[]
   usageLedgers         UsageLedger[]
   walletTransactions   WalletTransaction[]
+  pointPurchases       PointPurchase[]
+  chatSessions         ChatSession[]
 }
 
 /// ユーザーごとのロール（DB テーブル名は `profiles`）
@@ -128,6 +132,7 @@ model Agent {
   reviews              Review[]
   usageLedgers         UsageLedger[]
   walletTransactions   WalletTransaction[]
+  chatSessions         ChatSession[]
 }
 
 /// 知識: アップロード文書のメタ（実ファイルは Storage 側を想定）
@@ -199,6 +204,53 @@ model ModelConfig {
   outputRate Float
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+/// Stripe でのポイント購入履歴
+model PointPurchase {
+  id              String   @id @default(cuid())
+  userId          String
+  amountPt        Int
+  amountYen       Int
+  stripeSessionId String   @unique
+  /// "pending" | "completed" | "failed"
+  status          String   @default("pending")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// チャット会話セッション（ユーザーごと・エージェントごと）
+model ChatSession {
+  id        String   @id @default(cuid())
+  userId    String
+  agentId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent    Agent         @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@index([userId, agentId])
+  @@index([agentId])
+}
+
+/// チャットメッセージ
+model ChatMessage {
+  id        String   @id @default(cuid())
+  sessionId String
+  /// "user" | "assistant"
+  role      String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
 }
 
 /// チャット実行ごとのトークン従量課金トランザクション

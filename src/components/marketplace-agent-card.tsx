@@ -26,7 +26,7 @@ export function MarketplaceAgentCard({ agent }: Props) {
             className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--background-muted)] text-[32px] leading-none shadow-inner"
             aria-hidden
           >
-            {agent.iconEmoji || "🤖"}
+            {agent.iconEmoji || "✦"}
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-[17px] font-bold leading-snug tracking-tight text-[#333333] dark:text-[var(--foreground)]">
