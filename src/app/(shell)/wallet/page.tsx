@@ -6,6 +6,7 @@ import { getSessionUserId } from "@/lib/session";
 import { DbUnavailableMessage } from "@/components/db-unavailable";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
 import { BuyPointsPanel } from "@/components/buy-points-panel";
+import { grantWalletPromoIfNeeded } from "@/lib/wallet-promo";
 
 const ledgerWithAgent = {
   include: {
@@ -28,6 +29,8 @@ export default async function WalletPage({
   if (!userId) {
     redirect("/login?next=%2Fwallet");
   }
+
+  await grantWalletPromoIfNeeded(userId);
 
   const { purchased } = await searchParams;
 

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { isDemoLoginEnabled } from "@/lib/demo";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
 import { getSessionUserId } from "@/lib/session";
+import { grantWalletPromoIfNeeded } from "@/lib/wallet-promo";
 import { SiteHeader } from "@/components/site-header";
 
 export async function SiteHeaderWrapper() {
@@ -20,6 +21,9 @@ export async function SiteHeaderWrapper() {
 
   try {
     const userId = await getSessionUserId();
+    if (userId) {
+      await grantWalletPromoIfNeeded(userId);
+    }
     const row = userId
       ? await prisma.user.findUnique({
           where: { id: userId },

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Inter, Noto_Sans_JP } from "next/font/google";
-import { PromoWalletGrant } from "@/components/promo-wallet-grant";
 import { SiteHeaderWrapper } from "@/components/site-header-wrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 import { HeaderVisibility } from "@/components/header-visibility";
@@ -48,7 +47,6 @@ export default function RootLayout({
           <HeaderVisibility>
             <SiteHeaderWrapper />
           </HeaderVisibility>
-          <PromoWalletGrant />
           {children}
           <AppToaster />
         </ThemeProvider>

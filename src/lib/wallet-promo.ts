@@ -2,19 +2,19 @@ import { isDatabaseConfigured } from "@/lib/is-database-configured";
 import { prisma } from "@/lib/prisma";
 
 /**
- * 期間限定付与。未設定時は開発のみデフォルト（slug / pt）。
- * 本番では `WALLET_PROMO_SLUG` と `WALLET_PROMO_PT` を明示してください。
+ * 期間限定付与。`WALLET_PROMO_PT` があれば本番でも有効（slug は省略時 `ltd-1000pt-202604`）。
+ * 未設定かつ開発環境のみデフォルト 1000pt。無効化は `WALLET_PROMO_PT=0`。
  */
 export function getWalletPromoConfig(): { slug: string; pt: number } | null {
-  const slug =
-    process.env.WALLET_PROMO_SLUG?.trim() ||
-    (process.env.NODE_ENV === "development" ? "ltd-1000pt-202604" : "");
-  const ptStr =
-    process.env.WALLET_PROMO_PT?.trim() ||
+  const rawPt =
+    process.env.WALLET_PROMO_PT?.trim() ??
     (process.env.NODE_ENV === "development" ? "1000" : "");
-  if (!slug || !ptStr) return null;
-  const pt = parseInt(ptStr, 10);
+  if (rawPt === "" || rawPt === "0") return null;
+  const pt = parseInt(rawPt, 10);
   if (!Number.isFinite(pt) || pt <= 0) return null;
+
+  const slug =
+    process.env.WALLET_PROMO_SLUG?.trim() || "ltd-1000pt-202604";
   return { slug, pt };
 }
 
