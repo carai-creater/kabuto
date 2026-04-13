@@ -38,6 +38,7 @@ model User {
   pointPurchases       PointPurchase[]
   chatSessions         ChatSession[]
   walletPromoClaims    WalletPromoClaim[]
+  agentFavorites       AgentFavorite[]
 }
 
 /// 期間限定ウォレットキャンペーンの受け取り記録（同一 slug はユーザーにつき 1 回）
@@ -148,6 +149,7 @@ model Agent {
   usageLedgers         UsageLedger[]
   walletTransactions   WalletTransaction[]
   chatSessions         ChatSession[]
+  agentFavorites       AgentFavorite[]
 }
 
 /// 知識: アップロード文書のメタ（実ファイルは Storage 側を想定）
@@ -266,6 +268,20 @@ model ChatMessage {
   session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
+}
+
+/// お気に入りエージェント
+model AgentFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  agentId   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, agentId])
+  @@index([userId])
 }
 
 /// チャット実行ごとのトークン従量課金トランザクション

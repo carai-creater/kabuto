@@ -26,8 +26,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "kabuto — AIエージェント・マーケットプレイス",
-  description: "クリエイターが公開した AI エージェントをポイントで利用。",
+  title: "kabuto — スキル・マーケットプレイス",
+  description: "専門家が作った自動化ツールをすぐに利用できます。",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "kabuto",
+  },
 };
 
 export default function RootLayout({

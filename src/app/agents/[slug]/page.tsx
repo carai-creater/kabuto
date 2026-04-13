@@ -48,19 +48,26 @@ export default async function AgentDetailPage(props: Props) {
     notFound();
   }
 
-  const sessionUserId = await getSessionUserId();
-
+  // session取得とagent取得を並列実行
+  let sessionUserId: string | null;
   let agent;
   try {
-    agent = await prisma.agent.findFirst({
-      where: sessionUserId
-        ? {
-            slug,
-            OR: [{ isPublished: true }, { creatorId: sessionUserId }],
-          }
-        : { slug, isPublished: true },
-      include: agentDetailInclude,
-    });
+    // まず公開済みエージェントとして並列フェッチ
+    [sessionUserId, agent] = await Promise.all([
+      getSessionUserId(),
+      prisma.agent.findFirst({
+        where: { slug, isPublished: true },
+        include: agentDetailInclude,
+      }),
+    ]);
+
+    // 未公開の場合、ログインユーザーがクリエイターなら再取得
+    if (!agent && sessionUserId) {
+      agent = await prisma.agent.findFirst({
+        where: { slug, creatorId: sessionUserId },
+        include: agentDetailInclude,
+      });
+    }
   } catch {
     return <DbUnavailableMessage />;
   }
@@ -69,10 +76,16 @@ export default async function AgentDetailPage(props: Props) {
     notFound();
   }
 
-  // ログイン中のみ履歴をロード
-  const chatHistory = sessionUserId
-    ? await getLatestChatSession(agent.id)
-    : null;
+  // ログイン中のみ履歴・お気に入り状態をロード（並列）
+  const [chatHistory, favoriteRow] = sessionUserId
+    ? await Promise.all([
+        getLatestChatSession(agent.id),
+        prisma.agentFavorite.findUnique({
+          where: { userId_agentId: { userId: sessionUserId, agentId: agent.id } },
+          select: { id: true },
+        }),
+      ])
+    : [null, null];
 
   return (
     <AgentDetailView
@@ -80,6 +93,7 @@ export default async function AgentDetailPage(props: Props) {
       sessionUserId={sessionUserId}
       initialMessages={chatHistory?.messages}
       chatSessionId={chatHistory?.sessionId}
+      initialFavorited={Boolean(favoriteRow)}
     />
   );
 }

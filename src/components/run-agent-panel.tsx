@@ -2,6 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   useCallback,
@@ -43,6 +44,32 @@ function uiMessagePlainText(m: UIMessage): string {
 }
 
 type ToolRow = { name: string; type?: string };
+
+function ChatNavLinks({
+  isLoggedIn,
+  className = "",
+}: {
+  isLoggedIn: boolean;
+  className?: string;
+}) {
+  const agentsHref = isLoggedIn ? "/agents" : "/login?next=%2Fagents";
+  const dashboardHref = isLoggedIn ? "/dashboard" : "/login?next=%2Fdashboard";
+  const linkClass =
+    "inline-flex items-center justify-center rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-[12px] font-medium text-[var(--muted)] transition hover:border-[var(--accent)]/40 hover:text-[var(--foreground)]";
+  return (
+    <nav
+      className={`flex flex-wrap gap-2 ${className}`}
+      aria-label="画面遷移"
+    >
+      <Link href={agentsHref} className={linkClass}>
+        エージェントを探す
+      </Link>
+      <Link href={dashboardHref} className={linkClass}>
+        マイページ
+      </Link>
+    </nav>
+  );
+}
 
 type Props = {
   agentId: string;
@@ -241,20 +268,28 @@ export function RunAgentPanel({
       aria-label={fullScreenChat ? "チャット" : undefined}
     >
       {!fullScreenChat ? (
-        <h2
-          id={`${panelId}-heading`}
-          className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]"
-        >
-          試してみる
-        </h2>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2
+            id={`${panelId}-heading`}
+            className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]"
+          >
+            試してみる
+          </h2>
+          <ChatNavLinks isLoggedIn={isLoggedIn} />
+        </div>
       ) : (
-        <div className="mb-3 flex items-center justify-between gap-4 border-b border-[var(--border)] pb-3">
-          <p className="text-[14px] font-semibold text-foreground">メッセージ</p>
+        <div className="mb-3 flex flex-col gap-3 border-b border-[var(--border)] pb-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <p className="shrink-0 text-[14px] font-semibold text-foreground">
+              メッセージ
+            </p>
+            <ChatNavLinks isLoggedIn={isLoggedIn} />
+          </div>
           {/* モデル選択は詳細オプションとして折りたたむ */}
           <button
             type="button"
             onClick={() => setShowModelSelect((v) => !v)}
-            className="text-[12px] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+            className="shrink-0 self-end text-[12px] text-[var(--muted)] transition hover:text-[var(--foreground)] sm:self-auto"
           >
             {showModelSelect ? "▲ オプションを隠す" : "▼ 詳細オプション"}
           </button>

@@ -1,15 +1,17 @@
 import { parseKabutoEditor } from "@/lib/agent/editor-config";
 import type { AgentDetailPayload } from "@/lib/agent/agent-detail-include";
 import { RunAgentPanel } from "@/components/run-agent-panel";
+import { FavoriteButton } from "@/components/favorite-button";
 
 type Props = {
   agent: AgentDetailPayload;
   sessionUserId: string | null;
   initialMessages?: { role: "user" | "assistant"; content: string }[];
   chatSessionId?: string;
+  initialFavorited?: boolean;
 };
 
-export function AgentDetailView({ agent, sessionUserId, initialMessages, chatSessionId }: Props) {
+export function AgentDetailView({ agent, sessionUserId, initialMessages, chatSessionId, initialFavorited = false }: Props) {
   const rating = Number(agent.ratingAvg);
   const hasRating = agent.reviewCount > 0;
   const highValue =
@@ -45,6 +47,14 @@ export function AgentDetailView({ agent, sessionUserId, initialMessages, chatSes
         chatSessionId={chatSessionId}
       />
       <section className="mx-auto w-full max-w-4xl px-4 pb-6 sm:px-6">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-[15px] font-semibold text-foreground">{agent.title}</p>
+          <FavoriteButton
+            agentId={agent.id}
+            initialFavorited={initialFavorited}
+            isLoggedIn={Boolean(sessionUserId)}
+          />
+        </div>
         <details className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4">
           <summary className="cursor-pointer text-[13px] font-semibold text-[var(--muted)]">
             サービス詳細

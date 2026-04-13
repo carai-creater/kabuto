@@ -10,6 +10,7 @@ async function main() {
   await prisma.review.deleteMany();
   await prisma.conversationStarter.deleteMany();
   await prisma.knowledgeDocument.deleteMany();
+  await prisma.agentFavorite.deleteMany();
   await prisma.agent.deleteMany();
   await prisma.wallet.deleteMany();
   await prisma.creatorWallet.deleteMany();

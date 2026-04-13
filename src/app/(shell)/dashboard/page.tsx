@@ -7,6 +7,7 @@ import {
   CreditCard,
   MessageSquare,
   Sparkles,
+  Star,
   Wallet,
 } from "lucide-react";
 
@@ -33,9 +34,10 @@ export default async function UserDashboardPage() {
     iconEmoji: string;
     lastAt: Date;
   }[] = [];
+  let favorites: { id: string; slug: string; title: string; iconEmoji: string }[] = [];
 
   try {
-    const [u, w, ledgers] = await Promise.all([
+    const [u, w, ledgers, favRows] = await Promise.all([
       prisma.user.findUnique({
         where: { id: userId },
         select: { name: true, email: true },
@@ -54,9 +56,17 @@ export default async function UserDashboardPage() {
           },
         },
       }),
+      prisma.agentFavorite.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        include: {
+          agent: { select: { id: true, slug: true, title: true, iconEmoji: true } },
+        },
+      }),
     ]);
     user = u;
     wallet = w;
+    favorites = favRows.map((r) => r.agent);
 
     const seen = new Set<string>();
     for (const row of ledgers) {
@@ -89,6 +99,32 @@ export default async function UserDashboardPage() {
           残高と直近の会話
         </p>
       </header>
+
+      {/* お気に入り */}
+      {favorites.length > 0 && (
+        <section className="mt-10">
+          <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <Star className="h-4 w-4 text-amber-500" aria-hidden />
+            お気に入り
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            {favorites.map((a) => (
+              <Link
+                key={a.id}
+                href={`/agents/${a.slug}`}
+                className="group flex flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-4 text-center shadow-sm transition hover:border-amber-400/60 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/80"
+              >
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-2xl dark:bg-slate-800">
+                  {a.iconEmoji}
+                </span>
+                <p className="line-clamp-2 text-[13px] font-semibold text-slate-800 dark:text-slate-100">
+                  {a.title}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="mt-10 flex flex-col gap-8">
         <div className="grid gap-6 lg:grid-cols-2">

@@ -96,6 +96,9 @@ export default async function WalletPage({
         <p className="mt-1 text-[14px] text-[var(--muted)]">
           1 pt = 1 円。ポイントはすべてのサービスで共通利用できます。
         </p>
+        <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-5 py-3 text-[13px] font-medium text-amber-700 dark:text-amber-300">
+          キャンペーン実施中 — 新規登録で <span className="font-bold">1,000 pt</span> 無料プレゼント
+        </div>
         {stripeConfigured ? (
           <BuyPointsPanel />
         ) : (
