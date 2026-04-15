@@ -1,24 +1,13 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { toggleFavoriteCore } from "@/lib/agent/favorite-core";
 import { getSessionUserId } from "@/lib/session";
 
 export async function toggleFavorite(agentId: string): Promise<{ favorited: boolean }> {
   const userId = await getSessionUserId();
   if (!userId) throw new Error("unauthorized");
-
-  const existing = await prisma.agentFavorite.findUnique({
-    where: { userId_agentId: { userId, agentId } },
-    select: { id: true },
-  });
-
-  if (existing) {
-    await prisma.agentFavorite.delete({ where: { id: existing.id } });
-    return { favorited: false };
-  } else {
-    await prisma.agentFavorite.create({ data: { userId, agentId } });
-    return { favorited: true };
-  }
+  return toggleFavoriteCore(userId, agentId);
 }
 
 export async function getFavoriteAgents(): Promise<
