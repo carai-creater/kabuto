@@ -5,7 +5,14 @@ import { prisma } from "@/lib/prisma";
 const GUEST_DAILY_LIMIT = 3;
 
 function getSalt(): string {
-  return process.env.GUEST_IP_HASH_SALT ?? "kabuto-guest-v1";
+  const salt = process.env.GUEST_IP_HASH_SALT?.trim();
+  if (salt) return salt;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "GUEST_IP_HASH_SALT is not set. Set a strong random salt in production to anonymize guest IPs.",
+    );
+  }
+  return "kabuto-guest-dev";
 }
 
 export function getClientIp(req: Request): string {
