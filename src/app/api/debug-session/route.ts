@@ -3,6 +3,10 @@ import { createClient } from "@/utils/supabase/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
+  // 本番では診断情報（authEmail/authId 等）を露出しない
+  if (process.env.NODE_ENV === "production") {
+    return new NextResponse(null, { status: 404 });
+  }
   try {
     const supabase = await createClient();
     const { data: { user }, error } = await supabase.auth.getUser();

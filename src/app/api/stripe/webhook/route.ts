@@ -31,30 +31,48 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const { userId, amountPt } = session.metadata ?? {};
-
-    if (!userId || !amountPt) {
-      console.error("[stripe/webhook] missing metadata", session.id);
-      return NextResponse.json({ ok: true });
-    }
-
-    const pt = parseInt(amountPt, 10);
 
     try {
-      await prisma.$transaction([
-        // 購入レコードを completed に更新
-        prisma.pointPurchase.update({
+      // セキュリティ: userId / pt を metadata ではなく DB の PointPurchase 行から取得する。
+      // metadata は checkout 作成時に付与されるが、source of truth は pending レコード。
+      // 冪等化: pending のときだけ completed に遷移し、その時だけウォレット加算する。
+      // Stripe は webhook をリトライ/再送するため、updateMany の count == 0 なら既処理。
+      const result = await prisma.$transaction(async (tx) => {
+        const purchase = await tx.pointPurchase.findUnique({
           where: { stripeSessionId: session.id },
+          select: { userId: true, amountPt: true, status: true },
+        });
+        if (!purchase) {
+          console.error("[stripe/webhook] no matching PointPurchase", session.id);
+          return { alreadyProcessed: true as const };
+        }
+        if (purchase.status !== "pending") {
+          return { alreadyProcessed: true as const };
+        }
+        const updated = await tx.pointPurchase.updateMany({
+          where: { stripeSessionId: session.id, status: "pending" },
           data: { status: "completed" },
-        }),
-        // ウォレットにポイント追加（upsert でウォレットがない場合も対応）
-        prisma.wallet.upsert({
-          where: { userId },
-          update: { balancePt: { increment: pt } },
-          create: { userId, balancePt: pt },
-        }),
-      ]);
-      console.log(`[stripe/webhook] +${pt}pt → user ${userId}`);
+        });
+        if (updated.count === 0) {
+          return { alreadyProcessed: true as const };
+        }
+        await tx.wallet.upsert({
+          where: { userId: purchase.userId },
+          update: { balancePt: { increment: purchase.amountPt } },
+          create: { userId: purchase.userId, balancePt: purchase.amountPt },
+        });
+        return {
+          alreadyProcessed: false as const,
+          userId: purchase.userId,
+          pt: purchase.amountPt,
+        };
+      });
+
+      if (result.alreadyProcessed) {
+        console.log(`[stripe/webhook] duplicate event ignored: ${session.id}`);
+      } else {
+        console.log(`[stripe/webhook] +${result.pt}pt → user ${result.userId}`);
+      }
     } catch (err) {
       console.error("[stripe/webhook] db error:", err);
       return NextResponse.json({ error: "db error" }, { status: 500 });

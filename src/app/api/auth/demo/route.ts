@@ -6,6 +6,15 @@ import { SESSION_COOKIE } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
+  // 二重ガード: NEXT_PUBLIC_* の事故設定でも本番では絶対に通さない。
+  // isDemoLoginEnabled() は NEXT_PUBLIC_ENABLE_DEMO_LOGIN を見るため、
+  // サーバー側でも NODE_ENV を独立に判定する。
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json(
+      { ok: false, error: "not found" },
+      { status: 404 }
+    );
+  }
   if (!isDemoLoginEnabled()) {
     return NextResponse.json(
       { ok: false, error: "demo login disabled" },
