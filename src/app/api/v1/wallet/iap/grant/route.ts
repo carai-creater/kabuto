@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveUserIdFromBearer } from "@/lib/auth/verify-bearer-token";
 import { grantIapCore } from "@/lib/wallet/iap-grant";
-import { parseIapJws } from "@/lib/wallet/iap-jws";
+import { verifyIapJws } from "@/lib/wallet/iap-jws";
 import { lookupIapPackage } from "@/lib/wallet/iap-packages";
 
 /**
@@ -49,9 +49,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Parse the JWS payload and cross-check against client-sent values.
-  // Signature verification is deferred (A12).
-  const claims = parseIapJws(jws);
+  // Phase 6: cryptographically verify the JWS (A12).
+  // Rejects anything that doesn't chain to Apple Root CA - G3, anything
+  // with an expired cert in the chain, or any bundle id mismatch.
+  const claims = await verifyIapJws(jws);
   if (!claims) {
     return NextResponse.json(
       { ok: false, error: "invalid_jws" },
