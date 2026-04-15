@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { getLatestChatSessionForUser } from "@/lib/chat/history-core";
 import { getSessionUserId } from "@/lib/session";
 
 type MessageInput = { role: "user" | "assistant"; content: string };
@@ -20,7 +21,17 @@ export async function saveChatMessages(
   if (messages.length < 2) return null;
 
   try {
-    let sessionId = currentSessionId;
+    let sessionId: string | null = null;
+
+    if (currentSessionId) {
+      // クライアントから受け取った sessionId は必ず所有権と agentId 一致を検証する
+      // （未検証のまま使うと他ユーザーのチャット履歴を上書きできてしまう: IDOR）
+      const owned = await prisma.chatSession.findFirst({
+        where: { id: currentSessionId, userId, agentId },
+        select: { id: true },
+      });
+      sessionId = owned?.id ?? null;
+    }
 
     if (!sessionId) {
       // 既存セッションを取得（最新1件）
@@ -33,7 +44,13 @@ export async function saveChatMessages(
     }
 
     if (!sessionId) {
-      // 新規セッション作成
+      // 新規セッション作成前に agent の存在を検証（orphan/不正 agentId 回避）
+      const agent = await prisma.agent.findUnique({
+        where: { id: agentId },
+        select: { id: true },
+      });
+      if (!agent) return null;
+
       const session = await prisma.chatSession.create({
         data: { userId, agentId },
         select: { id: true },
@@ -72,26 +89,5 @@ export async function getLatestChatSession(
 ): Promise<{ sessionId: string; messages: MessageInput[] } | null> {
   const userId = await getSessionUserId();
   if (!userId) return null;
-
-  try {
-    const session = await prisma.chatSession.findFirst({
-      where: { userId, agentId },
-      orderBy: { updatedAt: "desc" },
-      include: {
-        messages: { orderBy: { createdAt: "asc" } },
-      },
-    });
-
-    if (!session || session.messages.length === 0) return null;
-
-    return {
-      sessionId: session.id,
-      messages: session.messages.map((m: { role: string; content: string }) => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
-      })),
-    };
-  } catch {
-    return null;
-  }
+  return getLatestChatSessionForUser(userId, agentId);
 }
