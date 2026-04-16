@@ -4,6 +4,7 @@ import { RunAgentPanel } from "@/components/run-agent-panel";
 import { SetLastVisitedAgent } from "@/components/set-last-visited-agent";
 import { TaskWorkspacePanel } from "@/components/task-workspace-panel";
 import { FavoriteButton } from "@/components/favorite-button";
+import { AgentServicePanel } from "@/components/agent-service-panel";
 
 type Props = {
   agent: AgentDetailPayload;
@@ -12,6 +13,7 @@ type Props = {
   chatSessionId?: string;
   initialFavorited?: boolean;
   linkedAgents?: { id: string; slug: string; title: string }[];
+  userMcpConnections?: { serverKey: string; authType?: "token" | "oauth"; accountEmail?: string | null }[];
 };
 
 export function AgentDetailView({
@@ -21,6 +23,7 @@ export function AgentDetailView({
   chatSessionId,
   initialFavorited = false,
   linkedAgents = [],
+  userMcpConnections = [],
 }: Props) {
   const rating = Number(agent.ratingAvg);
   const hasRating = agent.reviewCount > 0;
@@ -55,6 +58,15 @@ export function AgentDetailView({
         title={agent.title}
         hint={idleHint}
       />
+      {agent.mcpServices.length > 0 && (
+        <div className="mx-auto w-full max-w-4xl px-4 pt-3 sm:px-6">
+          <AgentServicePanel
+            requiredServices={agent.mcpServices}
+            connectedServices={userMcpConnections}
+            isLoggedIn={Boolean(sessionUserId)}
+          />
+        </div>
+      )}
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row lg:items-stretch">
         <div className="order-2 flex min-h-0 min-w-0 flex-1 flex-col lg:order-1">
           <RunAgentPanel
@@ -89,6 +101,7 @@ export function AgentDetailView({
             isLoggedIn={Boolean(sessionUserId)}
           />
         </div>
+
         <details className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4">
           <summary className="cursor-pointer text-[13px] font-semibold text-[var(--muted)]">
             サービス詳細
