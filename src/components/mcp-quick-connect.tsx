@@ -1,103 +1,27 @@
 "use client";
 
-import { useMemo, useState } from "react";
+/**
+ * クリエイター向け: このエージェントが「どの外部サービスを使うか」を宣言するだけ。
+ * 実際のトークン/認証はユーザーが設定画面（/dashboard/settings）で接続する。
+ */
 
-type Preset = {
-  key: string;
-  label: string;
-  serverKey: string;
-  authType: "none" | "api_key" | "oauth";
-  privacyPolicyUrl: string;
-  instruction: string;
-};
-
-const MCP_PRESETS: Preset[] = [
-  {
-    key: "github",
-    label: "GitHub MCP",
-    serverKey: "github",
-    authType: "oauth",
-    privacyPolicyUrl: "https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement",
-    instruction:
-      "リポジトリ操作・Issue/PR 調査に使う。破壊的操作は事前確認してから実行する。",
-  },
-  {
-    key: "notion",
-    label: "Notion MCP",
-    serverKey: "notion",
-    authType: "oauth",
-    privacyPolicyUrl: "https://www.notion.so/product/privacy-policy",
-    instruction:
-      "議事録・ドキュメント要約に使う。更新前に対象ページIDを確認する。",
-  },
-  {
-    key: "slack",
-    label: "Slack MCP",
-    serverKey: "slack",
-    authType: "oauth",
-    privacyPolicyUrl: "https://slack.com/trust/privacy/privacy-policy",
-    instruction:
-      "進捗共有・通知送信に使う。投稿チャンネルを明示してから送信する。",
-  },
+const MCP_SERVICES = [
+  { key: "github",          label: "GitHub",          icon: "🐙", description: "リポジトリ・Issue・PR の操作" },
+  { key: "notion",          label: "Notion",          icon: "📝", description: "ドキュメント読み書き" },
+  { key: "slack",           label: "Slack",           icon: "💬", description: "チャンネル読み書き・通知" },
+  { key: "google-drive",    label: "Google Drive",    icon: "📁", description: "ファイル検索・読み書き" },
+  { key: "google-calendar", label: "Google Calendar", icon: "📅", description: "予定確認・作成" },
+  { key: "gmail",           label: "Gmail",           icon: "✉️", description: "メール検索・送信" },
+  { key: "linear",          label: "Linear",          icon: "⬡",  description: "Issue 管理" },
+  { key: "jira",            label: "Jira",            icon: "🟦", description: "チケット管理" },
+  { key: "supabase",        label: "Supabase",        icon: "⚡", description: "データベース操作" },
+  { key: "stripe",          label: "Stripe",          icon: "💳", description: "決済・顧客情報" },
+  { key: "hubspot",         label: "HubSpot",         icon: "🧲", description: "CRM・コンタクト" },
+  { key: "airtable",        label: "Airtable",        icon: "🗂",  description: "レコード読み書き" },
+  { key: "brave-search",    label: "Brave Search",    icon: "🦁", description: "ウェブ検索" },
+  { key: "figma",           label: "Figma",           icon: "🎨", description: "デザインファイル参照" },
+  { key: "zapier",          label: "Zapier",          icon: "⚡", description: "自動化ワークフロー" },
 ];
-
-function buildMcpOpenApiSchema(baseUrl: string): string {
-  const root = baseUrl.trim().replace(/\/+$/, "") || "https://mcp.example.com";
-  return `openapi: 3.1.0
-info:
-  title: MCP Bridge API
-  version: 1.0.0
-servers:
-  - url: ${root}
-paths:
-  /mcp/execute:
-    post:
-      summary: Execute MCP action
-      operationId: mcpExecute
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                server:
-                  type: string
-                action:
-                  type: string
-                payload:
-                  type: object
-              required: [server, action]
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                type: object`;
-}
-
-function setInputValue(name: string, value: string) {
-  const el = document.querySelector(`[name="${name}"]`) as
-    | HTMLInputElement
-    | HTMLTextAreaElement
-    | HTMLSelectElement
-    | null;
-  if (!el) return;
-  el.value = value;
-  el.dispatchEvent(new Event("input", { bubbles: true }));
-  el.dispatchEvent(new Event("change", { bubbles: true }));
-}
-
-function setChecked(name: string, checked: boolean) {
-  const el = document.querySelector(`[name="${name}"]`) as
-    | HTMLInputElement
-    | null;
-  if (!el) return;
-  el.checked = checked;
-  el.dispatchEvent(new Event("input", { bubbles: true }));
-  el.dispatchEvent(new Event("change", { bubbles: true }));
-}
 
 type Props = {
   initial?: {
@@ -109,134 +33,49 @@ type Props = {
 };
 
 export function McpQuickConnect({ initial }: Props) {
-  const [presetKey, setPresetKey] = useState("github");
-  const selected = useMemo(
-    () => MCP_PRESETS.find((p) => p.key === presetKey) ?? MCP_PRESETS[0],
-    [presetKey],
-  );
-
   return (
-    <section className="space-y-6">
-      <h2 className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-        MCP かんたん接続
-      </h2>
+    <section className="space-y-5">
+      <div>
+        <h2 className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+          必要な外部サービス連携
+        </h2>
+        <p className="mt-2 text-[13px] text-[var(--muted)]">
+          このエージェントが使う外部サービスを選択します。
+          利用者はサービスを使う際に自分のトークンを
+          <a href="/dashboard/settings" target="_blank" className="mx-1 text-[var(--accent)] underline">
+            設定画面
+          </a>
+          で接続します。
+        </p>
+      </div>
 
-      <p className="text-[13px] text-[var(--muted)]">
-        1) プリセットを選択 2) 接続先 URL を入れる 3) 保存。必要な OpenAPI と認証設定を自動入力できます。
-      </p>
-
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--card-elevated)] p-4">
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="min-w-[12rem] flex-1">
-            <label htmlFor="mcpPreset" className="text-label">
-              プリセット
-            </label>
-            <select
-              id="mcpPreset"
-              value={presetKey}
-              onChange={(e) => setPresetKey(e.target.value)}
-              className="input-apple mt-2 w-full"
-            >
-              {MCP_PRESETS.map((p) => (
-                <option key={p.key} value={p.key}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            type="button"
-            className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-[13px] font-semibold text-foreground transition hover:border-[var(--accent)]/40"
-            onClick={() => {
-              const endpoint =
-                (
-                  document.querySelector(`[name="mcpEndpointUrl"]`) as
-                    | HTMLInputElement
-                    | null
-                )?.value ?? "";
-              setChecked("mcpEnabled", true);
-              setInputValue("mcpServerKey", selected.serverKey);
-              setInputValue("mcpInstruction", selected.instruction);
-              setInputValue("actionsAuthType", selected.authType);
-              setInputValue(
-                "actionsOpenApiSchema",
-                buildMcpOpenApiSchema(endpoint),
-              );
-              if (selected.privacyPolicyUrl) {
-                setInputValue(
-                  "actionsPrivacyPolicyUrl",
-                  selected.privacyPolicyUrl,
-                );
-              }
-            }}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {MCP_SERVICES.map((service) => (
+          <label
+            key={service.key}
+            className="flex cursor-pointer items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 transition hover:border-[var(--accent)]/40 has-[:checked]:border-[var(--accent)]/40 has-[:checked]:bg-[var(--brand-muted)]"
           >
-            プリセットを適用
-          </button>
-        </div>
+            <input
+              type="checkbox"
+              name="mcp_service"
+              value={service.key}
+              defaultChecked={initial?.serverKey === service.key && initial?.enabled}
+              className="h-4 w-4 rounded accent-[var(--accent)]"
+            />
+            <span className="text-xl">{service.icon}</span>
+            <div className="min-w-0">
+              <p className="text-[13px] font-semibold text-[var(--foreground)]">{service.label}</p>
+              <p className="text-[11px] text-[var(--muted)]">{service.description}</p>
+            </div>
+          </label>
+        ))}
       </div>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-600 dark:bg-slate-900/40">
-        <input
-          id="mcpEnabled"
-          type="checkbox"
-          name="mcpEnabled"
-          defaultChecked={initial?.enabled ?? false}
-          className="mt-1 h-4 w-4 rounded border-slate-300"
-        />
-        <span>
-          <span className="text-[14px] font-medium text-foreground">
-            MCP 連携を有効化
-          </span>
-          <span className="mt-1 block text-[12px] text-[var(--muted)]">
-            オフのときは通常チャットのみ
-          </span>
-        </span>
-      </label>
-
-      <div>
-        <label htmlFor="mcpServerKey" className="text-label">
-          MCP サーバー識別子
-        </label>
-        <input
-          id="mcpServerKey"
-          name="mcpServerKey"
-          type="text"
-          maxLength={100}
-          defaultValue={initial?.serverKey ?? ""}
-          className="input-apple mt-2 w-full"
-          placeholder="例: github"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="mcpEndpointUrl" className="text-label">
-          MCP ブリッジ URL
-        </label>
-        <input
-          id="mcpEndpointUrl"
-          name="mcpEndpointUrl"
-          type="url"
-          maxLength={2000}
-          defaultValue={initial?.endpointUrl ?? ""}
-          className="input-apple mt-2 w-full"
-          placeholder="https://mcp.example.com"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="mcpInstruction" className="text-label">
-          MCP 利用ルール（任意）
-        </label>
-        <textarea
-          id="mcpInstruction"
-          name="mcpInstruction"
-          rows={3}
-          maxLength={5000}
-          defaultValue={initial?.instruction ?? ""}
-          className="input-apple mt-2 w-full resize-y"
-          placeholder="例: リポジトリ更新前は変更内容を要約して確認をとる"
-        />
-      </div>
+      {/* 既存フォームとの後方互換（隠しフィールド） */}
+      <input type="hidden" name="mcpEnabled" value="false" />
+      <input type="hidden" name="mcpServerKey" defaultValue={initial?.serverKey ?? ""} />
+      <input type="hidden" name="mcpEndpointUrl" defaultValue={initial?.endpointUrl ?? ""} />
+      <input type="hidden" name="mcpInstruction" defaultValue={initial?.instruction ?? ""} />
     </section>
   );
 }

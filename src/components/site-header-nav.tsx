@@ -42,10 +42,10 @@ function NavLink({
     <Link
       href={href}
       title={title}
-      className={`rounded-full px-2 py-1.5 text-[12px] transition sm:px-3 sm:text-[13px] ${
+      className={`rounded-full px-2.5 py-1.5 text-[13px] transition sm:px-3 ${
         active
-          ? "font-bold text-[#333333] underline decoration-2 underline-offset-[6px] [text-decoration-color:var(--accent)] dark:text-[var(--foreground)]"
-          : "font-medium text-[var(--muted)] hover:text-[#333333] dark:hover:text-[var(--foreground)]"
+          ? "font-semibold text-[var(--foreground)]"
+          : "font-medium text-[var(--muted)] hover:text-[var(--foreground)]"
       }`}
     >
       {children}

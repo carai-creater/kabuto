@@ -42,6 +42,7 @@ export async function updateAgentFromPayload(
         defaultLlm: data.defaultLlm,
         toolConfig,
         pricePerUsePt: data.pricePerUsePt,
+        mcpServices: data.mcpServices,
         isPublished: opts.isPublished,
       },
     });

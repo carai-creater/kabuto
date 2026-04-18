@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <rect width="100" height="100" rx="22" fill="#1e40af"/>
+  <!-- trend line -->
+  <polyline
+    points="18,70 34,52 48,60 64,34 82,42"
+    fill="none"
+    stroke="white"
+    stroke-width="5.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+  <!-- peak dot -->
+  <circle cx="64" cy="34" r="5.5" fill="white"/>
+</svg>

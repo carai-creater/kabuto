@@ -76,8 +76,8 @@ export default async function AgentDetailPage(props: Props) {
     notFound();
   }
 
-  // ログイン中のみ履歴・お気に入り状態をロード（並列）
-  const [chatHistory, favoriteRow, linkedAgents] = sessionUserId
+  // ログイン中のみ履歴・お気に入り状態・MCP接続をロード（並列）
+  const [chatHistory, favoriteRow, linkedAgents, mcpConnections] = sessionUserId
     ? await Promise.all([
         getLatestChatSession(agent.id),
         prisma.agentFavorite.findUnique({
@@ -90,8 +90,14 @@ export default async function AgentDetailPage(props: Props) {
           select: { id: true, slug: true, title: true },
           take: 6,
         }),
+        agent.mcpServices.length > 0
+          ? prisma.userMcpConnection.findMany({
+              where: { userId: sessionUserId, serverKey: { in: agent.mcpServices } },
+              select: { serverKey: true, authType: true, accountEmail: true },
+            })
+          : Promise.resolve([]),
       ])
-    : [null, null, []];
+    : [null, null, [], []];
 
   return (
     <AgentDetailView
@@ -101,6 +107,7 @@ export default async function AgentDetailPage(props: Props) {
       chatSessionId={chatHistory?.sessionId}
       initialFavorited={Boolean(favoriteRow)}
       linkedAgents={linkedAgents}
+      userMcpConnections={(mcpConnections as { serverKey: string; authType?: "token" | "oauth"; accountEmail?: string | null }[]) ?? []}
     />
   );
 }

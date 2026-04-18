@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Coins, Star } from "lucide-react";
+import { Star, Coins, BarChart3 } from "lucide-react";
 import type { Agent } from "@prisma/client";
 
 type Props = {
@@ -10,6 +10,7 @@ type Props = {
     | "title"
     | "description"
     | "iconEmoji"
+    | "iconUrl"
     | "pricePerUsePt"
     | "usageCount"
     | "ratingAvg"
@@ -22,9 +23,6 @@ type Props = {
 export function AgentCard({ agent }: Props) {
   const rating = Number(agent.ratingAvg);
   const hasRating = agent.reviewCount > 0;
-  const highValue =
-    agent.tags.includes("高コスパ") ||
-    (agent.reviewCount >= 3 && rating >= 4);
 
   return (
     <article className="agent-card-surface group relative flex flex-col overflow-hidden">
@@ -34,81 +32,71 @@ export function AgentCard({ agent }: Props) {
         className="absolute inset-0 z-10 rounded-[var(--radius-card)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
       />
 
-      <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-start sm:gap-5">
-        <div className="relative mx-auto aspect-square w-full max-w-[112px] shrink-0 overflow-hidden rounded-[12px] border border-[var(--border)] bg-[var(--background-muted)] sm:mx-0">
-          <span
-            className="flex h-full w-full items-center justify-center text-[48px] leading-none"
-            aria-hidden
-          >
-            {agent.iconEmoji || "🤖"}
-          </span>
-        </div>
+      <div className="flex flex-col gap-3 p-5 sm:p-6">
+        {/* アイコン */}
+        {agent.iconUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={agent.iconUrl} alt="" width={44} height={44} className="h-11 w-11 rounded-xl object-cover" />
+        )}
 
-        <div className="min-w-0 flex-1">
-          <h2 className="text-[18px] font-bold leading-snug tracking-tight text-[#333333] transition-colors group-hover:text-[var(--accent)] dark:text-[var(--foreground)]">
-            {agent.title}
-          </h2>
-          <p className="mt-2 line-clamp-2 text-[14px] leading-[1.7] text-[var(--muted)]">
-            {agent.description}
-          </p>
-
-          <div className="mt-3 flex flex-wrap gap-2">
+        {/* タグ */}
+        {(agent.firstThreeFree || agent.tags.length > 0) && (
+          <div className="flex flex-wrap gap-1.5">
             {agent.firstThreeFree && (
-              <span className="rounded-[10px] bg-[var(--tag-pastel-bg)] px-2.5 py-1 text-[11px] font-medium text-[var(--tag-pastel-text)]">
+              <span className="rounded-full bg-[var(--tag-pastel-bg)] px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[var(--tag-pastel-text)]">
                 初回3回無料
               </span>
             )}
-            {highValue && (
-              <span className="rounded-[10px] bg-[var(--tag-pastel-bg)] px-2.5 py-1 text-[11px] font-medium text-[var(--tag-pastel-text)]">
-                高コスパ
+            {agent.tags.slice(0, 3).map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-[var(--tag-neutral-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--tag-neutral-text)]"
+              >
+                {tag}
               </span>
-            )}
-            {agent.tags
-              .filter((t) => t !== "高コスパ")
-              .slice(0, 3)
-              .map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-[10px] bg-[var(--tag-neutral-bg)] px-2.5 py-1 text-[11px] font-medium text-[var(--tag-neutral-text)]"
-                >
-                  {tag}
-                </span>
-              ))}
+            ))}
           </div>
+        )}
+
+        {/* タイトル・説明 */}
+        <div>
+          <h2 className="text-[17px] font-bold leading-snug tracking-tight text-[var(--foreground)] transition-colors group-hover:text-[var(--accent)]">
+            {agent.title}
+          </h2>
+          <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-[var(--muted)]">
+            {agent.description}
+          </p>
         </div>
       </div>
 
-      {/* フッター: 評価・実績・価格 */}
-      <div className="relative z-0 flex flex-col gap-3 border-t border-[var(--border)] bg-[#f8fafc] px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between dark:bg-[var(--card-elevated)]">
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-[13px] text-[var(--muted)]">
-          <span className="inline-flex items-center gap-1.5 tabular-nums">
+      {/* フッター */}
+      <div className="flex items-center justify-between gap-3 border-t border-[var(--border)] px-5 py-3 sm:px-6 dark:bg-[var(--card-elevated)]">
+        <div className="flex items-center gap-4 text-[12px] text-[var(--muted)]">
+          <span className="inline-flex items-center gap-1 tabular-nums">
             <Star
-              className={`h-4 w-4 shrink-0 ${hasRating ? "fill-amber-400 text-amber-500" : "text-[var(--muted)]"}`}
-              strokeWidth={hasRating ? 0 : 2}
+              className={`h-3.5 w-3.5 shrink-0 ${hasRating ? "fill-amber-400 text-amber-400" : ""}`}
+              strokeWidth={hasRating ? 0 : 1.5}
               aria-hidden
             />
             {hasRating ? (
               <>
-                <span className="font-bold text-[#333333] dark:text-[var(--foreground)]">
-                  {rating.toFixed(1)}
-                </span>
-                <span className="text-[var(--muted)]">
-                  （{agent.reviewCount} 件）
-                </span>
+                <span className="font-semibold text-[var(--foreground)]">{rating.toFixed(1)}</span>
+                <span className="text-[var(--muted)]">（{agent.reviewCount}）</span>
               </>
             ) : (
               <span>評価なし</span>
             )}
           </span>
-          <span className="inline-flex items-center gap-1.5 tabular-nums">
-            <BarChart3 className="h-4 w-4 opacity-75" aria-hidden />
-            利用 {agent.usageCount.toLocaleString("ja-JP")} 回
+          <span className="inline-flex items-center gap-1 tabular-nums">
+            <BarChart3 className="h-3.5 w-3.5 opacity-60" aria-hidden />
+            {agent.usageCount.toLocaleString("ja-JP")} 回
           </span>
         </div>
-        <span className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-[10px] bg-white px-3 py-1.5 text-[14px] font-bold tabular-nums text-[var(--brand)] ring-1 ring-[var(--border)] dark:bg-[var(--card)] sm:self-center">
-          <Coins className="h-4 w-4 opacity-90" strokeWidth={2} aria-hidden />
+
+        <span className="inline-flex shrink-0 items-center gap-1 tabular-nums text-[13px] font-bold text-[var(--brand)]">
+          <Coins className="h-3.5 w-3.5 opacity-80" strokeWidth={2} aria-hidden />
           {agent.pricePerUsePt.toLocaleString("ja-JP")}
-          <span className="text-[12px] font-semibold">pt</span>
+          <span className="text-[11px] font-semibold">pt</span>
         </span>
       </div>
     </article>

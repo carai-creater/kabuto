@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import type { AgentListItem } from "@/components/agent-directory";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
 import { getMarketplaceDemoAgents } from "@/lib/marketplace-demo-agents";
@@ -9,6 +10,7 @@ const agentSelect = {
   title: true,
   description: true,
   iconEmoji: true,
+  iconUrl: true,
   pricePerUsePt: true,
   usageCount: true,
   ratingAvg: true,
@@ -18,7 +20,7 @@ const agentSelect = {
   createdAt: true,
 } as const;
 
-export async function getMarketplaceAgents(): Promise<AgentListItem[]> {
+async function fetchMarketplaceAgents(): Promise<AgentListItem[]> {
   if (!isDatabaseConfigured()) {
     return getMarketplaceDemoAgents();
   }
@@ -37,3 +39,13 @@ export async function getMarketplaceAgents(): Promise<AgentListItem[]> {
     return getMarketplaceDemoAgents();
   }
 }
+
+/**
+ * エージェント一覧を 60 秒キャッシュ。
+ * エージェント公開・更新時は revalidateTag("marketplace-agents") で即時無効化。
+ */
+export const getMarketplaceAgents = unstable_cache(
+  fetchMarketplaceAgents,
+  ["marketplace-agents"],
+  { revalidate: 60, tags: ["marketplace-agents"] },
+);

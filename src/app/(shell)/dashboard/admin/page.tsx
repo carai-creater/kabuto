@@ -46,8 +46,8 @@ export default async function AdminDashboardPage() {
     <div className="w-full">
       <header className="border-b border-slate-200/80 pb-8 dark:border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 dark:bg-slate-800">
-            <Shield className="h-6 w-6 text-blue-600 dark:text-blue-400" aria-hidden />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--brand-muted)] dark:bg-slate-800">
+            <Shield className="h-6 w-6 text-[var(--accent)] dark:text-[var(--accent)]" aria-hidden />
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
@@ -96,7 +96,7 @@ export default async function AdminDashboardPage() {
                   <td className="px-4 py-2.5 text-slate-800 dark:text-slate-200">
                     {r.email}
                     {me?.email && r.email === me.email ? (
-                      <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">（あなた）</span>
+                      <span className="ml-2 text-xs text-[var(--accent)] dark:text-[var(--accent)]">（あなた）</span>
                     ) : null}
                   </td>
                   <td className="px-4 py-2.5 font-mono text-xs text-slate-600 dark:text-slate-400">
@@ -110,7 +110,7 @@ export default async function AdminDashboardPage() {
       </section>
 
       <p className="mt-10 text-sm text-slate-500 dark:text-slate-500">
-        <Link href="/dashboard" className="text-blue-600 hover:underline dark:text-blue-400">
+        <Link href="/dashboard" className="text-[var(--accent)] hover:underline dark:text-[var(--accent)]">
           マイページに戻る
         </Link>
       </p>

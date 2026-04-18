@@ -39,6 +39,8 @@ model User {
   chatSessions         ChatSession[]
   walletPromoClaims    WalletPromoClaim[]
   agentFavorites       AgentFavorite[]
+  mcpConnections       UserMcpConnection[]
+  pushSubscriptions    PushSubscription[]
 }
 
 /// 期間限定ウォレットキャンペーンの受け取り記録（同一 slug はユーザーにつき 1 回）
@@ -112,6 +114,8 @@ model Agent {
   description String  @db.Text
   /// 表示用（絵文字1つなど）
   iconEmoji   String  @default("🤖")
+  /// カスタム画像 URL（設定時は iconEmoji より優先して表示）
+  iconUrl     String?
   /// 役割: システムプロンプト
   systemPrompt String @db.Text
   /// 追加のエージェント指示（任意）。未設定なら systemPrompt のみを使用
@@ -138,6 +142,9 @@ model Agent {
   tools Json @default("[]")
 
   defaultLlm String @default("gpt-4o")
+
+  /// クリエイターが宣言した外部サービス連携キーの一覧（例: ["github", "notion"]）
+  mcpServices String[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -268,6 +275,58 @@ model ChatMessage {
   session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
+}
+
+/// ユーザーのMCP接続情報（API キーや OAuth トークン）
+model UserMcpConnection {
+  id         String   @id @default(cuid())
+  userId     String
+  serverKey  String
+  label      String
+
+  /// "token" (user-pasted API key) | "oauth" (authorized via OAuth 2.0)
+  authType   String   @default("token")
+
+  // --- token 方式（既存 / 貼り付け API キー） ---
+  /// AES-256-GCM 暗号化済み。oauth 方式では null。
+  credential String?  @db.Text
+
+  // --- oauth 方式（新規） ---
+  /// 暗号化済み access_token
+  accessToken  String?   @db.Text
+  /// 暗号化済み refresh_token（発行されなかった場合は null）
+  refreshToken String?   @db.Text
+  /// access_token の失効時刻
+  expiresAt    DateTime?
+  /// 付与されたスコープ（スペース区切り）
+  scopes       String?
+  /// 認可したアカウントの表示用メールアドレス
+  accountEmail String?
+  /// 認可したアカウントの不変 ID（例: Google id_token の sub）
+  accountId    String?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, serverKey])
+  @@index([userId])
+}
+
+/// Web Push 通知サブスクリプション
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String   @db.Text
+  auth      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 /// お気に入りエージェント

@@ -73,16 +73,27 @@ export async function POST(req: Request) {
     cancel_url: `${origin}/wallet`,
   });
 
-  // 購入レコードを pending で作成
-  await prisma.pointPurchase.create({
-    data: {
-      userId,
-      amountPt: pkg.amountPt,
-      amountYen: pkg.amountYen,
-      stripeSessionId: session.id,
-      status: "pending",
-    },
-  });
+  // 購入レコードを pending で作成。失敗した場合は Stripe 側のセッションを expire して孤立を防ぐ
+  try {
+    await prisma.pointPurchase.create({
+      data: {
+        userId,
+        amountPt: pkg.amountPt,
+        amountYen: pkg.amountYen,
+        stripeSessionId: session.id,
+        status: "pending",
+      },
+    });
+  } catch (e) {
+    console.error("[stripe/checkout] pointPurchase.create failed, expiring session", e);
+    await stripe.checkout.sessions.expire(session.id).catch((expireErr) => {
+      console.error("[stripe/checkout] session.expire also failed", expireErr);
+    });
+    return NextResponse.json(
+      { error: "failed to record purchase" },
+      { status: 500 },
+    );
+  }
 
   return NextResponse.json({ url: session.url });
 }

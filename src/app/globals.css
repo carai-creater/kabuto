@@ -2,56 +2,56 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* 商用マーケットプレイス: 薄灰背景 #F7F9FB、カード境界 #E2E8F0、Inter + Noto Sans JP */
+/* Anthropic-inspired: warm cream background, terracotta accent, generous whitespace */
 :root {
-  --background: #f7f9fb;
-  --background-muted: #f1f5f9;
-  --foreground: #333333;
-  --muted: #64748b;
-  --subtle: #64748b;
+  --background: #f7f5f0;
+  --background-muted: #f0ece4;
+  --foreground: #1a1917;
+  --muted: #6b6762;
+  --subtle: #6b6762;
   --card: #ffffff;
-  --card-elevated: #f8fafc;
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
+  --card-elevated: #faf8f4;
+  --border: #e6e1d8;
+  --border-strong: #cfc8bc;
   --input-bg: #ffffff;
-  --input-border: #e2e8f0;
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --brand: #2563eb;
-  --brand-muted: rgb(37 99 235 / 0.08);
-  --tag-pastel-bg: #eff6ff;
-  --tag-pastel-text: #1d4ed8;
-  --tag-neutral-bg: #f1f5f9;
-  --tag-neutral-text: #475569;
-  --destructive: #dc2626;
-  --header-bg: rgb(255 255 255 / 0.94);
-  --shadow-card: none;
+  --input-border: #e6e1d8;
+  --accent: #d97757;
+  --accent-hover: #c4613d;
+  --brand: #d97757;
+  --brand-muted: rgb(217 119 87 / 0.10);
+  --tag-pastel-bg: #fdf0eb;
+  --tag-pastel-text: #b35a39;
+  --tag-neutral-bg: #f0ece4;
+  --tag-neutral-text: #5a554e;
+  --destructive: #c0392b;
+  --header-bg: rgb(247 245 240 / 0.92);
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.04);
   --radius-card: 12px;
-  --radius-control: 10px;
+  --radius-control: 8px;
 }
 
 .dark {
-  --background: #0f1419;
-  --background-muted: #151c24;
-  --foreground: #f0f3f7;
-  --muted: #94a3b8;
-  --subtle: #94a3b8;
-  --card: #1a222d;
-  --card-elevated: #1f2937;
-  --border: rgb(255 255 255 / 0.1);
-  --border-strong: rgb(255 255 255 / 0.16);
-  --input-bg: rgb(26 34 45 / 0.95);
-  --input-border: rgb(255 255 255 / 0.1);
-  --accent: #3b82f6;
-  --accent-hover: #60a5fa;
-  --brand: #3b82f6;
-  --brand-muted: rgb(59 130 246 / 0.15);
-  --tag-pastel-bg: rgb(30 58 138 / 0.35);
-  --tag-pastel-text: #93c5fd;
+  --background: #17150f;
+  --background-muted: #1e1b14;
+  --foreground: #f2ede6;
+  --muted: #9c9588;
+  --subtle: #9c9588;
+  --card: #211e17;
+  --card-elevated: #28241c;
+  --border: rgb(255 255 255 / 0.09);
+  --border-strong: rgb(255 255 255 / 0.15);
+  --input-bg: rgb(33 30 23 / 0.95);
+  --input-border: rgb(255 255 255 / 0.09);
+  --accent: #e08a67;
+  --accent-hover: #ea9e7e;
+  --brand: #e08a67;
+  --brand-muted: rgb(217 119 87 / 0.18);
+  --tag-pastel-bg: rgb(180 80 40 / 0.2);
+  --tag-pastel-text: #f0a882;
   --tag-neutral-bg: rgb(255 255 255 / 0.06);
-  --tag-neutral-text: #cbd5e1;
-  --destructive: #f87171;
-  --header-bg: rgb(15 20 25 / 0.92);
+  --tag-neutral-text: #c9c2b6;
+  --destructive: #e06c5a;
+  --header-bg: rgb(23 21 15 / 0.92);
   --shadow-card: none;
 }
 
@@ -94,14 +94,17 @@ body {
     border-radius: var(--radius-card);
     border: 1px solid var(--border);
     background: var(--card);
-    box-shadow: none;
-    transition: border-color 0.2s ease;
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
   }
   .agent-card-surface:hover {
     border-color: var(--border-strong);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.08), 0 2px 4px rgb(0 0 0 / 0.04);
+    transform: translateY(-1px);
   }
   .dark .agent-card-surface:hover {
     border-color: rgb(255 255 255 / 0.18);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.25);
   }
   .surface-card-elevated {
     border-radius: var(--radius-card);
@@ -129,8 +132,8 @@ body {
     box-shadow: 0 0 0 3px rgb(59 130 246 / 0.2);
   }
   .btn-primary {
-    border-radius: var(--radius-control);
-    @apply inline-flex items-center justify-center px-5 py-2.5 text-[15px] font-semibold text-white transition;
+    border-radius: 9999px;
+    @apply inline-flex items-center justify-center px-6 py-2.5 text-[15px] font-semibold text-white transition;
     background: var(--accent);
   }
   .btn-primary:hover {
@@ -145,5 +148,11 @@ body {
   }
   .link-subtle:hover {
     color: var(--accent);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
   }
 }

@@ -13,6 +13,7 @@ export type AgentListItem = Pick<
   | "title"
   | "description"
   | "iconEmoji"
+  | "iconUrl"
   | "pricePerUsePt"
   | "usageCount"
   | "ratingAvg"

@@ -110,7 +110,7 @@ export async function AgentEditorPreview({ userId, previewSlug }: Props) {
         </p>
         <a
           href={`/agents/${encodeURIComponent(agent.slug)}`}
-          className="text-[12px] font-medium text-blue-600 hover:underline dark:text-blue-400"
+          className="text-[12px] font-medium text-[var(--accent)] hover:underline dark:text-[var(--accent)]"
         >
           公開ページへ →
         </a>

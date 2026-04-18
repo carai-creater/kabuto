@@ -153,7 +153,7 @@ export function EditAgentForm({ initial }: Props) {
           type="file"
           multiple
           accept=".pdf,.txt,.md,.csv,application/pdf,text/plain,text/csv"
-          className="block w-full text-[13px] file:mr-3 file:rounded-lg file:border-0 file:bg-blue-600 file:px-3 file:py-1.5 file:text-[13px] file:font-medium file:text-white hover:file:bg-blue-500"
+          className="block w-full text-[13px] file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--accent)] file:px-3 file:py-1.5 file:text-[13px] file:font-medium file:text-white hover:file:bg-[var(--accent-hover)]"
         />
       </section>
 

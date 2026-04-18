@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
@@ -6,9 +7,27 @@ import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
 
 /**
- * マイページ系: サイドナビ共有（/dashboard, /wallet など）
- * DB の余計なヘルスチェックは省略し、ヘッダー・各ページと getSessionUserId を cache で共有する。
+ * ユーザーのロールを 5 分キャッシュ（管理者チェック）。
+ * ロール変更時は revalidateTag(`user-role-${userId}`) で無効化。
  */
+function getCachedUserRole(userId: string) {
+  return unstable_cache(
+    async () => {
+      try {
+        const profile = await prisma.profile.findUnique({
+          where: { userId },
+          select: { role: true },
+        });
+        return profile?.role ?? "user";
+      } catch {
+        return "user";
+      }
+    },
+    [`user-role-${userId}`],
+    { revalidate: 300, tags: [`user-role-${userId}`] },
+  )();
+}
+
 export default async function ShellLayout({
   children,
 }: Readonly<{
@@ -23,16 +42,8 @@ export default async function ShellLayout({
     redirect("/login?login_error=no_app_user");
   }
 
-  let isAdmin = false;
-  try {
-    const profile = await prisma.profile.findUnique({
-      where: { userId },
-      select: { role: true },
-    });
-    isAdmin = profile?.role === "admin";
-  } catch {
-    isAdmin = false;
-  }
+  const role = await getCachedUserRole(userId);
+  const isAdmin = role === "admin";
 
   return <DashboardShell isAdmin={isAdmin}>{children}</DashboardShell>;
 }

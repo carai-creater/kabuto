@@ -38,7 +38,7 @@ export default async function NewAgentPage(props: PageProps) {
     <div className="mx-auto w-full max-w-[1600px] px-0">
       <Link
         href="/dashboard/creator"
-        className="inline-flex items-center gap-2 text-[14px] font-medium text-blue-600 hover:underline dark:text-blue-400"
+        className="inline-flex items-center gap-2 text-[14px] font-medium text-[var(--accent)] hover:underline dark:text-[var(--accent)]"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />
         管理一覧に戻る

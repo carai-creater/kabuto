@@ -52,6 +52,8 @@ export const createAgentPayloadSchema = z.object({
     endpointUrl: z.string().max(2000),
     instruction: z.string().max(5000),
   }),
+  /** クリエイターが宣言した外部サービス連携キー一覧 */
+  mcpServices: z.array(z.string().max(64)).max(20).default([]),
 });
 
 export type CreateAgentPayload = z.infer<typeof createAgentPayloadSchema>;
@@ -103,6 +105,13 @@ export function parseCreateAgentFormData(
     instruction: String(formData.get("mcpInstruction") ?? "").trim(),
   };
 
+  // クリエイターが選択した外部サービス連携キーを収集
+  const mcpServices = formData
+    .getAll("mcp_service")
+    .map((v) => String(v).trim())
+    .filter((v) => v.length > 0)
+    .slice(0, 20);
+
   const defaultLlmRaw = String(formData.get("defaultLlm") ?? "").trim();
   const defaultLlm = modelIds.includes(defaultLlmRaw as AgentModelId)
     ? (defaultLlmRaw as AgentModelId)
@@ -120,6 +129,7 @@ export function parseCreateAgentFormData(
     capabilities,
     actions,
     mcp,
+    mcpServices,
   };
 
   const parsed = createAgentPayloadSchema.safeParse(raw);
@@ -180,6 +190,7 @@ export async function createAgentFromPayload(
       defaultLlm: data.defaultLlm,
       toolConfig,
       pricePerUsePt: data.pricePerUsePt,
+      mcpServices: data.mcpServices,
       isPublished: false,
       tags: [],
       ...(starters.length > 0

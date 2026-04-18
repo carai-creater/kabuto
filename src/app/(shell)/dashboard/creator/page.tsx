@@ -103,7 +103,7 @@ export default async function CreatorDashboardPage() {
         </div>
         <Link
           href="/dashboard/creator/new"
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[var(--accent)]/20 transition hover:bg-[var(--accent-hover)] dark:bg-[var(--accent)] dark:hover:bg-[var(--accent-hover)]"
         >
           <Plus className="h-5 w-5" aria-hidden />
           新規作成
@@ -113,7 +113,7 @@ export default async function CreatorDashboardPage() {
       <section className="mt-10 grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-none">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            <Store className="h-4 w-4 text-blue-600 dark:text-blue-400" aria-hidden />
+            <Store className="h-4 w-4 text-[var(--accent)] dark:text-[var(--accent)]" aria-hidden />
             公開中のエージェント
           </div>
           <p className="mt-4 text-3xl font-bold tabular-nums text-slate-900 dark:text-white">
@@ -125,10 +125,10 @@ export default async function CreatorDashboardPage() {
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-none">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            <BarChart3 className="h-4 w-4 text-blue-600 dark:text-blue-400" aria-hidden />
+            <BarChart3 className="h-4 w-4 text-[var(--accent)] dark:text-[var(--accent)]" aria-hidden />
             総売上 (pt)
           </div>
-          <p className="mt-4 text-3xl font-bold tabular-nums text-blue-600 dark:text-blue-400">
+          <p className="mt-4 text-3xl font-bold tabular-nums text-[var(--accent)] dark:text-[var(--accent)]">
             {totalRevenuePt.toLocaleString("ja-JP")}
             <span className="ml-1 text-base font-medium text-slate-500 dark:text-slate-400">
               pt
@@ -158,7 +158,7 @@ export default async function CreatorDashboardPage() {
 
       <section className="mt-10">
         <div className="mb-4 flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden />
+          <Sparkles className="h-5 w-5 text-[var(--accent)] dark:text-[var(--accent)]" aria-hidden />
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
             あなたのエージェント
           </h2>
@@ -167,11 +167,11 @@ export default async function CreatorDashboardPage() {
         {agents.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-6 py-16 text-center dark:border-slate-700 dark:bg-slate-950/50">
             <div
-              className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 to-violet-500/15 ring-1 ring-blue-500/20"
+              className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent)]/15 to-[var(--accent)]/5 ring-1 ring-[var(--accent)]/20"
               aria-hidden
             >
               <div className="relative">
-                <Bot className="h-10 w-10 text-blue-600 dark:text-blue-400" strokeWidth={1.5} />
+                <Bot className="h-10 w-10 text-[var(--accent)] dark:text-[var(--accent)]" strokeWidth={1.5} />
                 <Sparkles className="absolute -right-1 -top-1 h-5 w-5 text-amber-400" strokeWidth={2} />
               </div>
             </div>
@@ -180,7 +180,7 @@ export default async function CreatorDashboardPage() {
             </p>
             <Link
               href="/dashboard/creator/new"
-              className="mt-8 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-500"
+              className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-md shadow-[var(--accent)]/20 transition hover:bg-[var(--accent-hover)]"
             >
               <Plus className="h-5 w-5" aria-hidden />
               新規作成
@@ -202,7 +202,7 @@ export default async function CreatorDashboardPage() {
                       <div className="min-w-0 flex-1">
                         <Link
                           href={`/dashboard/creator/edit/${encodeURIComponent(a.slug)}`}
-                          className="truncate text-base font-semibold text-slate-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+                          className="truncate text-base font-semibold text-slate-900 hover:text-[var(--accent)] dark:text-white dark:hover:text-[var(--accent)]"
                         >
                           {a.title}
                         </Link>
@@ -225,7 +225,7 @@ export default async function CreatorDashboardPage() {
                     <div className="flex shrink-0 items-center justify-end gap-2 sm:justify-center">
                       <Link
                         href={`/dashboard/creator/edit/${encodeURIComponent(a.slug)}`}
-                        className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-blue-500/50 dark:hover:bg-slate-700 dark:hover:text-blue-300"
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-[var(--accent)]/40 hover:bg-[var(--brand-muted)] hover:text-[var(--accent)] dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-[var(--accent)]/30 dark:hover:bg-slate-700 dark:hover:text-[var(--accent)]"
                       >
                         <Pencil className="h-4 w-4" aria-hidden />
                         編集

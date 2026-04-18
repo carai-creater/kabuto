@@ -4,8 +4,12 @@ import { APPLE_ROOT_CA_G3_PEM } from "@/lib/wallet/apple-root-ca";
 
 /**
  * Parses & **cryptographically verifies** a StoreKit 2 signed transaction
- * JWS (Compact Serialization). Phase 6 upgrade from the Phase 5 structural-
- * only decoder.
+ * JWS (Compact Serialization).
+ *
+ * Phase 6.1 upgrade: returns a discriminated union so the grant route can
+ * return typed error codes (`invalid_signature` / `expired_cert` /
+ * `chain_invalid` / `bundle_mismatch` / `malformed`) instead of a
+ * black-box 400.
  *
  * Verification steps:
  *   1. Parse the JWS protected header, extract the `x5c` certificate chain
@@ -17,9 +21,6 @@ import { APPLE_ROOT_CA_G3_PEM } from "@/lib/wallet/apple-root-ca";
  *      with `jose.compactVerify`.
  *   5. Parse the payload and cross-check the expected iOS bundle id
  *      (via `IAP_EXPECTED_BUNDLE_ID` env or the default).
- *
- * Any failure returns `null`; the caller (`/api/v1/wallet/iap/grant`)
- * rejects the request with 400.
  */
 
 export type IapClaims = {
@@ -30,89 +31,149 @@ export type IapClaims = {
   bundleId?: string;
 };
 
+export type IapVerifyFailure =
+  /** JWS is not three base64url segments, or header is unparseable */
+  | "malformed"
+  /** Header has no x5c chain or chain is empty */
+  | "no_chain"
+  /** A cert in the chain is outside its validity window */
+  | "expired_cert"
+  /** A cert isn't signed by its purported issuer, or chain doesn't terminate at the pinned Apple root */
+  | "chain_invalid"
+  /** JWS signature under the leaf key fails verification */
+  | "invalid_signature"
+  /** Payload is valid JSON but missing required `transactionId`/`productId` */
+  | "missing_claims"
+  /** Payload's bundleId ≠ expected */
+  | "bundle_mismatch"
+  /** Catch-all; exception in dependency. Err details are logged server-side but not surfaced to client */
+  | "internal";
+
+export type IapVerifyResult =
+  | { ok: true; claims: IapClaims }
+  | { ok: false; reason: IapVerifyFailure };
+
 type VerifyOptions = {
-  /** Override the expected bundle id. When omitted, reads
-   *  `IAP_EXPECTED_BUNDLE_ID` or falls back to the Debug bundle. */
   expectedBundleId?: string;
-  /** Accept a date instead of "now" — used by tests to pin notBefore/notAfter. */
   clock?: Date;
-  /** Override the trusted root CA — used by tests that generate their own chain. */
   trustedRootPem?: string;
 };
 
-export async function verifyIapJws(
+export async function verifyIapJwsTyped(
   jws: string,
   options: VerifyOptions = {},
-): Promise<IapClaims | null> {
+): Promise<IapVerifyResult> {
   try {
-    const header = decodeProtectedHeader(jws);
+    if (typeof jws !== "string" || jws.split(".").length !== 3) {
+      return { ok: false, reason: "malformed" };
+    }
+
+    let header;
+    try {
+      header = decodeProtectedHeader(jws);
+    } catch {
+      return { ok: false, reason: "malformed" };
+    }
+
     const x5c = header.x5c;
-    if (!Array.isArray(x5c) || x5c.length < 1) return null;
+    if (!Array.isArray(x5c) || x5c.length < 1) {
+      return { ok: false, reason: "no_chain" };
+    }
 
-    // Build the chain as X509Certificate objects.
-    const chain = x5c.map((b64) => new X509Certificate(Buffer.from(b64, "base64")));
-    if (chain.length === 0) return null;
+    let chain: X509Certificate[];
+    try {
+      chain = x5c.map((b64) => new X509Certificate(Buffer.from(b64, "base64")));
+    } catch {
+      return { ok: false, reason: "chain_invalid" };
+    }
 
-    // Add the pinned trust anchor at the end so chain validation terminates.
     const trustedRootPem = options.trustedRootPem ?? APPLE_ROOT_CA_G3_PEM;
     const trustedRoot = new X509Certificate(trustedRootPem);
 
     const now = (options.clock ?? new Date()).getTime();
-    if (!validityOk(trustedRoot, now)) return null;
+    if (!validityOk(trustedRoot, now)) {
+      return { ok: false, reason: "expired_cert" };
+    }
 
-    // Walk: chain[i] must be signed by chain[i+1]; the final cert must
-    // either BE the pinned root or be signed by it.
     for (let i = 0; i < chain.length; i++) {
       const cert = chain[i];
-      if (!validityOk(cert, now)) return null;
+      if (!validityOk(cert, now)) {
+        return { ok: false, reason: "expired_cert" };
+      }
       const issuer = chain[i + 1] ?? trustedRoot;
       if (!cert.checkIssued(issuer) || !cert.verify(issuer.publicKey)) {
-        return null;
+        return { ok: false, reason: "chain_invalid" };
       }
     }
-    // Ensure the top of the supplied chain actually chains to Apple root.
+
     const top = chain[chain.length - 1];
-    if (
-      !top.checkIssued(trustedRoot) ||
-      !top.verify(trustedRoot.publicKey)
-    ) {
-      // Unless the top IS the trusted root itself (self-signed match).
+    if (!top.checkIssued(trustedRoot) || !top.verify(trustedRoot.publicKey)) {
       if (top.fingerprint256 !== trustedRoot.fingerprint256) {
-        return null;
+        return { ok: false, reason: "chain_invalid" };
       }
     }
 
-    // Verify the JWS signature using the leaf cert's public key.
     const leafPem = chain[0].toString();
-    const leafKey = await importX509(leafPem, (header.alg as string) ?? "ES256");
-    const { payload } = await compactVerify(jws, leafKey);
+    let payload: Uint8Array;
+    try {
+      const leafKey = await importX509(leafPem, (header.alg as string) ?? "ES256");
+      const verified = await compactVerify(jws, leafKey);
+      payload = verified.payload;
+    } catch {
+      return { ok: false, reason: "invalid_signature" };
+    }
 
-    const parsed = JSON.parse(Buffer.from(payload).toString("utf8")) as Record<string, unknown>;
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(Buffer.from(payload).toString("utf8")) as Record<string, unknown>;
+    } catch {
+      return { ok: false, reason: "malformed" };
+    }
+
     const transactionId = typeof parsed.transactionId === "string" ? parsed.transactionId : null;
     const productId = typeof parsed.productId === "string" ? parsed.productId : null;
-    if (!transactionId || !productId) return null;
+    if (!transactionId || !productId) {
+      return { ok: false, reason: "missing_claims" };
+    }
 
-    // Bundle ID pinning — reject JWS that wasn't issued for our app.
     const expectedBundle = options.expectedBundleId
       ?? process.env.IAP_EXPECTED_BUNDLE_ID
       ?? "com.carai.kabutoios";
     const claimedBundle = typeof parsed.bundleId === "string" ? parsed.bundleId : null;
-    if (claimedBundle && claimedBundle !== expectedBundle) return null;
+    if (claimedBundle && claimedBundle !== expectedBundle) {
+      return { ok: false, reason: "bundle_mismatch" };
+    }
 
     return {
-      transactionId,
-      productId,
-      purchaseDate: typeof parsed.purchaseDate === "number" ? parsed.purchaseDate : undefined,
-      originalTransactionId:
-        typeof parsed.originalTransactionId === "string"
-          ? parsed.originalTransactionId
-          : undefined,
-      bundleId: claimedBundle ?? undefined,
+      ok: true,
+      claims: {
+        transactionId,
+        productId,
+        purchaseDate: typeof parsed.purchaseDate === "number" ? parsed.purchaseDate : undefined,
+        originalTransactionId:
+          typeof parsed.originalTransactionId === "string"
+            ? parsed.originalTransactionId
+            : undefined,
+        bundleId: claimedBundle ?? undefined,
+      },
     };
   } catch (err) {
-    console.error("[verifyIapJws] failed:", err);
-    return null;
+    console.error("[verifyIapJwsTyped] unexpected failure:", err);
+    return { ok: false, reason: "internal" };
   }
+}
+
+/**
+ * Backward-compatible wrapper that collapses any failure to `null`.
+ * Preserved for Phase 5 call sites that don't care about the reason.
+ * New code should call `verifyIapJwsTyped` directly.
+ */
+export async function verifyIapJws(
+  jws: string,
+  options: VerifyOptions = {},
+): Promise<IapClaims | null> {
+  const result = await verifyIapJwsTyped(jws, options);
+  return result.ok ? result.claims : null;
 }
 
 function validityOk(cert: X509Certificate, nowMs: number): boolean {

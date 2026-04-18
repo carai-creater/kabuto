@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session";
 import { completeUsageTransaction } from "@/lib/usage/completeUsage";
@@ -79,16 +79,15 @@ export async function runAgentCompletion(input: {
     return { ok: false, code: "SETTLEMENT_FAILED" };
   }
 
-  const slugRow = await prisma.agent.findUnique({
-    where: { id: input.agentId },
-    select: { slug: true },
-  });
   revalidatePath("/");
   revalidatePath("/wallet");
-    revalidatePath("/dashboard/creator");
-  if (slugRow) {
-    revalidatePath(`/agents/${slugRow.slug}`);
-  }
+  revalidatePath("/dashboard/creator");
+  // 動的セグメントは route pattern で無効化（リテラル日本語パスは Next.js 16 でハングする）
+  revalidatePath("/agents/[slug]", "page");
+  revalidateTag("marketplace-agents", "max");
+  // ヘッダーの残高表示キャッシュを即時無効化
+  const uid = await getSessionUserId();
+  if (uid) revalidateTag(`user-header-${uid}`, "max");
 
   return {
     ok: true,

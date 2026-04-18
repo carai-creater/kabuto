@@ -288,6 +288,12 @@ export function RunAgentPanel({
   }, [tools]);
 
   const run = useCallback(async () => {
+    // 未ログインの場合はログイン画面へ
+    if (!isLoggedIn) {
+      const next = agentSlug ? `/agents/${agentSlug}` : "/agents";
+      router.push(`/login?next=${encodeURIComponent(next)}`);
+      return;
+    }
     setError(null);
     clearError();
     const text = message.trim();
@@ -297,7 +303,7 @@ export function RunAgentPanel({
     }
     setMessage("");
     await sendMessage({ text });
-  }, [message, sendMessage, clearError]);
+  }, [isLoggedIn, agentSlug, router, message, sendMessage, clearError]);
 
   return (
     <>
@@ -429,18 +435,32 @@ export function RunAgentPanel({
                 {messages.map((m) => (
                   <div
                     key={m.id}
-                    className={
-                      m.role === "user"
-                        ? "ml-auto max-w-[85%] rounded-2xl bg-[var(--accent)] px-4 py-3 text-[15px] leading-relaxed text-white"
-                        : "mr-auto max-w-[85%] rounded-2xl bg-[var(--card)] px-4 py-3 text-[15px] leading-relaxed text-[var(--foreground)] ring-1 ring-[var(--border)]"
-                    }
+                    className={m.role === "user" ? "ml-auto flex max-w-[85%] flex-col items-end gap-1" : ""}
                   >
-                    {m.role === "assistant" ? (
-                      <pre className="whitespace-pre-wrap font-sans">
-                        {uiMessagePlainText(m)}
-                      </pre>
-                    ) : (
-                      uiMessagePlainText(m)
+                    <div
+                      className={
+                        m.role === "user"
+                          ? "rounded-2xl bg-[var(--accent)] px-4 py-3 text-[15px] leading-relaxed text-white"
+                          : "mr-auto max-w-[85%] rounded-2xl bg-[var(--card)] px-4 py-3 text-[15px] leading-relaxed text-[var(--foreground)] ring-1 ring-[var(--border)]"
+                      }
+                    >
+                      {m.role === "assistant" ? (
+                        <pre className="whitespace-pre-wrap font-sans">
+                          {uiMessagePlainText(m)}
+                        </pre>
+                      ) : (
+                        uiMessagePlainText(m)
+                      )}
+                    </div>
+                    {m.role === "user" && !pending && (
+                      <button
+                        type="button"
+                        onClick={() => setMessage(uiMessagePlainText(m))}
+                        className="text-[11px] text-[var(--muted)]/60 transition hover:text-[var(--muted)]"
+                        title="この内容を編集して再送信"
+                      >
+                        編集
+                      </button>
                     )}
                   </div>
                 ))}
@@ -488,13 +508,14 @@ export function RunAgentPanel({
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey && !pending) {
+                  // Cmd/Ctrl+Enter で送信、それ以外の Enter は改行
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && !pending) {
                     e.preventDefault();
                     void run();
                   }
                 }}
                 rows={2}
-                placeholder="メッセージを入力… (Shift+Enter で改行)"
+                placeholder="メッセージを入力… (⌘Enter で送信)"
                 className="input-apple min-h-[44px] w-full resize-y border-none bg-transparent px-3 py-2 shadow-none ring-0"
               />
               <button

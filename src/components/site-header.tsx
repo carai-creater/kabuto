@@ -26,44 +26,29 @@ export function SiteHeader({
   showAdminLink = false,
 }: Props) {
   return (
-    <header
-      className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--header-bg)] backdrop-blur-md backdrop-saturate-150"
-    >
-      <div
-        className={`flex h-[52px] w-full items-center gap-4 sm:h-14 sm:gap-8 lg:gap-12 ${PAGE_SHELL}`}
-      >
+    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--header-bg)] backdrop-blur-lg">
+      <div className={`flex h-14 w-full items-center gap-6 ${PAGE_SHELL}`}>
+        {/* ロゴ */}
         <Link
           href="/"
-          className="group flex shrink-0 items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
+          className="group flex shrink-0 items-center gap-2 outline-none"
         >
-          <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] dark:bg-[var(--card)]">
-            <img
-              src="/kabuto-logo-light.png"
-              alt=""
-              width={32}
-              height={32}
-              className="h-8 w-8 object-contain dark:hidden"
-            />
-            <img
-              src="/kabuto-logo-dark.png"
-              alt=""
-              width={32}
-              height={32}
-              className="hidden h-8 w-8 object-contain dark:block"
-            />
+          <span className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+            <img src="/kabuto-logo-light.png" alt="" width={28} height={28} className="h-7 w-7 object-contain dark:hidden" />
+            <img src="/kabuto-logo-dark.png" alt="" width={28} height={28} className="hidden h-7 w-7 object-contain dark:block" />
           </span>
-          <span className="text-[17px] font-bold tracking-tight text-[#333333] dark:text-[var(--foreground)]">
+          <span className="text-[16px] font-semibold tracking-tight text-[var(--foreground)]">
             kabuto
           </span>
         </Link>
 
         {configWarning && (
-          <p className="hidden min-w-0 flex-1 truncate px-1 text-center text-[11px] text-[var(--muted)] sm:block">
+          <p className="hidden min-w-0 flex-1 truncate text-center text-[11px] text-[var(--muted)] sm:block">
             {configWarning}
           </p>
         )}
 
-        <div className="ml-auto flex min-w-0 shrink-0 items-center gap-2 sm:gap-3 lg:gap-4">
+        <div className="ml-auto flex items-center gap-1">
           <SiteHeaderNav
             demoLoginEnabled={demoLoginEnabled}
             showAdminLink={showAdminLink}
@@ -71,17 +56,8 @@ export function SiteHeader({
             email={email}
           />
           {balancePt != null && (
-            <span
-              className="tabular-nums text-[12px] font-medium text-[var(--subtle)] sm:text-[13px] sm:px-1"
-              title="残高"
-            >
-              {balancePt.toLocaleString("ja-JP")}
-              <span className="text-[var(--muted)]"> pt</span>
-            </span>
-          )}
-          {email && (
-            <span className="hidden max-w-[8rem] truncate text-[12px] text-[var(--muted)] lg:inline">
-              {displayName ?? email}
+            <span className="ml-1 rounded-full bg-[var(--brand-muted)] px-3 py-1 text-[12px] font-semibold tabular-nums text-[var(--accent)]" title="残高">
+              {balancePt.toLocaleString("ja-JP")} pt
             </span>
           )}
           <ThemeToggle />

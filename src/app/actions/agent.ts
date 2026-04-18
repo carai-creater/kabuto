@@ -1,7 +1,7 @@
 "use server";
 
 import { Prisma } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import {
@@ -61,7 +61,9 @@ export async function createAgent(
 
   revalidatePath("/dashboard/creator");
   revalidatePath("/");
-  revalidatePath(`/agents/${slug}`);
+  // 動的セグメントは route pattern で無効化（リテラル日本語パスは Next.js 16 でハングする）
+  revalidatePath("/agents/[slug]", "page");
+  revalidateTag("marketplace-agents", "max");
   redirect(`/dashboard/creator/new?preview=${encodeURIComponent(slug)}`);
 }
 
@@ -101,9 +103,11 @@ export async function updateAgent(
 
   revalidatePath("/dashboard/creator");
   revalidatePath("/");
-  revalidatePath(`/agents/${slug}`);
-  revalidatePath(`/dashboard/creator/edit/${slug}`);
-  revalidatePath(`/dashboard/creator/agents/${slug}`);
+  // 動的セグメントは route pattern で無効化（リテラル日本語パスは Next.js 16 でハングする）
+  revalidatePath("/agents/[slug]", "page");
+  revalidatePath("/dashboard/creator/edit/[slug]", "page");
+  revalidatePath("/dashboard/creator/agents/[slug]", "page");
+  revalidateTag("marketplace-agents", "max");
 
   redirect(
     `/dashboard/creator/edit/${encodeURIComponent(slug)}?saved=${isPublished ? "published" : "draft"}`,

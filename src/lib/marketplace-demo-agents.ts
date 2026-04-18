@@ -12,6 +12,7 @@ export function getMarketplaceDemoAgents(): AgentListItem[] {
       description:
         "ブログや報告書のたたき台を、トーンを指定して短時間で整えます（サンプル表示）。",
       iconEmoji: "✍️",
+      iconUrl: null,
       pricePerUsePt: 15,
       usageCount: 1840,
       ratingAvg: new Prisma.Decimal("4.7"),
@@ -27,6 +28,7 @@ export function getMarketplaceDemoAgents(): AgentListItem[] {
       description:
         "差分を読み、バグの芽と可読性の改善点を箇条書きで返します（サンプル表示）。",
       iconEmoji: "💻",
+      iconUrl: null,
       pricePerUsePt: 20,
       usageCount: 960,
       ratingAvg: new Prisma.Decimal("4.5"),
@@ -42,6 +44,7 @@ export function getMarketplaceDemoAgents(): AgentListItem[] {
       description:
         "論点の整理と次に調べるべきキーワードを提案します（サンプル表示）。",
       iconEmoji: "🔭",
+      iconUrl: null,
       pricePerUsePt: 25,
       usageCount: 720,
       ratingAvg: new Prisma.Decimal("4.6"),
@@ -57,6 +60,7 @@ export function getMarketplaceDemoAgents(): AgentListItem[] {
       description:
         "議事メモからアクションアイテムと期限の候補を抽出します（サンプル表示）。",
       iconEmoji: "📝",
+      iconUrl: null,
       pricePerUsePt: 18,
       usageCount: 512,
       ratingAvg: new Prisma.Decimal("4.3"),
@@ -72,6 +76,7 @@ export function getMarketplaceDemoAgents(): AgentListItem[] {
       description:
         "自然な言い換えと文化ニュアンスのヒントを日本語・英語で（サンプル表示）。",
       iconEmoji: "🌐",
+      iconUrl: null,
       pricePerUsePt: 12,
       usageCount: 1340,
       ratingAvg: new Prisma.Decimal("4.8"),
@@ -87,6 +92,7 @@ export function getMarketplaceDemoAgents(): AgentListItem[] {
       description:
         "バナーやスライドの構成案と配色の方向性を短く提案します（サンプル表示）。",
       iconEmoji: "🎨",
+      iconUrl: null,
       pricePerUsePt: 22,
       usageCount: 410,
       ratingAvg: new Prisma.Decimal("4.4"),
