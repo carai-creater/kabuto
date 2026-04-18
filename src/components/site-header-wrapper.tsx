@@ -4,6 +4,7 @@ import { isDemoLoginEnabled } from "@/lib/demo";
 import { isDatabaseConfigured } from "@/lib/is-database-configured";
 import { getSessionUserId } from "@/lib/session";
 import { SiteHeader } from "@/components/site-header";
+import { grantWalletPromoIfNeeded } from "@/lib/wallet-promo";
 
 /**
  * ヘッダー表示用ユーザーデータを 5 分キャッシュ。
